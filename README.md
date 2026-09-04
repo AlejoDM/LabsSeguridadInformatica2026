@@ -47,9 +47,9 @@ Reglas que valen para todos los labs:
 | Lab | Unidad | Tema | Estado |
 |---|---|---|---|
 | [01](labs/lab01-introduccion/) | 1 | Introducción: la tríada CIA, historia de la seguridad informática e integridad con funciones de hash | **Publicado** |
-| 02 | 2 | Criptografía | Por publicar |
-| 03 | 3 | *Título según programa analítico* | Por publicar |
-| 04 | 4 | Marcos normativos y gestión de la seguridad | Por publicar |
+| [02](labs/lab02-criptografia/) | 2 | Criptografía: romper un cifrado clásico y MAC con HMAC | **Publicado** |
+| [03](labs/lab03-autenticacion/) | 3 | Autenticación y control de acceso: PBKDF2 y TOTP (2FA) | **Publicado** |
+| [04](labs/lab04-marcos-normativos/) | 4 | Marcos normativos y gestión: aplicar ISO/NIST y cuantificar riesgo | **Publicado** |
 | [05](labs/lab05-reconocimiento/) | 5 | Reconocimiento: identificación y clasificación de la superficie de ataque | **Publicado** |
 | [06](labs/lab06-enumeracion-de-servicios/) | 6 | Enumeración de servicios: directorios, `.git`, métodos HTTP, APIs y fingerprinting | **Publicado** |
 | [07](labs/lab07-explotacion/) | 7 | Explotación: SQLi, inyección de comandos, path traversal e IDOR | **Publicado** |
