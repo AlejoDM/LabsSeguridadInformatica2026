@@ -135,6 +135,17 @@ p.lead{font-size:clamp(17px,2vw,22px);line-height:1.5;color:var(--text);max-widt
 .hint{position:fixed;bottom:44px;right:clamp(18px,4vw,42px);z-index:9;font-family:var(--mono);
   font-size:11px;color:var(--dim);opacity:.8}
 kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;padding:0 5px;color:var(--muted)}
+
+/* diagramas SVG */
+figure.dia{margin:6px 0 0;max-width:560px}
+figure.dia.wide{max-width:760px}
+figure.dia svg{width:100%;height:auto;display:block}
+figure.dia figcaption{font-family:var(--mono);font-size:11.5px;color:var(--muted);margin-top:10px;line-height:1.45}
+.dia .box{fill:#111a22;stroke:#2c404c}
+.dia .lbl{fill:#cdd8de;font-family:'IBM Plex Sans',sans-serif}
+.dia .sub{fill:#7c909b;font-family:'IBM Plex Mono',monospace}
+.dia .edge{stroke:#7c909b;stroke-width:1.6;fill:none}
+.dia .elbl{fill:#7c909b;font-family:'IBM Plex Mono',monospace}
 </style>
 </head>
 <body>
@@ -147,7 +158,7 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
   <section class="slide cover active">
     <div class="wm">root@cyberlab:~# ./iniciar_practico.sh</div>
     <h1>Cyber<span class="green">·</span>Lab<span class="cursor"></span></h1>
-    <div class="sub">Práctico ofensivo de Seguridad Informática. De las herramientas básicas a los agentes autónomos — todo con las manos en el teclado.</div>
+    <div class="sub">Práctico de Seguridad Informática. De la tríada CIA a los agentes autónomos —y de vuelta a la defensa. Diez laboratorios + un engagement final, todo con las manos en el teclado.</div>
     <div class="meta">
       <span>UTN · FRVM</span><span class="dot">/</span>
       <span>Seguridad Informática</span><span class="dot">/</span>
@@ -160,11 +171,11 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
   <section class="slide">
     <div class="eyebrow"><span class="bar"></span>// Qué es</div>
     <h2>No se aprende leyendo.<br>Se aprende <span class="green">haciendo</span>.</h2>
-    <p class="lead">Un recorrido práctico y progresivo por la seguridad ofensiva. Operás herramientas reales contra objetivos deliberadamente vulnerables que <b>se levantan solos en Docker</b>, dentro de tu propia máquina.</p>
+    <p class="lead">Un recorrido práctico y progresivo por la seguridad. Primero los fundamentos en código; después, operás herramientas reales contra objetivos deliberadamente vulnerables que <b>se levantan solos en Docker</b>, dentro de tu propia máquina.</p>
     <div class="grid g3" style="margin-top:34px">
       <div class="card"><div class="k">Hands-on</div><h3>Todo con código</h3><p>Cada técnica se ejecuta a mano, tool por tool, clasificando y explicando cada escenario.</p></div>
       <div class="card"><div class="k">Autodescubrible</div><h3>Se levanta solo</h3><p>Un comando <span class="mono green">./ctf</span> y el entorno arranca. Cero instalar en tu máquina.</p></div>
-      <div class="card"><div class="k">Progresivo</div><h3>Sube de nivel</h3><p>De tools básicas a pentest profundo con agentes de IA. La dificultad crece lab a lab.</p></div>
+      <div class="card"><div class="k">Progresivo</div><h3>Sube de nivel</h3><p>De la tríada CIA a agentes de IA y defensa. La dificultad crece lab a lab.</p></div>
     </div>
   </section>
 
@@ -180,21 +191,64 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
     </div>
   </section>
 
-  <!-- 4 -->
+  <!-- 4 · el programa completo -->
   <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// El arco ofensivo · Unidades 5–9</div>
-    <h2>La cadena de un ataque, paso a paso</h2>
-    <p class="lead muted">Un mismo hilo narrativo atraviesa las cinco unidades: la auditoría de <b class="green">PhantomCorp</b>. Cada lab continúa donde terminó el anterior.</p>
-    <div class="chain" style="margin-top:24px">
-      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 05</div><h3>Reconocimiento</h3><p>Mapear la superficie: puertos, servicios, versiones.</p></div>
-      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 06</div><h3>Enumeración</h3><p>Sacarle todo a cada servicio.</p></div>
-      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 07</div><h3>Explotación</h3><p>SQLi, RCE, traversal, IDOR.</p></div>
-      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 08</div><h3>Post-explotación</h3><p>Escalar, pivotear, automatizar.</p></div>
-      <div class="node on ai"><span class="phase-tag">agentes</span><div class="n">UNIDAD 09</div><h3>Agentes de IA</h3><p>Orquestar todo lo anterior.</p></div>
+    <div class="eyebrow"><span class="bar"></span>// El programa · 10 labs + final</div>
+    <h2>Dos pistas, un solo camino</h2>
+    <div class="two" style="margin-top:14px">
+      <div class="card">
+        <div class="k green">Fundamentos · código (Python)</div>
+        <ul class="rows" style="margin-top:6px">
+          <li><b>01</b> Introducción — tríada CIA, hashing</li>
+          <li><b>02</b> Criptografía — romper cifrado, HMAC</li>
+          <li><b>03</b> Autenticación — PBKDF2, TOTP (2FA)</li>
+          <li><b>04</b> Marcos normativos — ISO/NIST, riesgo</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="k cyan">Ofensiva · Docker</div>
+        <ul class="rows" style="margin-top:6px">
+          <li><b>05</b> Reconocimiento</li>
+          <li><b>06</b> Enumeración</li>
+          <li><b>07</b> Explotación</li>
+          <li><b>08</b> Post-explotación</li>
+          <li><b>09</b> Agentes de IA</li>
+          <li><b>10</b> Detección y evasión</li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead" style="margin-top:20px;font-size:17px">…y todo desemboca en el <span class="amber">★ Práctico Final</span>: un engagement completo con informe de pentest profesional.</p>
+  </section>
+
+  <!-- 5 · fundamentos -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidades 01–04 · fundamentos en código</div>
+    <h2>Antes de atacar, entender</h2>
+    <div class="grid g4" style="margin-top:24px">
+      <div class="card"><div class="k">01 · CIA</div><h3>¿Qué protegés?</h3><p>Confidencialidad, integridad, disponibilidad. Verificación de integridad con hashes.</p></div>
+      <div class="card"><div class="k">02 · Cripto</div><h3>Cómo (no) se usa</h3><p>Rompés un cifrado clásico por frecuencia; construís una MAC con HMAC.</p></div>
+      <div class="card"><div class="k">03 · Auth</div><h3>¿Sos quien decís?</h3><p>Contraseñas con PBKDF2 y salt; segundo factor TOTP, todo verificado contra el RFC.</p></div>
+      <div class="card"><div class="k">04 · Gestión</div><h3>Decidir con números</h3><p>ISO 27001 / NIST CSF y riesgo cuantitativo: priorizar por ALE, no por corazonada.</p></div>
+    </div>
+    <p class="lead muted" style="margin-top:22px;font-size:16px">Python, biblioteca estándar. Nada de "instalar y que ande": entender y construir.</p>
+  </section>
+
+  <!-- 6 · arco ofensivo -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidades 05–10 · la cadena del ataque… y la defensa</div>
+    <h2>El engagement, paso a paso</h2>
+    <p class="lead muted" style="margin-top:2px">Un hilo narrativo —la auditoría de <b class="green">PhantomCorp</b>— atraviesa las seis unidades. Cada lab continúa donde terminó el anterior.</p>
+    <div class="chain" style="margin-top:22px">
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">05</div><h3>Reconocimiento</h3><p>Mapear la superficie.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">06</div><h3>Enumeración</h3><p>Sacarle todo a cada servicio.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">07</div><h3>Explotación</h3><p>SQLi, RCE, traversal, IDOR.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">08</div><h3>Post-explotación</h3><p>Escalar, pivotear, automatizar.</p></div>
+      <div class="node on ai"><span class="phase-tag">agentes</span><div class="n">09</div><h3>Agentes de IA</h3><p>Orquestar todo lo anterior.</p></div>
+      <div class="node on"><span class="phase-tag" style="color:var(--amber);border-color:rgba(240,180,41,.4)">defensa</span><div class="n">10</div><h3>Detección y evasión</h3><p>La vista del defensor.</p></div>
     </div>
   </section>
 
-  <!-- 5 -->
+  <!-- 7 · cómo se juega -->
   <section class="slide">
     <div class="eyebrow"><span class="bar"></span>// Cómo se juega</div>
     <h2>Un comando, y adentro</h2>
@@ -224,81 +278,49 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
     </div>
   </section>
 
-  <!-- 6 · lab05 -->
+  <!-- 8 · ofensiva manual 05-08 -->
   <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// Unidad 05</div>
-    <div class="labwrap">
-      <div>
-        <h2>Reconocimiento</h2>
-        <p class="lead muted">Antes de tocar nada, entendé qué hay. Un puerto abierto no es un hallazgo; un puerto <b class="green">identificado y clasificado</b> sí.</p>
-        <ul class="learn">
-          <li>Barrido de puertos y detección de versiones</li>
-          <li>Banner grabbing y fingerprinting de servicios</li>
-          <li>Clasificar contra CVE / CVSS</li>
-        </ul>
-        <div class="tools"><span class="tool">nmap</span><span class="tool">ncat</span><span class="tool">curl</span><span class="tool">whois</span><span class="tool">dig</span></div>
-      </div>
-      <div style="text-align:center"><div class="bignum">05</div></div>
+    <div class="eyebrow"><span class="bar"></span>// 05–08 · a mano, siempre primero</div>
+    <h2>El pentest, sin atajos</h2>
+    <div class="two" style="margin-top:8px">
+      <div class="card"><div class="k">05 · Reconocimiento</div><p>nmap, banner grabbing, headers, robots. Mapear y <b>clasificar</b> la superficie.</p></div>
+      <div class="card"><div class="k">06 · Enumeración</div><p>dirb, whatweb, <span class="mono">.git</span> expuesto, métodos HTTP, APIs.</p></div>
+      <div class="card"><div class="k">07 · Explotación</div><p>SQLi <b>real</b> (sqlite + sqlmap), inyección de comandos, path traversal, IDOR.</p></div>
+      <div class="card"><div class="k">08 · Post-explotación</div><p>Escalada por SUID, <b>pivoting</b> a red interna segmentada, automatización.</p></div>
     </div>
+    <figure class="dia wide" role="img" aria-label="Pivoting: el atacante en la red labnet alcanza al host víctima, pero no llega a la base de datos interna. La víctima, presente en ambas redes, sirve de trampolín para alcanzarla." style="margin:20px auto 0">
+      <svg viewBox="0 0 720 210" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <marker id="pvG" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#39d98a"/></marker>
+          <marker id="pvR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#e0645b"/></marker>
+        </defs>
+        <rect x="12" y="30" width="440" height="110" rx="12" fill="none" stroke="#2c404c" stroke-dasharray="5 4"/>
+        <text x="28" y="24" font-size="11" fill="#7c909b" font-family="'IBM Plex Mono',monospace">red: labnet</text>
+        <rect x="286" y="30" width="422" height="110" rx="12" fill="none" stroke="#4cc9f0" stroke-dasharray="5 4"/>
+        <text x="690" y="24" font-size="11" fill="#4cc9f0" font-family="'IBM Plex Mono',monospace" text-anchor="end">red: internalnet (interna)</text>
+        <rect class="box" x="44" y="58" width="132" height="54" rx="10"/>
+        <text x="110" y="82" text-anchor="middle" font-size="13.5" fill="#cdd8de" font-weight="600">Atacante</text>
+        <text x="110" y="99" text-anchor="middle" font-size="10.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">tu consola</text>
+        <rect class="box" x="300" y="58" width="132" height="54" rx="10" stroke="#39d98a"/>
+        <text x="366" y="82" text-anchor="middle" font-size="13.5" fill="#cdd8de" font-weight="600">Víctima (web)</text>
+        <text x="366" y="99" text-anchor="middle" font-size="10.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">en ambas redes</text>
+        <rect class="box" x="556" y="58" width="132" height="54" rx="10"/>
+        <text x="622" y="82" text-anchor="middle" font-size="13.5" fill="#cdd8de" font-weight="600">DB interna</text>
+        <text x="622" y="99" text-anchor="middle" font-size="10.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">crown jewels</text>
+        <line class="edge" x1="176" y1="85" x2="298" y2="85" stroke="#39d98a" marker-end="url(#pvG)"/>
+        <text x="237" y="76" text-anchor="middle" font-size="10.5" fill="#39d98a" font-family="'IBM Plex Mono',monospace">HTTP ✓</text>
+        <line class="edge" x1="432" y1="85" x2="554" y2="85" stroke="#39d98a" marker-end="url(#pvG)"/>
+        <text x="493" y="76" text-anchor="middle" font-size="10.5" fill="#39d98a" font-family="'IBM Plex Mono',monospace">pivot ✓</text>
+        <polyline points="110,112 110,180 622,180 622,114" fill="none" stroke="#e0645b" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#pvR)"/>
+        <text x="366" y="174" text-anchor="middle" font-size="11" fill="#e0645b" font-family="'IBM Plex Mono',monospace">✗ sin ruta directa — la red está segmentada</text>
+      </svg>
+      <figcaption>El atacante no llega a la DB interna. Pero la víctima vive en las dos redes: comprometerla es tener el trampolín. Eso es <b>pivoting</b>.</figcaption>
+    </figure>
   </section>
 
-  <!-- 7 · lab06 -->
+  <!-- 9 · agentes -->
   <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// Unidad 06</div>
-    <div class="labwrap">
-      <div>
-        <h2>Enumeración</h2>
-        <p class="lead muted">Todo servicio esconde más de lo que muestra. El index dice "bienvenido"; vos preguntás por lo que <b class="green">no</b> está en el index.</p>
-        <ul class="learn">
-          <li>Fuerza bruta de directorios y archivos</li>
-          <li><span class="mono">.git</span> expuesto, métodos HTTP peligrosos, APIs</li>
-          <li>Fingerprinting dirigido del stack</li>
-        </ul>
-        <div class="tools"><span class="tool">dirb</span><span class="tool">gobuster</span><span class="tool">whatweb</span><span class="tool">wfuzz</span></div>
-      </div>
-      <div style="text-align:center"><div class="bignum">06</div></div>
-    </div>
-  </section>
-
-  <!-- 8 · lab07 -->
-  <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// Unidad 07</div>
-    <div class="labwrap">
-      <div>
-        <h2>Explotación</h2>
-        <p class="lead muted">Toda entrada del usuario es una mentira potencial. Cuando el dato se mezcla con el código, tu dato <b class="green">se ejecuta</b> como código.</p>
-        <ul class="learn">
-          <li>SQL injection real (backend sqlite) — a mano y con sqlmap</li>
-          <li>Inyección de comandos (RCE), path traversal</li>
-          <li>IDOR y control de acceso roto</li>
-        </ul>
-        <div class="tools"><span class="tool">curl</span><span class="tool">sqlmap</span><span class="tool">payloads a mano</span></div>
-      </div>
-      <div style="text-align:center"><div class="bignum">07</div></div>
-    </div>
-  </section>
-
-  <!-- 9 · lab08 -->
-  <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// Unidad 08</div>
-    <div class="labwrap">
-      <div>
-        <h2>Post-explotación</h2>
-        <p class="lead muted">Un shell sin privilegios es el principio, no el final. Y lo que se hace más de una vez, <b class="green">se automatiza</b>.</p>
-        <ul class="learn">
-          <li>Recon del host, loot de credenciales</li>
-          <li>Escalada a root por binario SUID</li>
-          <li>Pivoting real a una red interna segmentada</li>
-        </ul>
-        <div class="tools"><span class="tool">SUID</span><span class="tool">redes segmentadas</span><span class="tool">scripting</span></div>
-      </div>
-      <div style="text-align:center"><div class="bignum">08</div></div>
-    </div>
-  </section>
-
-  <!-- 10 · lab09 -->
-  <section class="slide">
-    <div class="eyebrow"><span class="bar"></span>// Unidad 09 · el gran final</div>
+    <div class="eyebrow"><span class="bar"></span>// Unidad 09</div>
     <div class="labwrap">
       <div>
         <h2>Agentes de pentest</h2>
@@ -310,26 +332,126 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
         </ul>
         <div class="tools"><span class="tool">tool-use</span><span class="tool">guardrails</span><span class="tool">Claude / OpenAI / mock</span></div>
       </div>
-      <div style="text-align:center"><div class="bignum" style="-webkit-text-stroke-color:var(--violet);opacity:.5">09</div></div>
+      <figure class="dia" role="img" aria-label="Loop de tool-use: el LLM decide una herramienta, el guardrail valida el alcance, la tool se ejecuta y el resultado vuelve al LLM para el próximo paso.">
+        <svg viewBox="0 0 560 250" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="agG" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#39d98a"/></marker>
+            <marker id="agA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#f0b429"/></marker>
+          </defs>
+          <rect class="box" x="20" y="28" width="140" height="58" rx="10"/>
+          <text class="lbl" x="90" y="53" text-anchor="middle" font-size="14" font-weight="600">LLM razona</text>
+          <text class="sub" x="90" y="71" text-anchor="middle" font-size="11">¿qué tool corro?</text>
+          <rect class="box" x="210" y="28" width="140" height="58" rx="10" stroke="#b19cf0"/>
+          <text class="lbl" x="280" y="53" text-anchor="middle" font-size="14" font-weight="600">Guardrail</text>
+          <text class="sub" x="280" y="71" text-anchor="middle" font-size="11">¿en alcance?</text>
+          <rect class="box" x="400" y="28" width="140" height="58" rx="10"/>
+          <text class="lbl" x="470" y="53" text-anchor="middle" font-size="14" font-weight="600">Tool ejecuta</text>
+          <text class="sub" x="470" y="71" text-anchor="middle" font-size="11">nmap · curl</text>
+          <line class="edge" x1="160" y1="57" x2="205" y2="57" marker-end="url(#agG)"/>
+          <text class="elbl" x="182" y="48" text-anchor="middle" font-size="10">propone</text>
+          <line class="edge" x1="350" y1="57" x2="395" y2="57" marker-end="url(#agG)"/>
+          <text class="elbl" x="372" y="48" text-anchor="middle" font-size="10" fill="#39d98a">ok ✓</text>
+          <line class="edge" x1="280" y1="86" x2="280" y2="116" stroke="#f0b429" marker-end="url(#agA)"/>
+          <rect x="205" y="118" width="150" height="38" rx="9" fill="#1b1a12" stroke="#f0b429"/>
+          <text x="280" y="142" text-anchor="middle" font-size="12.5" fill="#f0b429" font-family="'IBM Plex Mono',monospace">✗ BLOQUEA</text>
+          <text class="elbl" x="368" y="110" font-size="10" fill="#f0b429">fuera de alcance</text>
+          <polyline class="edge" points="470,86 470,208 90,208 90,88" stroke="#39d98a" marker-end="url(#agG)"/>
+          <text class="elbl" x="280" y="228" text-anchor="middle" font-size="11" fill="#39d98a">el resultado vuelve al LLM → observa y decide el próximo paso ↺</text>
+        </svg>
+        <figcaption>Un agente = este loop. El LLM aporta el razonamiento; tu código, las manos (tools) y los límites (guardrail).</figcaption>
+      </figure>
     </div>
   </section>
 
-  <!-- 11 · phantomcorp -->
+  <!-- 10 · defensa -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 10 · el otro lado</div>
+    <div class="labwrap">
+      <div>
+        <h2>Detección y evasión</h2>
+        <p class="lead muted">Cinco labs fuiste el atacante. Ahora date vuelta: del otro lado <b class="amber">siempre hubo alguien mirando</b>. Blue vs Red.</p>
+        <ul class="learn">
+          <li>Cómo un IDS/SOC te detecta por firmas</li>
+          <li>Cómo se <b>evade</b> una firma (y por qué ninguna es perfecta)</li>
+          <li>Cómo se caza una intrusión escondida en el log</li>
+        </ul>
+        <div class="tools"><span class="tool">firmas</span><span class="tool">evasión</span><span class="tool">análisis de logs</span></div>
+      </div>
+      <figure class="dia" role="img" aria-label="Dos requests con el mismo efecto pasan por la misma firma del IDS: la que tiene un espacio matchea y dispara alerta; la que usa un comentario en vez del espacio no matchea y evade la detección.">
+        <svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <marker id="dR" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#e0645b"/></marker>
+            <marker id="dA" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#f0b429"/></marker>
+            <marker id="dM" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#7c909b"/></marker>
+          </defs>
+          <rect class="box" x="8" y="20" width="180" height="44" rx="9"/>
+          <text x="98" y="47" text-anchor="middle" font-size="13" fill="#cdd8de" font-family="'IBM Plex Mono',monospace">?q=UNION␣SELECT</text>
+          <rect class="box" x="8" y="146" width="180" height="44" rx="9"/>
+          <text x="98" y="173" text-anchor="middle" font-size="13" fill="#cdd8de" font-family="'IBM Plex Mono',monospace">?q=UNION/**/SELECT</text>
+          <rect class="box" x="225" y="66" width="120" height="80" rx="10" stroke="#4cc9f0"/>
+          <text x="285" y="100" text-anchor="middle" font-size="13" fill="#cdd8de" font-weight="600">IDS · firma</text>
+          <text x="285" y="119" text-anchor="middle" font-size="11" fill="#7c909b" font-family="'IBM Plex Mono',monospace">/union\s+select/</text>
+          <rect x="398" y="20" width="154" height="44" rx="9" fill="#1c1210" stroke="#e0645b"/>
+          <text x="475" y="47" text-anchor="middle" font-size="13" fill="#e0645b" font-weight="600">🚫 ALERTA</text>
+          <rect x="398" y="146" width="154" height="44" rx="9" fill="#1b1a12" stroke="#f0b429"/>
+          <text x="475" y="173" text-anchor="middle" font-size="13" fill="#f0b429" font-weight="600">✓ evadido</text>
+          <line class="edge" x1="188" y1="42" x2="223" y2="86" marker-end="url(#dM)"/>
+          <line class="edge" x1="188" y1="168" x2="223" y2="126" marker-end="url(#dM)"/>
+          <line class="edge" x1="347" y1="86" x2="396" y2="46" stroke="#e0645b" marker-end="url(#dR)"/>
+          <text x="372" y="60" text-anchor="middle" font-size="10" fill="#e0645b" font-family="'IBM Plex Mono',monospace">match</text>
+          <line class="edge" x1="347" y1="126" x2="396" y2="166" stroke="#f0b429" marker-end="url(#dA)"/>
+          <text x="372" y="152" text-anchor="middle" font-size="10" fill="#f0b429" font-family="'IBM Plex Mono',monospace">no match</text>
+        </svg>
+        <figcaption>Mismo ataque, misma firma: el espacio la dispara; un comentario <span class="mono">/**/</span> en su lugar la esquiva. Ninguna firma es perfecta.</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- 11 · práctico final -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// ★ Práctico Final</div>
+    <h2>El engagement completo</h2>
+    <p class="lead">Un solo objetivo que exige encadenar TODO el curso: recon → foothold por SQLi → loot de un token → RCE hasta los <span class="amber">datos de clientes</span>. Sin guía paso a paso: para eso hiciste los diez labs.</p>
+    <div class="two" style="margin-top:22px">
+      <div class="card"><div class="k">El desafío</div><p>Caja negra. Cuatro hitos encadenados. Reglas de engagement como en un pentest real.</p></div>
+      <div class="card"><div class="k amber">El entregable</div><p>Un <b>informe de pentest profesional</b>: resumen ejecutivo + hallazgos con CVSS, evidencia y remediación.</p></div>
+    </div>
+    <figure class="dia wide" role="img" aria-label="Cadena del engagement: el reconocimiento revela un portal oculto, la SQL injection da un punto de apoyo, el loot entrega un token de API, y con ese token la ejecución de comandos llega a los datos de clientes." style="margin:18px auto 0">
+      <svg viewBox="0 0 720 118" xmlns="http://www.w3.org/2000/svg">
+        <defs><marker id="fc" markerWidth="9" markerHeight="9" refX="7" refY="3" orient="auto"><polygon points="0,0 8,3 0,6" fill="#39d98a"/></marker></defs>
+        <rect class="box" x="6" y="40" width="118" height="54" rx="10"/><text x="65" y="63" text-anchor="middle" font-size="12.5" fill="#cdd8de" font-weight="600">Recon</text><text x="65" y="80" text-anchor="middle" font-size="10" fill="#7c909b" font-family="'IBM Plex Mono',monospace">05·06</text>
+        <rect class="box" x="148" y="40" width="118" height="54" rx="10"/><text x="207" y="63" text-anchor="middle" font-size="12.5" fill="#cdd8de" font-weight="600">Foothold</text><text x="207" y="80" text-anchor="middle" font-size="10" fill="#7c909b" font-family="'IBM Plex Mono',monospace">SQLi · 07</text>
+        <rect class="box" x="290" y="40" width="118" height="54" rx="10"/><text x="349" y="63" text-anchor="middle" font-size="12.5" fill="#cdd8de" font-weight="600">Loot</text><text x="349" y="80" text-anchor="middle" font-size="10" fill="#7c909b" font-family="'IBM Plex Mono',monospace">token · 08</text>
+        <rect class="box" x="432" y="40" width="118" height="54" rx="10"/><text x="491" y="63" text-anchor="middle" font-size="12.5" fill="#cdd8de" font-weight="600">RCE</text><text x="491" y="80" text-anchor="middle" font-size="10" fill="#7c909b" font-family="'IBM Plex Mono',monospace">cmd inj</text>
+        <rect x="574" y="40" width="124" height="54" rx="10" fill="#1b1a12" stroke="#f0b429"/><text x="636" y="63" text-anchor="middle" font-size="12.5" fill="#f0b429" font-weight="600">Crown jewels</text><text x="636" y="80" text-anchor="middle" font-size="10" fill="#f0b429" font-family="'IBM Plex Mono',monospace">datos clientes</text>
+        <line class="edge" x1="124" y1="67" x2="146" y2="67" stroke="#39d98a" marker-end="url(#fc)"/><text x="135" y="34" text-anchor="middle" font-size="9.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">portal</text>
+        <line class="edge" x1="266" y1="67" x2="288" y2="67" stroke="#39d98a" marker-end="url(#fc)"/><text x="277" y="34" text-anchor="middle" font-size="9.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">acceso</text>
+        <line class="edge" x1="408" y1="67" x2="430" y2="67" stroke="#39d98a" marker-end="url(#fc)"/><text x="419" y="34" text-anchor="middle" font-size="9.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">token</text>
+        <line class="edge" x1="550" y1="67" x2="572" y2="67" stroke="#39d98a" marker-end="url(#fc)"/><text x="561" y="34" text-anchor="middle" font-size="9.5" fill="#7c909b" font-family="'IBM Plex Mono',monospace">exec</text>
+      </svg>
+      <figcaption>Cada eslabón habilita el siguiente. Cortá el primero (parametrizá el login) y la cadena entera no arranca.</figcaption>
+    </figure>
+    <p class="lead muted" style="margin-top:16px;font-size:16px">La técnica se demuestra rompiendo; el valor profesional, comunicando lo que rompiste de forma que alguien lo arregle.</p>
+  </section>
+
+  <!-- 12 · phantomcorp -->
   <section class="slide">
     <div class="eyebrow"><span class="bar"></span>// El hilo narrativo</div>
     <h2>Sos el pentester junior.<br>Tu cliente: <span class="green">PhantomCorp S.A.</span></h2>
-    <p class="lead">Un engagement ficticio atraviesa las cinco unidades. Reconocés su perímetro, enumerás lo que exponen, explotás lo que encontrás, escalás y pivoteás — y al final soltás un agente que orquesta todo. <span class="muted">La historia te mantiene metido en la materia; cada lab avanza el ataque.</span></p>
-    <div class="term" style="margin-top:26px;max-width:640px">
+    <p class="lead">Un engagement ficticio atraviesa las unidades ofensivas. Reconocés su perímetro, enumerás, explotás, escalás y pivoteás, soltás un agente, ves cómo te detectan — y al final entregás un informe. <span class="muted">La historia te mantiene metido en la materia; cada lab avanza el ataque.</span></p>
+    <div class="term" style="margin-top:26px;max-width:660px">
       <div class="bar"><i></i><i></i><i></i><span>engagement.log</span></div>
-<div class="body"><span class="o">[05]</span> perímetro mapeado ......... <span class="p">4 servicios</span>
-<span class="o">[06]</span> intranet enumerada ........ <span class="p">.git expuesto</span>
-<span class="o">[07]</span> portal comprometido ....... <span class="p">RCE + SQLi</span>
-<span class="o">[08]</span> root + red interna ........ <span class="p">pivot ok</span>
-<span class="o">[09]</span> auditoría autónoma ........ <span class="win">agente desplegado</span></div>
+<div class="body"><span class="o">[05]</span> perímetro mapeado ....... <span class="p">4 servicios</span>
+<span class="o">[06]</span> intranet enumerada ...... <span class="p">.git expuesto</span>
+<span class="o">[07]</span> portal comprometido ..... <span class="p">RCE + SQLi</span>
+<span class="o">[08]</span> root + red interna ...... <span class="p">pivot ok</span>
+<span class="o">[09]</span> auditoría autónoma ...... <span class="p">agente</span>
+<span class="o">[10]</span> visto por el SOC ........ <span class="p">firma evadida</span>
+<span class="o">[★ ]</span> engagement final ........ <span class="win">informe entregado</span></div>
     </div>
   </section>
 
-  <!-- 12 · entrega -->
+  <!-- 13 · entrega -->
   <section class="slide">
     <div class="eyebrow"><span class="bar"></span>// Cómo se entrega y se corrige</div>
     <h2>Como en un proyecto real</h2>
@@ -351,10 +473,10 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
         </ul>
       </div>
     </div>
-    <p class="lead muted" style="margin-top:24px;font-size:16px"><span class="amber">⚠ Uso responsable.</span> <span class="muted">Todo se practica solo contra los contenedores de la cátedra. Estas técnicas contra terceros son delito — Ley 26.388.</span></p>
+    <p class="lead muted" style="margin-top:24px;font-size:16px"><span class="amber">⚠ Uso responsable.</span> Todo se practica solo contra los contenedores de la cátedra. Estas técnicas contra terceros son delito — Ley 26.388.</p>
   </section>
 
-  <!-- 13 · arquitectura -->
+  <!-- 14 · arquitectura -->
   <section class="slide">
     <div class="eyebrow"><span class="bar"></span>// Bajo el capó · para la cátedra</div>
     <h2>El motor</h2>
@@ -366,11 +488,11 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
     <p class="lead muted" style="margin-top:24px;font-size:16px">Cada lab: <span class="mono green">README</span> (teoría→ejemplos→tools→práctica) · <span class="mono">entorno/</span> Docker · <span class="mono">retos.manifest</span> · <span class="mono">rúbrica</span> · <span class="mono">solucion.md</span> (solo docente).</p>
   </section>
 
-  <!-- 14 · cierre -->
+  <!-- 15 · cierre -->
   <section class="slide cover">
     <div class="wm">root@cyberlab:~# ./fin.sh</div>
     <h1>El humano <span class="green">dirige</span>.<br>La máquina ejecuta.</h1>
-    <div class="sub">Por eso el orden importa: nadie dirige un agente que hace lo que no sabe hacer. Primero las manos en el teclado. Después, la IA.</div>
+    <div class="sub">Diez laboratorios y un engagement final. La diferencia entre un pentester y un delincuente es la autorización, el alcance y la ética. Nunca lo olvides.</div>
     <div class="meta"><span class="green">git clone</span><span class="dot">·</span><span>hacé el fork</span><span class="dot">·</span><span>ponete las pilas</span><span class="cursor"></span></div>
   </section>
 
@@ -379,14 +501,14 @@ kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;pa
 <div class="foot">
   <div class="prompt">root@cyberlab:~# <b id="slug">iniciar</b></div>
   <div class="dots" id="dots"></div>
-  <div class="count"><span id="cur">01</span> / <span id="tot">14</span></div>
+  <div class="count"><span id="cur">01</span> / <span id="tot">15</span></div>
 </div>
 <div class="hint">← → · <kbd>espacio</kbd> para avanzar</div>
 
 <script>
 (function(){
   var slides=[].slice.call(document.querySelectorAll('.slide'));
-  var slugs=['iniciar','que_es','filosofia','el_arco','como_jugar','recon','enum','exploit','post','agentes','phantomcorp','entrega','motor','fin'];
+  var slugs=['iniciar','que_es','filosofia','programa','fundamentos','arco_ofensivo','como_jugar','ofensiva_manual','agentes','defensa','practico_final','phantomcorp','entrega','motor','fin'];
   var i=0, n=slides.length;
   var prog=document.getElementById('prog'), cur=document.getElementById('cur'),
       tot=document.getElementById('tot'), slug=document.getElementById('slug'),
