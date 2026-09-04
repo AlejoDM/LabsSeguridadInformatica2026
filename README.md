@@ -53,7 +53,7 @@ Reglas que valen para todos los labs:
 | [05](labs/lab05-reconocimiento/) | 5 | Reconocimiento: identificación y clasificación de la superficie de ataque | **Publicado** |
 | [06](labs/lab06-enumeracion-de-servicios/) | 6 | Enumeración de servicios: directorios, `.git`, métodos HTTP, APIs y fingerprinting | **Publicado** |
 | [07](labs/lab07-explotacion/) | 7 | Explotación: SQLi, inyección de comandos, path traversal e IDOR | **Publicado** |
-| 08 | 8 | *Título según programa analítico* | Por publicar |
+| [08](labs/lab08-postexplotacion/) | 8 | Post-explotación y automatización: loot, SUID, pivoting y scripting | **Publicado** |
 | 09 | 9 | *Título según programa analítico* | Por publicar |
 
 Cada laboratorio se habilita al inicio de la unidad correspondiente. Los

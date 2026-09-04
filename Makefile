@@ -17,11 +17,12 @@ define lab_compose
 $(firstword $(wildcard labs/lab$(N)-*/entorno/target.compose.yml))
 endef
 
-.PHONY: setup lab shell down ps clean help
+.PHONY: setup lab shell shell-victima down ps clean help
 help:
 	@echo "make setup        · construye la consola del atacante"
 	@echo "make lab N=05     · levanta atacante + target del lab 05"
 	@echo "make shell        · entra a la consola del atacante"
+	@echo "make shell-victima · entra al host comprometido (Lab 08)"
 	@echo "make down         · baja todo"
 	@echo "make ps / clean"
 
@@ -39,6 +40,10 @@ lab:
 shell:
 	docker exec -it $(PROJECT)-attacker bash || \
 	  echo "No hay consola corriendo. Levantá un lab primero:  make lab N=05"
+
+shell-victima:
+	docker exec -u operador -it cyberlab-phantomcorp bash || \
+	  echo "No hay host comprometido. Es del Lab 08:  make lab N=08"
 
 down:
 	docker compose -p $(PROJECT) $(DCFLAGS) -f $(BASE) $(if $(strip $(lab_compose)),-f $(lab_compose),) down
