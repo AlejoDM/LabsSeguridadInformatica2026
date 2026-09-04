@@ -1,0 +1,7 @@
+# Retos del Lab 07 — Explotación.  Formato:  id|titulo|sha256(flag)
+# Entregá con:  ./ctf submit 07 R1 'FLAG{...}'
+R1|SQLi - bypass de autenticacion|9e8f2ecdbb0ad6fdbb0a7775e7a407fecd814d57a623a9aac20dd4767ac13537
+R2|SQLi - extraccion de datos con UNION|9f75841558e355415fff4d7de6b1e6c59671c1cfcecc71dfb7fb3632cadfd190
+R3|Inyeccion de comandos (RCE)|4d08cc381ddbb0f882bf104e2857c6ffb407573879f141b2addda7c7b96420cd
+R4|Path traversal / LFI|a3b8bb79089a7891d7f54c786b82708684ccb7059b6275e2de9a795ae1ace46b
+R5|IDOR - control de acceso roto|1a9fc5b9cbef488925fa1c4e1a4da376190a360c5978e0b40b92c1f11ed089b1

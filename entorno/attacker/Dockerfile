@@ -4,7 +4,7 @@ FROM debian:stable-slim
 ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update && apt-get install -y --no-install-recommends \
       nmap ncat curl wget whois dnsutils iputils-ping netcat-openbsd \
-      dirb gobuster whatweb wfuzz \
+      dirb gobuster whatweb wfuzz sqlmap \
       python3 python3-pip jq git less vim-tiny ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 WORKDIR /loot
