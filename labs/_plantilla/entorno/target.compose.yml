@@ -1,0 +1,8 @@
+# Target del lab NN. Se combina con entorno/docker-compose.yml (make lab N=NN).
+# Ruta de build relativa a la RAÍZ del repo. NO publiques puertos al host.
+services:
+  phantomcorp:
+    build: ./labs/labNN-tema/entorno/target     # <-- ajustá el path al copiar
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]

@@ -1,0 +1,7 @@
+# Target del Lab 09. make lab N=09.
+services:
+  phantomcorp:
+    build: ./labs/lab09-agentes/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]

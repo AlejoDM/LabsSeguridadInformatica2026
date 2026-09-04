@@ -1,0 +1,7 @@
+# Retos del Lab 06 — Enumeración.  Formato:  id|titulo|sha256(flag)
+# Entregá con:  ./ctf submit 06 R1 'FLAG{...}'
+R1|Enumeracion de directorios|da6320ddb8a9ab85ecd18591d7723200a3352078fdb3b14deecab901aa492e0b
+R2|Repositorio Git expuesto|92b02d1d99a0d169dd0d296b0f195c227f2ba4a2c64de6ee77b6ad53f1c0e495
+R3|Metodos HTTP peligrosos habilitados|aff9edef6a241cd15f32feb901adeff0a327bb4de591d2bea728b6da35d745d8
+R4|Enumeracion de usuarios via API|a2be70ba0a43e8c1e7802fe642fc48c9f357a578f9b8e3bbae26a782632add54
+R5|Fingerprinting de tecnologia|d0429633e2a5ddd86d79f691990c129559018cf890eac496a072a01ddec6a823

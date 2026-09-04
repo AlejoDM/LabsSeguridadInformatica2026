@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+# ctf — punto de entrada autodescubrible del curso. Corré ./ctf sin argumentos.
+set -euo pipefail
+CTF_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; export CTF_ROOT
+source "$CTF_ROOT/bin/lib/ui.sh"
+source "$CTF_ROOT/bin/lib/banner.sh"
+source "$CTF_ROOT/bin/lib/check.sh"
+LABS_DIR="$CTF_ROOT/labs"
+
+_lab_dir()  { local n="$1"; n="$(printf '%02d' "$((10#$n))" 2>/dev/null || echo "$n")"; find "$LABS_DIR" -maxdepth 1 -type d -name "lab$n-*" 2>/dev/null | head -1; }
+_lab_slug() { basename "$(_lab_dir "$1")" 2>/dev/null | sed 's/^lab//; s/-.*//'; }
+
+cmd_list() {
+  banner_main; ui_box "PLAN DE LABORATORIOS"; echo
+  local d name num tema total done
+  for d in "$LABS_DIR"/lab*/; do
+    [ -d "$d" ] || continue
+    name="$(basename "$d")"; num="$(echo "$name" | sed 's/^lab//; s/-.*//')"
+    tema="$(echo "$name" | sed 's/^lab[0-9]*-//; s/-/ /g')"
+    total=0; done=0
+    if [ -f "$d/retos.manifest" ]; then
+      total="$(grep -cE '^R[0-9]' "$d/retos.manifest" 2>/dev/null || echo 0)"
+      [ -f "$CTF_ROOT/.progreso/$num.done" ] && done="$(wc -l < "$CTF_ROOT/.progreso/$num.done" | tr -d ' ')"
+      printf '   %s%s%s  %-34s %s%s/%s%s\n' "$C_CYAN" "$num" "$C_RESET" "$tema" "$C_GREY" "$done" "$total" "$C_RESET"
+    else
+      printf '   %s%s%s  %-34s %s(teoría/código)%s\n' "$C_CYAN" "$num" "$C_RESET" "$tema" "$C_GREY" "$C_RESET"
+    fi
+  done
+  echo; ui_dim "   Arrancá un lab:   ./ctf lab 05"; ui_dim "   Ayuda:            ./ctf help"; echo
+}
+cmd_lab() {
+  local n="${1:-}"; [ -n "$n" ] || { ui_fail "Decime qué lab. Ej: ./ctf lab 05"; return 1; }
+  local dir; dir="$(_lab_dir "$n")"; [ -n "$dir" ] || { ui_fail "No existe el lab $n"; return 1; }
+  if [ -x "$dir/start.sh" ]; then "$dir/start.sh"; else ui_info "Guía del lab:"; ui_dim "   $dir/README.md"; fi
+}
+cmd_status() { local n="${1:-}"; [ -n "$n" ] || { cmd_list; return; }; ctf_status "$(_lab_dir "$n")" "$(_lab_slug "$n")"; }
+cmd_submit() {
+  local n="${1:-}" id="${2:-}" flag="${3:-}"
+  [ -n "$n" ] && [ -n "$id" ] && [ -n "$flag" ] || { ui_fail "Uso:  ./ctf submit <lab> <reto> <flag>"; ui_dim "Ej:   ./ctf submit 05 R1 'FLAG{...}'"; return 1; }
+  ctf_submit "$(_lab_dir "$n")" "$(_lab_slug "$n")" "$id" "$flag"
+}
+cmd_help() {
+  banner_main; ui_box "COMANDOS"
+  cat <<HELP
+
+   ./ctf                      plan de laboratorios y tu progreso
+   ./ctf lab <NN>             arranca un lab (levanta su entorno y abre la guía)
+   ./ctf status <NN>          retos resueltos en un lab
+   ./ctf submit <NN> <R> <f>  entregar una flag encontrada
+   ./ctf help                 esta ayuda
+
+   Los labs ofensivos corren en Docker. Primera vez:  make setup
+
+HELP
+}
+case "${1:-list}" in
+  list|"")        cmd_list ;;
+  lab|clase|start) shift; cmd_lab "$@" ;;
+  status)         shift; cmd_status "$@" ;;
+  submit)         shift; cmd_submit "$@" ;;
+  help|-h|--help) cmd_help ;;
+  *) ui_fail "Comando desconocido: $1"; cmd_help; exit 1 ;;
+esac

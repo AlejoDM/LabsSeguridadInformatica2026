@@ -1,0 +1,4 @@
+# Retos del lab NN.  Formato:  id|titulo|sha256(flag)
+# Generá cada línea con:  bin/nueva-flag.sh R1 "Titulo" 'FLAG{...}'
+# NUNCA guardes la flag en claro acá. La flag en claro va en solucion.md.
+R1|Titulo del primer reto|0000000000000000000000000000000000000000000000000000000000000000

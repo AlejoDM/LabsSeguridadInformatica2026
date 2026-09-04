@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CyberLab UTN</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+:root{
+  --bg:#0a0e12; --bg2:#0d141b; --surface:#111a22; --surface2:#16222c;
+  --border:#213039; --border2:#2c404c;
+  --text:#cdd8de; --muted:#7c909b; --dim:#556570;
+  --green:#39d98a; --cyan:#4cc9f0; --amber:#f0b429; --violet:#b19cf0;
+  --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --sans:'IBM Plex Sans',system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;overflow:hidden}
+/* faint scanline / grid atmosphere */
+body::before{content:"";position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:
+    radial-gradient(1200px 700px at 78% -10%, rgba(57,217,138,.07), transparent 60%),
+    radial-gradient(900px 600px at 8% 110%, rgba(76,201,240,.06), transparent 55%),
+    repeating-linear-gradient(transparent 0 3px, rgba(0,0,0,.13) 3px 4px);
+  opacity:.7}
+
+.deck{position:relative;height:100vh;z-index:1}
+.slide{position:absolute;inset:0;display:none;flex-direction:column;justify-content:center;
+  padding:clamp(28px,6vw,96px);max-width:1180px;margin:0 auto}
+.slide.active{display:flex;animation:in .5s cubic-bezier(.2,.7,.2,1) both}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.slide.active{animation:none}}
+
+.eyebrow{font-family:var(--mono);font-size:13px;letter-spacing:.22em;text-transform:uppercase;
+  color:var(--green);margin:0 0 18px;display:flex;align-items:center;gap:10px}
+.eyebrow .bar{width:26px;height:2px;background:var(--green);display:inline-block}
+h1{font-size:clamp(38px,7vw,80px);line-height:1.02;margin:0;font-weight:700;letter-spacing:-.02em;
+  text-wrap:balance}
+h2{font-size:clamp(28px,4.4vw,52px);line-height:1.05;margin:0 0 22px;font-weight:600;
+  letter-spacing:-.015em;text-wrap:balance}
+p.lead{font-size:clamp(17px,2vw,22px);line-height:1.5;color:var(--text);max-width:62ch;margin:0}
+.muted{color:var(--muted)}
+.mono{font-family:var(--mono)}
+.green{color:var(--green)} .cyan{color:var(--cyan)} .amber{color:var(--amber)}
+.flag{font-family:var(--mono);color:var(--amber);background:rgba(240,180,41,.09);
+  border:1px solid rgba(240,180,41,.25);border-radius:5px;padding:1px 7px;font-size:.88em;white-space:nowrap}
+
+/* cover */
+.cover h1{font-size:clamp(44px,9vw,110px)}
+.cover .wm{font-family:var(--mono);color:var(--green);font-size:clamp(13px,1.5vw,16px);
+  letter-spacing:.3em;margin-bottom:26px}
+.cover .sub{font-size:clamp(18px,2.4vw,26px);color:var(--muted);margin-top:26px;max-width:48ch;line-height:1.45}
+.cursor{display:inline-block;width:.6ch;height:1.05em;background:var(--green);
+  transform:translateY(.14em);margin-left:.12em;animation:blink 1.05s steps(1) infinite}
+@keyframes blink{50%{opacity:0}}
+.cover .meta{margin-top:44px;font-family:var(--mono);font-size:14px;color:var(--dim);
+  display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.cover .meta .dot{color:var(--border2)}
+
+/* pillar / principle grids */
+.grid{display:grid;gap:16px;margin-top:8px}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g4{grid-template-columns:repeat(2,1fr)}
+@media(max-width:760px){.g3,.g4{grid-template-columns:1fr}}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:22px 22px 20px}
+.card .k{font-family:var(--mono);font-size:12px;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--green);margin-bottom:12px}
+.card h3{margin:0 0 8px;font-size:19px;font-weight:600}
+.card p{margin:0;color:var(--muted);font-size:15px;line-height:1.5}
+
+/* attack chain */
+.chain{display:flex;flex-wrap:wrap;gap:12px;margin-top:10px}
+.node{flex:1 1 170px;background:var(--surface);border:1px solid var(--border);border-radius:12px;
+  padding:18px;position:relative}
+.node .n{font-family:var(--mono);font-size:12px;color:var(--dim);letter-spacing:.1em}
+.node h3{margin:8px 0 6px;font-size:18px}
+.node p{margin:0;font-size:13.5px;color:var(--muted);line-height:1.45}
+.node.on{border-color:var(--green);box-shadow:0 0 0 1px rgba(57,217,138,.25),0 14px 40px -20px rgba(57,217,138,.4)}
+.node.on .n{color:var(--green)}
+.phase-tag{position:absolute;top:-9px;right:14px;font-family:var(--mono);font-size:10px;
+  letter-spacing:.12em;text-transform:uppercase;background:var(--bg);padding:2px 8px;border-radius:20px;
+  border:1px solid var(--border2);color:var(--muted)}
+.node.ai .phase-tag{color:var(--violet);border-color:rgba(177,156,240,.4)}
+
+/* terminal */
+.term{background:#080c10;border:1px solid var(--border2);border-radius:12px;overflow:hidden;
+  font-family:var(--mono);font-size:clamp(12.5px,1.5vw,15px);max-width:720px;box-shadow:0 24px 60px -30px #000}
+.term .bar{display:flex;align-items:center;gap:7px;padding:11px 14px;background:#0d141b;border-bottom:1px solid var(--border)}
+.term .bar i{width:11px;height:11px;border-radius:50%;background:#2b3a44;display:inline-block}
+.term .bar i:nth-child(1){background:#e0645b}.term .bar i:nth-child(2){background:#e3b341}.term .bar i:nth-child(3){background:#4bbf73}
+.term .bar span{margin-left:8px;color:var(--dim);font-size:12px}
+.term .body{padding:16px 18px;line-height:1.75;white-space:pre-wrap}
+.term .p{color:var(--green)} .term .c{color:var(--text)} .term .o{color:var(--muted)}
+.term .win{color:var(--amber)}
+
+/* lab slide layout */
+.labwrap{display:grid;grid-template-columns:1.05fr .95fr;gap:34px;align-items:center}
+@media(max-width:820px){.labwrap{grid-template-columns:1fr;gap:22px}}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin:20px 0 0}
+.tool{font-family:var(--mono);font-size:12.5px;color:var(--cyan);background:rgba(76,201,240,.08);
+  border:1px solid rgba(76,201,240,.22);border-radius:20px;padding:4px 12px}
+.learn{list-style:none;padding:0;margin:16px 0 0}
+.learn li{display:flex;gap:11px;padding:7px 0;font-size:16px;color:var(--text);line-height:1.4;
+  border-bottom:1px solid var(--border)}
+.learn li:last-child{border-bottom:0}
+.learn li::before{content:"▸";color:var(--green);font-family:var(--mono)}
+.bignum{font-family:var(--mono);font-weight:600;color:var(--surface2);
+  font-size:clamp(90px,20vw,220px);line-height:.8;letter-spacing:-.04em;
+  -webkit-text-stroke:1.5px var(--border2);color:transparent}
+
+.two{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:6px}
+@media(max-width:760px){.two{grid-template-columns:1fr}}
+.rows{list-style:none;padding:0;margin:12px 0 0;display:grid;gap:10px}
+.rows li{display:flex;gap:12px;font-size:16px;line-height:1.4;color:var(--text)}
+.rows li b{color:var(--green);font-family:var(--mono);font-size:14px;min-width:118px;font-weight:600}
+
+/* chrome */
+.progress{position:fixed;top:0;left:0;height:3px;background:var(--green);z-index:10;
+  box-shadow:0 0 12px rgba(57,217,138,.6);transition:width .35s ease}
+.foot{position:fixed;bottom:0;left:0;right:0;z-index:9;display:flex;align-items:center;
+  justify-content:space-between;padding:12px clamp(18px,4vw,42px);
+  font-family:var(--mono);font-size:12px;color:var(--dim);
+  background:linear-gradient(transparent,var(--bg) 55%)}
+.foot .prompt{color:var(--muted)}
+.foot .prompt b{color:var(--green);font-weight:500}
+.dots{display:flex;gap:7px}
+.dots button{width:8px;height:8px;border-radius:50%;border:0;padding:0;cursor:pointer;
+  background:var(--border2);transition:.2s}
+.dots button.on{background:var(--green);box-shadow:0 0 8px rgba(57,217,138,.7)}
+.dots button:focus-visible{outline:2px solid var(--cyan);outline-offset:2px}
+.count{color:var(--muted)}
+.hint{position:fixed;bottom:44px;right:clamp(18px,4vw,42px);z-index:9;font-family:var(--mono);
+  font-size:11px;color:var(--dim);opacity:.8}
+kbd{font-family:var(--mono);border:1px solid var(--border2);border-radius:4px;padding:0 5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<div class="progress" id="prog"></div>
+
+<div class="deck" id="deck">
+
+  <!-- 1 -->
+  <section class="slide cover active">
+    <div class="wm">root@cyberlab:~# ./iniciar_practico.sh</div>
+    <h1>Cyber<span class="green">·</span>Lab<span class="cursor"></span></h1>
+    <div class="sub">Práctico ofensivo de Seguridad Informática. De las herramientas básicas a los agentes autónomos — todo con las manos en el teclado.</div>
+    <div class="meta">
+      <span>UTN · FRVM</span><span class="dot">/</span>
+      <span>Seguridad Informática</span><span class="dot">/</span>
+      <span>Ciclo 2026</span><span class="dot">/</span>
+      <span class="green">Ing. Fernando Boiero</span>
+    </div>
+  </section>
+
+  <!-- 2 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Qué es</div>
+    <h2>No se aprende leyendo.<br>Se aprende <span class="green">haciendo</span>.</h2>
+    <p class="lead">Un recorrido práctico y progresivo por la seguridad ofensiva. Operás herramientas reales contra objetivos deliberadamente vulnerables que <b>se levantan solos en Docker</b>, dentro de tu propia máquina.</p>
+    <div class="grid g3" style="margin-top:34px">
+      <div class="card"><div class="k">Hands-on</div><h3>Todo con código</h3><p>Cada técnica se ejecuta a mano, tool por tool, clasificando y explicando cada escenario.</p></div>
+      <div class="card"><div class="k">Autodescubrible</div><h3>Se levanta solo</h3><p>Un comando <span class="mono green">./ctf</span> y el entorno arranca. Cero instalar en tu máquina.</p></div>
+      <div class="card"><div class="k">Progresivo</div><h3>Sube de nivel</h3><p>De tools básicas a pentest profundo con agentes de IA. La dificultad crece lab a lab.</p></div>
+    </div>
+  </section>
+
+  <!-- 3 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Filosofía</div>
+    <h2>Cuatro reglas que no se negocian</h2>
+    <div class="grid g4" style="margin-top:26px">
+      <div class="card"><div class="k">01</div><h3>Conceptos antes que código</h3><p>Primero entendés el porqué; después tocás la herramienta. Sin fundamentos, un scanner es ruido.</p></div>
+      <div class="card"><div class="k">02</div><h3>A mano antes que automático</h3><p>Recon, explotación y post — todo manual primero. Los agentes recién al final.</p></div>
+      <div class="card"><div class="k">03</div><h3>La IA es una herramienta</h3><p>El agente acelera; no reemplaza tu criterio. El humano dirige, la máquina ejecuta.</p></div>
+      <div class="card"><div class="k">04</div><h3>Sin atajos</h3><p>El aprendizaje real lleva esfuerzo y tiempo. Nadie se hace pentester en dos horas.</p></div>
+    </div>
+  </section>
+
+  <!-- 4 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// El arco ofensivo · Unidades 5–9</div>
+    <h2>La cadena de un ataque, paso a paso</h2>
+    <p class="lead muted">Un mismo hilo narrativo atraviesa las cinco unidades: la auditoría de <b class="green">PhantomCorp</b>. Cada lab continúa donde terminó el anterior.</p>
+    <div class="chain" style="margin-top:24px">
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 05</div><h3>Reconocimiento</h3><p>Mapear la superficie: puertos, servicios, versiones.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 06</div><h3>Enumeración</h3><p>Sacarle todo a cada servicio.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 07</div><h3>Explotación</h3><p>SQLi, RCE, traversal, IDOR.</p></div>
+      <div class="node on"><span class="phase-tag">manual</span><div class="n">UNIDAD 08</div><h3>Post-explotación</h3><p>Escalar, pivotear, automatizar.</p></div>
+      <div class="node on ai"><span class="phase-tag">agentes</span><div class="n">UNIDAD 09</div><h3>Agentes de IA</h3><p>Orquestar todo lo anterior.</p></div>
+    </div>
+  </section>
+
+  <!-- 5 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Cómo se juega</div>
+    <h2>Un comando, y adentro</h2>
+    <div class="labwrap" style="margin-top:6px">
+      <div class="term">
+        <div class="bar"><i></i><i></i><i></i><span>operador@cyberlab</span></div>
+<div class="body"><span class="p">$</span> <span class="c">./ctf lab 05</span>
+<span class="o">  ┌─ LABORATORIO 05 · RECONOCIMIENTO ─┐</span>
+<span class="o">  >> entorno arriba. entrá con: make shell</span>
+
+<span class="p">$</span> <span class="c">make shell</span>
+<span class="o">operador@attacker:~$</span> <span class="c">nmap -Pn phantomcorp</span>
+<span class="o">  21/tcp  open  ftp   ProFTPD 1.3.5</span>
+<span class="o">  80/tcp  open  http  PhantomServer 2.4.1</span>
+
+<span class="p">$</span> <span class="c">./ctf submit 05 R1 'FLAG{...}'</span>
+<span class="win">  ★ FLAG CAPTURADA · +1 al score</span></div>
+      </div>
+      <div>
+        <ul class="learn">
+          <li>Cada lab esconde <b class="amber">flags</b> en los servicios del objetivo.</li>
+          <li>Las descubrís <b>operando las tools</b>, no leyendo un PDF.</li>
+          <li>Las entregás con <span class="mono green">./ctf submit</span> y llevás tu progreso.</li>
+        </ul>
+        <p class="lead" style="margin-top:22px;font-size:17px">Las flags te enganchan.<br><span class="green">El informe es lo que evalúa la rúbrica.</span></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 · lab05 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 05</div>
+    <div class="labwrap">
+      <div>
+        <h2>Reconocimiento</h2>
+        <p class="lead muted">Antes de tocar nada, entendé qué hay. Un puerto abierto no es un hallazgo; un puerto <b class="green">identificado y clasificado</b> sí.</p>
+        <ul class="learn">
+          <li>Barrido de puertos y detección de versiones</li>
+          <li>Banner grabbing y fingerprinting de servicios</li>
+          <li>Clasificar contra CVE / CVSS</li>
+        </ul>
+        <div class="tools"><span class="tool">nmap</span><span class="tool">ncat</span><span class="tool">curl</span><span class="tool">whois</span><span class="tool">dig</span></div>
+      </div>
+      <div style="text-align:center"><div class="bignum">05</div></div>
+    </div>
+  </section>
+
+  <!-- 7 · lab06 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 06</div>
+    <div class="labwrap">
+      <div>
+        <h2>Enumeración</h2>
+        <p class="lead muted">Todo servicio esconde más de lo que muestra. El index dice "bienvenido"; vos preguntás por lo que <b class="green">no</b> está en el index.</p>
+        <ul class="learn">
+          <li>Fuerza bruta de directorios y archivos</li>
+          <li><span class="mono">.git</span> expuesto, métodos HTTP peligrosos, APIs</li>
+          <li>Fingerprinting dirigido del stack</li>
+        </ul>
+        <div class="tools"><span class="tool">dirb</span><span class="tool">gobuster</span><span class="tool">whatweb</span><span class="tool">wfuzz</span></div>
+      </div>
+      <div style="text-align:center"><div class="bignum">06</div></div>
+    </div>
+  </section>
+
+  <!-- 8 · lab07 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 07</div>
+    <div class="labwrap">
+      <div>
+        <h2>Explotación</h2>
+        <p class="lead muted">Toda entrada del usuario es una mentira potencial. Cuando el dato se mezcla con el código, tu dato <b class="green">se ejecuta</b> como código.</p>
+        <ul class="learn">
+          <li>SQL injection real (backend sqlite) — a mano y con sqlmap</li>
+          <li>Inyección de comandos (RCE), path traversal</li>
+          <li>IDOR y control de acceso roto</li>
+        </ul>
+        <div class="tools"><span class="tool">curl</span><span class="tool">sqlmap</span><span class="tool">payloads a mano</span></div>
+      </div>
+      <div style="text-align:center"><div class="bignum">07</div></div>
+    </div>
+  </section>
+
+  <!-- 9 · lab08 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 08</div>
+    <div class="labwrap">
+      <div>
+        <h2>Post-explotación</h2>
+        <p class="lead muted">Un shell sin privilegios es el principio, no el final. Y lo que se hace más de una vez, <b class="green">se automatiza</b>.</p>
+        <ul class="learn">
+          <li>Recon del host, loot de credenciales</li>
+          <li>Escalada a root por binario SUID</li>
+          <li>Pivoting real a una red interna segmentada</li>
+        </ul>
+        <div class="tools"><span class="tool">SUID</span><span class="tool">redes segmentadas</span><span class="tool">scripting</span></div>
+      </div>
+      <div style="text-align:center"><div class="bignum">08</div></div>
+    </div>
+  </section>
+
+  <!-- 10 · lab09 -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Unidad 09 · el gran final</div>
+    <div class="labwrap">
+      <div>
+        <h2>Agentes de pentest</h2>
+        <p class="lead muted">Un agente no es magia: es un <b class="cyan">loop de tool-use</b>. El LLM razona; tu código pone las manos y los <b class="green">guardrails</b>.</p>
+        <ul class="learn">
+          <li>Cliente agnóstico: Claude · OpenAI · mock offline</li>
+          <li>Guardrails de alcance: el agente no sale del scope</li>
+          <li>Completás tu propio agente y lo auditás</li>
+        </ul>
+        <div class="tools"><span class="tool">tool-use</span><span class="tool">guardrails</span><span class="tool">Claude / OpenAI / mock</span></div>
+      </div>
+      <div style="text-align:center"><div class="bignum" style="-webkit-text-stroke-color:var(--violet);opacity:.5">09</div></div>
+    </div>
+  </section>
+
+  <!-- 11 · phantomcorp -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// El hilo narrativo</div>
+    <h2>Sos el pentester junior.<br>Tu cliente: <span class="green">PhantomCorp S.A.</span></h2>
+    <p class="lead">Un engagement ficticio atraviesa las cinco unidades. Reconocés su perímetro, enumerás lo que exponen, explotás lo que encontrás, escalás y pivoteás — y al final soltás un agente que orquesta todo. <span class="muted">La historia te mantiene metido en la materia; cada lab avanza el ataque.</span></p>
+    <div class="term" style="margin-top:26px;max-width:640px">
+      <div class="bar"><i></i><i></i><i></i><span>engagement.log</span></div>
+<div class="body"><span class="o">[05]</span> perímetro mapeado ......... <span class="p">4 servicios</span>
+<span class="o">[06]</span> intranet enumerada ........ <span class="p">.git expuesto</span>
+<span class="o">[07]</span> portal comprometido ....... <span class="p">RCE + SQLi</span>
+<span class="o">[08]</span> root + red interna ........ <span class="p">pivot ok</span>
+<span class="o">[09]</span> auditoría autónoma ........ <span class="win">agente desplegado</span></div>
+    </div>
+  </section>
+
+  <!-- 12 · entrega -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Cómo se entrega y se corrige</div>
+    <h2>Como en un proyecto real</h2>
+    <div class="two" style="margin-top:10px">
+      <div class="card">
+        <div class="k">Flujo</div>
+        <ul class="rows">
+          <li><b>fork + PR</b> El mismo flujo con el que se colabora en software serio.</li>
+          <li><b>grupos 4–5</b> En <span class="mono">entregas/labNN/grupoXX/</span>.</li>
+          <li><b>historial</b> Los commits de todos cuentan para la nota.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <div class="k">Evaluación</div>
+        <ul class="rows">
+          <li><b>rúbrica 100</b> Con descriptores y causales de rechazo.</li>
+          <li><b>flags · informe</b> Las flags demuestran que pudiste; el informe, que entendiste.</li>
+          <li><b>IA declarada</b> Usarla no está prohibido; no declararla, sí.</li>
+        </ul>
+      </div>
+    </div>
+    <p class="lead muted" style="margin-top:24px;font-size:16px"><span class="amber">⚠ Uso responsable.</span> <span class="muted">Todo se practica solo contra los contenedores de la cátedra. Estas técnicas contra terceros son delito — Ley 26.388.</span></p>
+  </section>
+
+  <!-- 13 · arquitectura -->
+  <section class="slide">
+    <div class="eyebrow"><span class="bar"></span>// Bajo el capó · para la cátedra</div>
+    <h2>El motor</h2>
+    <div class="grid g3" style="margin-top:20px">
+      <div class="card"><div class="k">Reproducible</div><h3>Docker Compose</h3><p>Mismo lab en cualquier SO. Se destruye y se recrea. Los targets no se exponen al host.</p></div>
+      <div class="card"><div class="k">Verificable</div><h3>Flags por SHA-256</h3><p>El manifest guarda hashes, nunca la flag en claro. <span class="mono">./ctf submit</span> compara.</p></div>
+      <div class="card"><div class="k">Extensible</div><h3>Plantilla</h3><p>Un lab nuevo es copiar <span class="mono">labs/_plantilla</span> y rellenar. El número se deriva solo.</p></div>
+    </div>
+    <p class="lead muted" style="margin-top:24px;font-size:16px">Cada lab: <span class="mono green">README</span> (teoría→ejemplos→tools→práctica) · <span class="mono">entorno/</span> Docker · <span class="mono">retos.manifest</span> · <span class="mono">rúbrica</span> · <span class="mono">solucion.md</span> (solo docente).</p>
+  </section>
+
+  <!-- 14 · cierre -->
+  <section class="slide cover">
+    <div class="wm">root@cyberlab:~# ./fin.sh</div>
+    <h1>El humano <span class="green">dirige</span>.<br>La máquina ejecuta.</h1>
+    <div class="sub">Por eso el orden importa: nadie dirige un agente que hace lo que no sabe hacer. Primero las manos en el teclado. Después, la IA.</div>
+    <div class="meta"><span class="green">git clone</span><span class="dot">·</span><span>hacé el fork</span><span class="dot">·</span><span>ponete las pilas</span><span class="cursor"></span></div>
+  </section>
+
+</div>
+
+<div class="foot">
+  <div class="prompt">root@cyberlab:~# <b id="slug">iniciar</b></div>
+  <div class="dots" id="dots"></div>
+  <div class="count"><span id="cur">01</span> / <span id="tot">14</span></div>
+</div>
+<div class="hint">← → · <kbd>espacio</kbd> para avanzar</div>
+
+<script>
+(function(){
+  var slides=[].slice.call(document.querySelectorAll('.slide'));
+  var slugs=['iniciar','que_es','filosofia','el_arco','como_jugar','recon','enum','exploit','post','agentes','phantomcorp','entrega','motor','fin'];
+  var i=0, n=slides.length;
+  var prog=document.getElementById('prog'), cur=document.getElementById('cur'),
+      tot=document.getElementById('tot'), slug=document.getElementById('slug'),
+      dotsEl=document.getElementById('dots');
+  tot.textContent=String(n).padStart(2,'0');
+  for(var d=0;d<n;d++){(function(k){var b=document.createElement('button');
+    b.setAttribute('aria-label','Ir a la diapositiva '+(k+1));
+    b.onclick=function(){go(k)};dotsEl.appendChild(b);})(d);}
+  var dots=[].slice.call(dotsEl.children);
+  function go(k){
+    i=Math.max(0,Math.min(n-1,k));
+    slides.forEach(function(s,x){s.classList.toggle('active',x===i);});
+    dots.forEach(function(b,x){b.classList.toggle('on',x===i);});
+    prog.style.width=((i)/(n-1)*100)+'%';
+    cur.textContent=String(i+1).padStart(2,'0');
+    slug.textContent=slugs[i]||'';
+  }
+  function next(){go(i+1)} function prev(){go(i-1)}
+  document.addEventListener('keydown',function(e){
+    if(e.key==='ArrowRight'||e.key===' '||e.key==='PageDown'){e.preventDefault();next();}
+    else if(e.key==='ArrowLeft'||e.key==='PageUp'){e.preventDefault();prev();}
+    else if(e.key==='Home'){go(0)} else if(e.key==='End'){go(n-1)}
+  });
+  document.getElementById('deck').addEventListener('click',function(e){
+    if(e.target.closest('.term')||e.target.closest('a'))return;
+    var x=e.clientX/window.innerWidth; if(x>0.62)next(); else if(x<0.38)prev();
+  });
+  go(0);
+})();
+</script>
+</body>
+</html>

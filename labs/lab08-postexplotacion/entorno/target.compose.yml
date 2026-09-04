@@ -1,0 +1,21 @@
+# Target del Lab 08. Dos hosts en redes SEGMENTADAS:
+#  - phantomcorp     (host comprometido): labnet + internalnet
+#  - phantomcorp-db  (host interno)      : SOLO internalnet
+# La consola atacante esta en labnet -> NO llega al db. Hay que pivotear.
+services:
+  phantomcorp:
+    build: ./labs/lab08-postexplotacion/entorno/victima
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    environment:
+      DEPLOY_ENV: "produccion"
+    networks: [labnet, internalnet]
+  phantomcorp-db:
+    build: ./labs/lab08-postexplotacion/entorno/db
+    container_name: cyberlab-phantomcorp-db
+    hostname: phantomcorp-db
+    networks: [internalnet]
+networks:
+  internalnet:
+    name: cyberlab_internalnet
+    internal: true

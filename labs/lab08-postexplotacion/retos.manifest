@@ -1,0 +1,7 @@
+# Retos del Lab 08 — Post-explotación y automatización.  id|titulo|sha256(flag)
+# Se resuelven DENTRO del host comprometido:  make shell-victima
+R1|Reconocimiento del host comprometido|7ace177715a6ef81d3048db3780b5a3dcb34ae2919c1cbe32771d449fb049771
+R2|Loot de credenciales|9a9323a3fc25b4999d8e5f4e7140ae36e1eb0bb9a382222eeb30da716e8395c9
+R3|Escalada de privilegios (SUID)|1be37da3b19a76d4742fbf509f1224ef61205c7d7445be41d58e7540b10c82cb
+R4|Pivoting al host interno|1a36e3776b1e08f893b5c7b3f9c9112c995ae46b91c8994ee44b2d31055b2b32
+R5|Automatizacion (fuerza bruta de legajos)|d2b677ab4945e39dd5262a4e207ff3ecb01ac64467d4613431c635e15fac55ca

@@ -1,0 +1,7 @@
+# Target del Lab 07. Se combina con entorno/docker-compose.yml (make lab N=07).
+services:
+  phantomcorp:
+    build: ./labs/lab07-explotacion/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]

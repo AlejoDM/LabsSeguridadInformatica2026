@@ -1,0 +1,8 @@
+# Target del Lab 06. Se combina con entorno/docker-compose.yml (make lab N=06).
+# Ruta de build relativa a la RAÍZ del repo. No se publican puertos al host.
+services:
+  phantomcorp:
+    build: ./labs/lab06-enumeracion-de-servicios/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]
