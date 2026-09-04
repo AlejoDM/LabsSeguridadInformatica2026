@@ -1,0 +1,7 @@
+# Retos del Lab 09 — Agentes de pentest.  id|titulo|sha256(flag)
+# Corré el agente y entregá las flags que encuentra: ./ctf submit 09 R1 'FLAG{...}'
+R1|El agente hace recon y encuentra el primer flag|fd10014be1123ef706daeb2572e0dbbbeae124b842bac2e6989b2af54c0fa9dd
+R2|El agente enumera y sigue la ruta oculta|d7f81283399f2b2848ce8b0efbc235b3b9497ea9e97ad6fb3cd30bbcefaf442b
+R3|El agente detecta la API expuesta|deeeb1702590aeb830742bffd4b3925379ea3b0082af4599ff070343c7f19153
+R4|El guardrail rechaza un objetivo fuera de alcance|5ca477c8d986916ca7fb8690b3f360d87ce8fefa0bd1b2567664acd85635a01c
+R5|Tu agente encadena token->vault (esqueleto completo)|622b8b2560015021334beb910a9518888a7b37812053c859991b7f00f103184f

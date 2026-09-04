@@ -38,7 +38,7 @@ lab:
 	@echo ">> Entorno del lab $(N) arriba. Entrá con:  make shell"
 
 shell:
-	docker exec -it $(PROJECT)-attacker bash || \
+	docker exec -e LLM_PROVIDER -e LLM_MODEL -e ANTHROPIC_API_KEY -e OPENAI_API_KEY -it $(PROJECT)-attacker bash || \
 	  echo "No hay consola corriendo. Levantá un lab primero:  make lab N=05"
 
 shell-victima:

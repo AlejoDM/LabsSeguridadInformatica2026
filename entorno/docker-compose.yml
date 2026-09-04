@@ -10,6 +10,7 @@ services:
     working_dir: /loot
     volumes:
       - ./.loot:/loot            # evidencia compartida con tu repo (gitignored)
+      - ./:/repo:ro              # el repo montado (para correr el agente del Lab 09)
     cap_add: [NET_RAW, NET_ADMIN] # nmap -sS necesita raw sockets
     networks: [labnet]
     command: sleep infinity

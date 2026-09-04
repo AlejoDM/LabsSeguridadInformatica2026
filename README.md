@@ -54,7 +54,7 @@ Reglas que valen para todos los labs:
 | [06](labs/lab06-enumeracion-de-servicios/) | 6 | Enumeración de servicios: directorios, `.git`, métodos HTTP, APIs y fingerprinting | **Publicado** |
 | [07](labs/lab07-explotacion/) | 7 | Explotación: SQLi, inyección de comandos, path traversal e IDOR | **Publicado** |
 | [08](labs/lab08-postexplotacion/) | 8 | Post-explotación y automatización: loot, SUID, pivoting y scripting | **Publicado** |
-| 09 | 9 | *Título según programa analítico* | Por publicar |
+| [09](labs/lab09-agentes/) | 9 | Agentes de pentest: tool-use, guardrails y APIs de LLM (Claude/OpenAI/mock) | **Publicado** |
 
 Cada laboratorio se habilita al inicio de la unidad correspondiente. Los
 títulos marcados *«según programa analítico»* se completan al publicarse el
