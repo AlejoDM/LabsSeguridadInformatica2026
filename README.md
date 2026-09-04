@@ -132,6 +132,15 @@ LabsSeguridadInformatica2026/
 
 ---
 
+## Documentación
+
+- [Guía del curso](docs/GUIA-DEL-CURSO.md) — qué es el práctico, el arco completo y cómo se trabaja.
+- [Guía para docentes](docs/PARA-DOCENTES.md) — diseño pedagógico, corrección y cómo crear labs nuevos.
+- [Arquitectura del motor](docs/ARQUITECTURA.md) — cómo funciona por dentro.
+- [Presentación](docs/presentacion.html) — deck para presentar el práctico (abrila en el navegador).
+
+---
+
 ## Contacto
 
 Consultas sobre los enunciados: por el canal de la cátedra o abriendo un
