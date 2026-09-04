@@ -1,0 +1,6 @@
+services:
+  phantomcorp:
+    build: ./labs/lab10-deteccion-evasion/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]

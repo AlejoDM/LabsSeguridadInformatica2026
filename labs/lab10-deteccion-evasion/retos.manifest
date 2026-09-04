@@ -1,0 +1,6 @@
+# Retos del Lab 10 — Detección y evasión.  id|titulo|sha256(flag)
+R1|Acceso a la vista del SOC|3058f01c2bc8187c76730283dad5f5dd1a78ace4a485c0c6c025c398d1d6177d
+R2|Disparar una deteccion (te vieron)|6587d699313160f407bd468893047ee5be659bfee32a40fb1ff79e7207b18123
+R3|Conocer el ruleset del IDS|fc2db20945b455251bdf871e4d1859d9bac975fbe4ac00374249803fd49afde2
+R4|Evadir una firma de deteccion|bdd0401c4a29cb12de95ccefc577a81a042156c2392b045d267dcbadd4188b0a
+R5|Encontrar la intrusion en el ruido|e633802ae90040572170000ce4bd1419713bd2ac3c76186a7bf96576d4ec06db
