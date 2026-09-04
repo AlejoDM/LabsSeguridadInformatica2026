@@ -1,0 +1,18 @@
+# Compose BASE compartido por todos los labs ofensivos.
+# Define la consola del atacante. Cada lab suma su(s) target(s) con -f.
+# OJO: las rutas son relativas a la RAÍZ del repo (se invoca con
+# --project-directory . desde el Makefile). No lo corras a mano sin eso.
+services:
+  attacker:
+    build: ./entorno/attacker
+    container_name: cyberlab-attacker
+    hostname: attacker
+    working_dir: /loot
+    volumes:
+      - ./.loot:/loot            # evidencia compartida con tu repo (gitignored)
+    cap_add: [NET_RAW, NET_ADMIN] # nmap -sS necesita raw sockets
+    networks: [labnet]
+    command: sleep infinity
+networks:
+  labnet:
+    name: cyberlab_labnet

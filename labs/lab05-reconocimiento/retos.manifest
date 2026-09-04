@@ -1,0 +1,8 @@
+# Retos del Lab 05 — Reconocimiento.  Formato:  id|titulo|sha256(flag)
+# Las flags se DESCUBREN con las tools, no se leen de acá (guardamos el hash).
+# Entregá con:  ./ctf submit 05 R1 'FLAG{...}'
+R1|Puerto oculto en rango alto (barrido completo)|cc24782490f257b9712ff303ecea8f8a5bb7929281ef98805bb0f5043f2727dd
+R2|Banner grabbing del servicio FTP|6583399e1bae2654d8f784e2367aa9f03e8645f92acde312d2b3c5870e5c28ba
+R3|Fuga de informacion en headers HTTP|27bfe75125efb72f00fb38b524bb498646d5d4b88ffcb42ade1b6154c897b7fd
+R4|Enumeracion de rutas via robots.txt|3d684b55de9ff7f5de921be1a74bfa7b8d771835fcac3ea24b9baa6ce262a431
+R5|Servicio dev expuesto en produccion|75b8bc39ad23a3a8dd597d6c627ffc5b5878c41895dce82b40dd1751955092e3

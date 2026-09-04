@@ -44,3 +44,6 @@ manifest.sha256
 *.pem
 secrets.json
 credenciales*
+.loot/
+.progreso/
+*.pyc

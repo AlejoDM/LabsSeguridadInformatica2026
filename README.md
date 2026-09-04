@@ -50,7 +50,7 @@ Reglas que valen para todos los labs:
 | 02 | 2 | Criptografía | Por publicar |
 | 03 | 3 | *Título según programa analítico* | Por publicar |
 | 04 | 4 | Marcos normativos y gestión de la seguridad | Por publicar |
-| 05 | 5 | Vulnerabilidades: identificación, clasificación y explotación | Por publicar |
+| [05](labs/lab05-reconocimiento/) | 5 | Reconocimiento: identificación y clasificación de la superficie de ataque | **Publicado** |
 | 06 | 6 | *Título según programa analítico* | Por publicar |
 | 07 | 7 | *Título según programa analítico* | Por publicar |
 | 08 | 8 | *Título según programa analítico* | Por publicar |
@@ -60,20 +60,48 @@ Cada laboratorio se habilita al inicio de la unidad correspondiente. Los
 títulos marcados *«según programa analítico»* se completan al publicarse el
 enunciado.
 
+Los laboratorios de la **primera mitad** son de teoría y código (Python). A
+partir de la Unidad 5 son **ofensivos**: operás herramientas reales contra
+objetivos deliberadamente vulnerables que **se levantan solos en Docker**, dentro
+de tu máquina. La dificultad y la autonomía crecen lab a lab, hasta cerrar con
+agentes de pentest en las últimas unidades.
+
+---
+
+## El motor de laboratorios — `./ctf`
+
+Los labs ofensivos son **autodescubribles**: no hay que adivinar qué hacer.
+Desde la raíz del repo:
+
+```bash
+./ctf                 # muestra el plan de labs y tu progreso
+./ctf lab 05          # arranca un lab: levanta su entorno y abre la guía
+./ctf status 05       # tus retos resueltos
+./ctf submit 05 R1 'FLAG{...}'   # entregás una flag que encontraste
+```
+
+Cada lab esconde **flags** en los servicios del objetivo. Las descubrís operando
+las tools (nmap, curl, etc.) y las entregás para llevar tu progreso. **Las flags
+te enganchan; el informe es lo que evalúa la rúbrica.** Todas las herramientas
+viven dentro de un contenedor "atacante": tu máquina queda limpia.
+
 ---
 
 ## Requisitos técnicos
 
-- **Python 3.10 o superior.** Los laboratorios que involucran código usan
-  exclusivamente la **biblioteca estándar** salvo indicación contraria en el
-  enunciado. No hay que instalar dependencias.
+- **Python 3.10 o superior.** Los laboratorios de código usan exclusivamente la
+  **biblioteca estándar** salvo indicación contraria. No hay que instalar
+  dependencias.
+- **Docker** y **Docker Compose** — para los labs ofensivos (Unidad 5 en
+  adelante). Docker Desktop en Mac/Windows; `docker` + plugin `compose` en Linux.
 - **Git** y una cuenta de **GitHub** por integrante.
 - Un editor de texto o IDE. Cualquiera sirve.
 
-Verificá tu versión de Python:
+Verificá tu entorno:
 
 ```bash
 python3 --version
+docker --version && docker compose version
 ```
 
 ---
@@ -82,15 +110,23 @@ python3 --version
 
 ```
 LabsSeguridadInformatica2026/
+├── ctf                      # Punto de entrada autodescubrible (./ctf)
+├── Makefile                 # make setup / make lab N=05 / make shell
 ├── CONTRIBUTING.md          # Flujo de trabajo: fork, rama, PR
-├── labs/                    # Enunciados y esqueletos de código (NO modificar)
-│   └── lab01-introduccion/
-│       ├── README.md        # Enunciado
-│       ├── src/             # Esqueleto de código con TODO a completar
-│       ├── data/            # Generador de datos de muestra
-│       └── docs/            # Plantilla de entregable, research y rúbrica
+├── bin/                     # Motor del curso (ASCII, verificador de flags)
+├── entorno/                 # Consola del atacante (Docker) compartida
+├── labs/                    # Enunciados y esqueletos (NO modificar)
+│   ├── _plantilla/          # Molde para crear labs nuevos
+│   ├── lab01-introduccion/  # Teoría + código (Python stdlib)
+│   │   ├── README.md · src/ · data/ · docs/
+│   └── lab05-reconocimiento/# Primer lab ofensivo (Docker + flags)
+│       ├── README.md        # Enunciado (Teoría → Ejemplos → Tools → Práctica)
+│       ├── entorno/         # Target vulnerable (PhantomCorp) en Docker
+│       ├── src/             # Ampliación opcional (mini-escáner a completar)
+│       ├── retos.manifest   # Flags del lab (hasheadas)
+│       └── docs/            # Entregable, research y rúbrica
 └── entregas/                # Acá va el trabajo de cada grupo
-    └── lab01/
+    └── lab05/
         └── grupo01/         # Lo crea el grupo
 ```
 

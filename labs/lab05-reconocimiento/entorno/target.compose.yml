@@ -1,0 +1,9 @@
+# Target del Lab 05. Se combina con entorno/docker-compose.yml.
+# Ruta de build relativa a la RAÍZ del repo (--project-directory .).
+# NO publicamos puertos al host: se escanea desde la consola por la red interna.
+services:
+  phantomcorp:
+    build: ./labs/lab05-reconocimiento/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]
