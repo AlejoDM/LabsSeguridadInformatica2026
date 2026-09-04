@@ -7,7 +7,7 @@ source "$CTF_ROOT/bin/lib/banner.sh"
 source "$CTF_ROOT/bin/lib/check.sh"
 LABS_DIR="$CTF_ROOT/labs"
 
-_lab_dir()  { local n="$1"; n="$(printf '%02d' "$((10#$n))" 2>/dev/null || echo "$n")"; find "$LABS_DIR" -maxdepth 1 -type d -name "lab$n-*" 2>/dev/null | head -1; }
+_lab_dir()  { local n="$1" p; if [[ "$n" =~ ^[0-9]+$ ]]; then p="$(printf '%02d' "$((10#$n))")"; else p="$n"; fi; find "$LABS_DIR" -maxdepth 1 -type d -name "lab$p-*" 2>/dev/null | head -1; }
 _lab_slug() { basename "$(_lab_dir "$1")" 2>/dev/null | sed 's/^lab//; s/-.*//'; }
 
 cmd_list() {

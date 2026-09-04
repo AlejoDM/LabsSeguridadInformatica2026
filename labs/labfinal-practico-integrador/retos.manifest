@@ -1,0 +1,5 @@
+# Practico Final — hitos del engagement.  id|titulo|sha256(flag)
+R1|Recon/enum: portal interno localizado|71369b0044f9f3cf902058a367a83c5f39dd4897208831a82002297f4e8142cb
+R2|Explotacion: foothold por SQLi|812d30f0d147908025ddffded3ebadc81769be1b6faf5b8dbf759ba8c7d16f5d
+R3|Post: token de API looteado|66a434f816e74d489f75a6636e627df3be31fade79acd8e7f9bf5a4205f6b4f8
+R4|Impacto: crown jewels (datos de clientes)|511226fbc003a0eaeb9e023f4de80d6109023691ed2a88b96ad1a10f9028ffab

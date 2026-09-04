@@ -56,6 +56,7 @@ Reglas que valen para todos los labs:
 | [08](labs/lab08-postexplotacion/) | 8 | Post-explotación y automatización: loot, SUID, pivoting y scripting | **Publicado** |
 | [09](labs/lab09-agentes/) | 9 | Agentes de pentest: tool-use, guardrails y APIs de LLM (Claude/OpenAI/mock) | **Publicado** |
 | [10](labs/lab10-deteccion-evasion/) | 10 | Detección y evasión: la vista del defensor (Blue vs Red) | **Publicado** |
+| [★ Final](labs/labfinal-practico-integrador/) | — | **Práctico final integrador**: engagement completo + informe de pentest profesional | **Publicado** |
 
 Cada laboratorio se habilita al inicio de la unidad correspondiente. Los
 títulos marcados *«según programa analítico»* se completan al publicarse el

@@ -1,0 +1,6 @@
+services:
+  phantomcorp:
+    build: ./labs/labfinal-practico-integrador/entorno/phantomcorp
+    container_name: cyberlab-phantomcorp
+    hostname: phantomcorp
+    networks: [labnet]
