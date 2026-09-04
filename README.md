@@ -51,7 +51,7 @@ Reglas que valen para todos los labs:
 | 03 | 3 | *Título según programa analítico* | Por publicar |
 | 04 | 4 | Marcos normativos y gestión de la seguridad | Por publicar |
 | [05](labs/lab05-reconocimiento/) | 5 | Reconocimiento: identificación y clasificación de la superficie de ataque | **Publicado** |
-| 06 | 6 | *Título según programa analítico* | Por publicar |
+| [06](labs/lab06-enumeracion-de-servicios/) | 6 | Enumeración de servicios: directorios, `.git`, métodos HTTP, APIs y fingerprinting | **Publicado** |
 | 07 | 7 | *Título según programa analítico* | Por publicar |
 | 08 | 8 | *Título según programa analítico* | Por publicar |
 | 09 | 9 | *Título según programa analítico* | Por publicar |

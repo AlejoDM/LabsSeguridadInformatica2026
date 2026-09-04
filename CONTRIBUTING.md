@@ -237,7 +237,15 @@ la solución de otro grupo, citalo en tu entregable — como citarías cualquier
 otra fuente.
 
 **¿Puedo usar bibliotecas externas?**
-Salvo que el enunciado lo autorice explícitamente, no. Los labs están diseñados
-para resolverse con la biblioteca estándar de Python. Esa restricción es
-pedagógica: si `pip install` te resuelve el ejercicio, no aprendiste el
-ejercicio.
+En los **labs de código** (Unidades 1 a 4), salvo que el enunciado lo autorice,
+no: están diseñados para resolverse con la biblioteca estándar de Python. Esa
+restricción es pedagógica: si `pip install` te resuelve el ejercicio, no
+aprendiste el ejercicio.
+
+**¿Y en los labs ofensivos (Unidad 5 en adelante)? ¿Tengo que instalar nmap, Kali, etc.?**
+No. Esos labs corren en **Docker** y todas las herramientas ya vienen dentro de
+una "consola del atacante" que se levanta sola. Tu máquina queda limpia: solo
+necesitás Docker. El flujo es `make setup` (una vez) y después `./ctf lab NN`.
+El enunciado de cada lab te guía. **Regla que no cambia:** esas herramientas se
+usan **exclusivamente** contra los contenedores que provee la cátedra — ver
+*Uso responsable* más arriba.
