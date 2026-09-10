@@ -92,9 +92,47 @@ Este ejemplo demuestra que un cifrado con un espacio de claves pequeño no ofrec
 
 ## 3. Parte B.2 — Autenticación
 
-**B.2.1 length-extension · B.2.2 cómo lo resuelve HMAC · B.2.3 tiempo constante**
+### B.2.1 — ¿Por qué `sha256(clave || mensaje)` permite un ataque de length-extension?
 
----
+Utilizar `sha256(clave || mensaje)` como MAC es inseguro debido a la forma en que SHA-256 procesa la información. El algoritmo trabaja con el mensaje en bloques sucesivos y el hash final depende del estado interno obtenido después de procesarlos.
+
+Si un atacante conoce un mensaje y su MAC correspondiente:
+
+`MAC = SHA256(clave || mensaje)`
+
+puede utilizar ese hash como punto de partida para continuar el cálculo y agregar nuevos datos al final del mensaje. Para realizar el ataque no necesita conocer el contenido de la clave secreta, aunque sí debe conocer o estimar su longitud para poder reproducir correctamente el padding utilizado por SHA-256.
+
+De esta forma, puede construir un mensaje como:
+
+`mensaje || padding || contenido_agregado`
+
+y obtener un MAC válido para ese mensaje extendido sin conocer la clave.
+
+Por ejemplo, si un sistema autentica el mensaje `usuario=123&accion=consultar`, un atacante que conozca el MAC podría intentar agregar al final `&admin=true` y calcular un nuevo MAC válido. Esto no significa que pueda modificar libremente cualquier parte del mensaje original, sino que puede extenderlo agregando información al final.
+
+Por este motivo, utilizar directamente `sha256(clave || mensaje)` no es una forma segura de construir un MAC.
+
+### B.2.2 — ¿Cómo lo resuelve HMAC estructuralmente?
+
+HMAC evita este problema porque no se limita a concatenar la clave con el mensaje y calcular un único hash. Utiliza una construcción de dos niveles en la que la clave secreta interviene dos veces, combinada con dos valores diferentes denominados `ipad` y `opad`.
+
+De forma simplificada, HMAC tiene la siguiente estructura:
+
+`H((K ⊕ opad) || H((K ⊕ ipad) || mensaje))`
+
+Primero se calcula un hash interno utilizando la clave combinada con `ipad` y el mensaje. Luego, el resultado de ese hash se utiliza como entrada de un segundo hash, donde vuelve a intervenir la clave, esta vez combinada con `opad`.
+
+Esto hace que el valor final que recibe un atacante sea el resultado del hash externo y no un estado interno que pueda reutilizar directamente para continuar procesando datos. Por lo tanto, aunque se utilice SHA-256 dentro de HMAC, un atacante no puede aprovechar un ataque de length-extension para generar un HMAC válido de un mensaje extendido, ya que para calcular correctamente el hash externo sigue necesitando conocer la clave secreta.
+
+### B.2.3 — ¿Qué ataque evita `hmac.compare_digest()`?
+
+`hmac.compare_digest()` se utiliza para reducir el riesgo de ataques de temporización o _timing attacks_ durante la verificación de un MAC.
+
+Una comparación convencional puede detenerse cuando encuentra el primer byte diferente. Esto puede generar pequeñas variaciones en el tiempo de respuesta dependiendo de cuántos bytes iniciales coincidan con el valor correcto.
+
+Por ejemplo, si el MAC correcto comienza con `a7f3`, un atacante podría realizar muchas pruebas con valores como `0000`, `a000`, `a700` o `a7f0`. Si las comparaciones que tienen más bytes correctos al comienzo tardan ligeramente más, podría utilizar esas diferencias de tiempo para ir deduciendo progresivamente el MAC esperado.
+
+## `hmac.compare_digest()` está diseñado para realizar la comparación sin que el tiempo dependa de la posición del primer byte diferente. De esta manera se reduce la información que puede obtener un atacante midiendo los tiempos de respuesta y se evita que esa diferencia funcione como un canal lateral para intentar descubrir un MAC válido.
 
 ## 4. Bitácora
 
