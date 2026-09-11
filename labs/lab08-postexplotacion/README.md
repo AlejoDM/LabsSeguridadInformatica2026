@@ -236,3 +236,12 @@ En `entregas/lab08/grupoXX/`: `informe.md`, `src/recolector.py` (completado) y
 
 Post-explotación es control de un sistema ajeno: máxima gravedad legal fuera del
 lab. Solo la cátedra. Ley 26.388.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.
