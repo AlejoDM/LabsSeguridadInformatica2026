@@ -405,7 +405,7 @@ alcance y la ética.
 
 ---
 
-## Clase 11 — Forensia del pentest (DFIR) · `defensivo` 🔬 *(próximamente)*
+## Clase 11 — Forensia del pentest (DFIR) · `defensivo` 🔬
 
 🎣 **El gancho:** El atacante entró, hizo su desastre y se fue. Ahora sos VOS el
 que llega después: ¿qué tocó? ¿por dónde entró? ¿qué se llevó? ¿sigue adentro?

@@ -75,7 +75,7 @@ SLIDES = [
  {"center": True, "art": (COVER, G), "lines": [
    L(("", W)),
    L(("Práctico de Seguridad Informática — de la tríada CIA a los agentes", W)),
-   L(("autónomos y de vuelta a la defensa. Diez labs + un engagement final.", W)),
+   L(("autónomos, la defensa y la forensia. Once labs + un engagement final.", W)),
    L(("", W)),
    L(("UTN · FRVM   /   Seguridad Informática   /   2026   /   ", D), ("Ing. Fernando Boiero", G)),
  ]},
@@ -96,7 +96,7 @@ SLIDES = [
    L(("[04] ", G), ("Sin atajos                   ", W), ("nadie se hace pentester en dos horas", D)),
  ]},
  # 4
- {"kicker": "El programa · 10 labs + final", "lines": [
+ {"kicker": "El programa · 11 labs + final", "lines": [
    L(("FUNDAMENTOS · CÓDIGO (Python)          ", G), ("OFENSIVA · Docker", C)),
    L(("┌─────────────────────────────┐    ┌─────────────────────────────┐", D)),
    L(("│ 01 Introducción (CIA, hash) │    │ 05 Reconocimiento           │", W)),
@@ -105,6 +105,7 @@ SLIDES = [
    L(("│ 04 Marcos normativos        │    │ 08 Post-explotación         │", W)),
    L(("│                             │    │ 09 Agentes de IA            │", W)),
    L(("│                             │    │ 10 Detección y evasión      │", W)),
+   L(("│                             │    │ 11 Forensia (DFIR)          │", W)),
    L(("└─────────────────────────────┘    └─────────────────────────────┘", D)),
    L(("", W)),
    L(("★ ", A), ("…y todo desemboca en el Práctico Final: engagement + informe.", W)),
@@ -217,7 +218,7 @@ SLIDES = [
    L(("HACÉS   ", G), ("disparás, evadís una firma, y cazás una intrusión en el ruido. 5 retos.", D)),
    L(("DATO    ", A), ("en casi toda brecha, la evidencia estaba en los logs desde el día uno.", A)),
  ]},
- {"kicker": "CLASE 11 · FORENSIA DEL PENTEST (DFIR)   [próximamente]", "lines": [
+ {"kicker": "CLASE 11 · FORENSIA DEL PENTEST (DFIR)   [defensivo]", "lines": [
    L(("El atacante entró, hizo su desastre y se fue. ¿Qué tocó? ¿Sigue adentro?", W)),
    L(("IDEA    ", G), ("reconstruir lo que pasó desde la evidencia: RAM, disco, logs. Cadena de custodia.", D)),
    L(("EJEMPLO ", C), ("borró el historial, pero en la RAM sigue el proceso y la conexión abierta.", D)),
