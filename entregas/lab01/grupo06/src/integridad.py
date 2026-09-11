@@ -186,12 +186,20 @@ def generar_manifiesto(directorio: Path, salida: Path) -> dict[str, str]:
     # TODO 1: implementar el recorrido y la construcción del manifiesto.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 1 de 4 — generar_manifiesto() sin implementar.\n"
-        "  Qué falta: recorrer el directorio recursivamente y devolver el\n"
-        "  diccionario {ruta_relativa_posix: digest_sha256}, ordenado por clave.\n"
-        "  Leé el docstring de esta función: están los requisitos y las pistas."
-    )
+    manifiesto: dict[str, str] = {}
+    salida_resuelta = salida.resolve()
+
+    for ruta in directorio.rglob("*"):
+        if not ruta.is_file() or ruta.is_symlink():
+            continue
+
+        if ruta.resolve() == salida_resuelta:
+            continue
+
+        ruta_relativa = ruta.relative_to(directorio).as_posix()
+        manifiesto[ruta_relativa] = sha256_archivo(ruta)
+
+    return dict(sorted(manifiesto.items()))
 
 
 # ==========================================================================
@@ -256,12 +264,43 @@ def verificar_manifiesto(
     # TODO 2: implementar la clasificación en OK / MODIFICADO / FALTANTE / NUEVO.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 2 de 4 — verificar_manifiesto() sin implementar.\n"
-        "  Qué falta: comparar el directorio contra el manifiesto y devolver\n"
-        "  el diccionario con las cuatro categorías OK/MODIFICADO/FALTANTE/NUEVO.\n"
-        "  Leé el docstring de esta función: está la estructura exacta esperada."
-    )
+    resultado = {
+        ESTADO_OK: [],
+        ESTADO_MODIFICADO: [],
+        ESTADO_FALTANTE: [],
+        ESTADO_NUEVO: [],
+    }
+
+    archivos_disco: dict[str, Path] = {}
+    manifiesto_resuelto = ruta_manifiesto.resolve()
+
+    for ruta in directorio.rglob("*"):
+        if not ruta.is_file() or ruta.is_symlink():
+            continue
+
+        if ruta.resolve() == manifiesto_resuelto:
+            continue
+
+        relativa = ruta.relative_to(directorio).as_posix()
+        archivos_disco[relativa] = ruta
+
+    del_disco = set(archivos_disco.keys())
+    del_manifiesto = set(manifiesto.keys())
+
+    en_ambos = del_disco & del_manifiesto
+
+    for relativa in sorted(en_ambos):
+        digest_actual = sha256_archivo(archivos_disco[relativa])
+
+        if digest_actual == manifiesto[relativa]:
+            resultado[ESTADO_OK].append(relativa)
+        else:
+            resultado[ESTADO_MODIFICADO].append(relativa)
+
+    resultado[ESTADO_NUEVO] = sorted(del_disco - del_manifiesto)
+    resultado[ESTADO_FALTANTE] = sorted(del_manifiesto - del_disco)
+
+    return resultado
 
 
 # ==========================================================================
