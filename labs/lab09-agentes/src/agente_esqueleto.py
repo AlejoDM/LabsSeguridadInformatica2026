@@ -11,7 +11,7 @@ entender el mecanismo desde adentro. Un agente no es magia: es este loop.
 Cuando funcione, corré:
     LLM_PROVIDER=mock python3 agente_esqueleto.py
 y tiene que llegar a encadenar /api/token -> POST /api/vault y traer el flag
-capstone (FLAG{agente_esqueleto_completo}).
+capstone que devuelve el vault.
 """
 import re
 import sys
