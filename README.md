@@ -137,6 +137,8 @@ LabsSeguridadInformatica2026/
 
 ## Documentación
 
+- **[Novedades](docs/NOVEDADES.md)** — qué cambió desde la última clase y cómo sincronizar tu fork.
+
 - [Guía del curso](docs/GUIA-DEL-CURSO.md) — qué es el práctico, el arco completo y cómo se trabaja.
 - [Guía dinámica de clases](docs/GUIA-DINAMICA-CLASES.md) — cada clase explicada con gancho, ejemplo y dato hacker (para engancharse).
 - [Banco de retos bonus](docs/BANCO-DE-RETOS.md) — ~30 desafíos opcionales, progresivos (★/★★/★★★), con más herramientas por lab.

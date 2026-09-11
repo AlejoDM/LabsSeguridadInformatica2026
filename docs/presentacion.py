@@ -79,6 +79,18 @@ SLIDES = [
    L(("", W)),
    L(("UTN · FRVM   /   Seguridad Informática   /   2026   /   ", D), ("Ing. Fernando Boiero", G)),
  ]},
+ # NOVEDADES (desde la clase del 04/09)
+ {"kicker": "NOVEDADES · desde la clase del 04/09", "lines": [
+   L(("Sincronizá tu fork y bajá lo nuevo. Nada de lo que ya hiciste cambia.", W)),
+   L(("", W)),
+   L(("1  ", G), ("Presentación de TERMINAL (esta) — matrix, radar, calavera, decode.", D)),
+   L(("2  ", G), ("Guía dinámica de las 11 clases (gancho + ejemplo + dato hacker).", D)),
+   L(("3  ", G), ("Banco de ~30 retos bonus con más tools (★/★★/★★★) por lab.", D)),
+   L(("4  ", G), ("Lab 11 NUEVO — Forensia DFIR: de atacar a investigar.", D)),
+   L(("5  ", G), ("timeline.py — automatizás la línea de tiempo del ataque.", D)),
+   L(("", W)),
+   L(("Cómo seguir  ", A), ("git fetch upstream  &&  git merge upstream/main", C)),
+ ]},
  # 2
  {"kicker": "Qué es", "title": "Se aprende haciendo", "lines": [
    L(("No se aprende leyendo. Se opera con herramientas reales contra objetivos", W)),
