@@ -8,18 +8,18 @@
 |---|---|
 | **Grupo** | 06 |
 | **Caso asignado (Parte A)** | Morris Worm (1988) |
-| **Tema del mini-research** | |
+| **Tema del mini-research** | Tema 3 — La disponibilidad, la propiedad descuidada de la tríada |
 | **Fecha de entrega** | |
 
 ### Integrantes
 
 | Nombre y apellido | Legajo | Usuario de GitHub |
 |---|---|---|
-| Martín Beccereca | | @martinbeccereca |
-| María Belén Benito | | @ |
-| Alejo De Miguel | | @AlejoDM |
-| Tomás Giudici | | @ |
-| Carolina Suppo | | @ |
+| Martín Beccereca | 15154 | @martinbeccereca |
+| María Belén Benito | 14625 | @belubenito603-byte |
+| Alejo De Miguel | 15138 | @AlejoDM |
+| Tomás Giudici | 14977 | @TomasGiudici |
+| Carolina Suppo | 15057 | @carosuppo |
 
 ---
 
@@ -294,28 +294,37 @@ propiedad tienen esas funciones que SHA-256 no tiene?*
 
 **Respuesta:**
 
+Aunque SHA-256 es una función de hash criptográfica robusta para garantizar la integridad de datos y verificar firmas digitales (resistente a colisiones y preimágenes), resulta una **pésima elección para el almacenamiento de contraseñas**. La razón fundamental radica en que SHA-256 fue expresamente diseñada para ser **computacionalmente rápida y altamente eficiente en hardware**. Dado que las contraseñas elegidas por humanos poseen una entropía intrínsecamente baja, un atacante que obtenga una base de datos de hashes puede aprovechar esta velocidad para ejecutar ataques masivos de fuerza bruta, ataques por diccionario y búsquedas con tablas arcoíris (*rainbow tables*). Utilizando hardware paralelo moderno (como clústeres de GPUs, FPGAs o circuitos integrados dedicados ASICs), un atacante puede calcular **miles de millones de hashes SHA-256 por segundo por dispositivo**, descifrando contraseñas comunes o de longitud media en cuestión de segundos o minutos. Además, un hash simple no incluye intrínsecamente un mecanismo obligatorio de *salt*, lo que permite atacar múltiples usuarios a la vez si no se gestiona manualmente.
+
+En su lugar, los estándares modernos de seguridad exigen el uso de **funciones de derivación de claves basadas en contraseñas (KDF)** y algoritmos especializados de hashing de contraseñas, tales como **Argon2id** (estándar recomendado por la *Password Hashing Competition* e IETF RFC 9106), **bcrypt** (basado en el algoritmo Eksblowfish), **scrypt** y **PBKDF2**.
+
+Estas funciones poseen tres propiedades esenciales que SHA-256 no tiene:
+
+1. **Factor de trabajo / lentitud configurable (*Work Factor / Cost Parameter*):** Permiten ajustar deliberadamente la cantidad de iteraciones y el tiempo de cómputo necesario para calcular un único hash. Esto permite calibrar el sistema para que verificar un intento de inicio de sesión legítimo tome una fracción de segundo imperceptible para el usuario en el servidor (ej. 100 a 300 ms), pero vuelva computacionalmente inviable para un atacante probar billones de combinaciones. Este parámetro de costo puede incrementarse en el tiempo a medida que el hardware de los atacantes se vuelve más potente.
+2. **Dureza de memoria (*Memory-Hardness*):** Algoritmos como Argon2id y scrypt requieren grandes cantidades de memoria RAM rápida para cada cálculo de hash. Esta característica neutraliza la ventaja de las GPUs y ASICs masivos (que poseen miles de núcleos pero muy poca memoria rápida local por hilo), haciendo que la construcción de hardware paralelo para ataques de fuerza bruta sea económicamente prohibitiva.
+3. **Salteado automático e intrínseco (*Built-in Salting*):** Integran por diseño la generación y almacenamiento de un *salt* criptográfico aleatorio único por cada contraseña en la propia cadena del hash. Esto garantiza que dos usuarios con la misma contraseña generen hashes completamente distintos y anula por completo la eficacia de ataques precalculados mediante tablas arcoíris.
+
 ---
 
 # Cierre
 
 ## Dificultades encontradas
 
-*Qué les costó, dónde se trabaron, qué decidieron y por qué. Esta sección se
-lee y suma. No es relleno: es donde se ve si entendieron el problema.*
+- **Integración de fuentes primarias y rigor histórico/técnico:** En la investigación sobre el Morris Worm y en el mini-research de disponibilidad, la principal dificultad fue filtrar el material de divulgación periodística para centrarse exclusivamente en fuentes primarias, documentos judiciales (*United States v. Morris*), estándares oficiales (NIST SP 800-34 Rev. 1, guías de CISA) y literatura académica arbitrada.
+- **Comprensión de la distancia de Hamming sobre bits crudos:** En la implementación práctica de la Parte B, fue fundamental distinguir el cálculo de bits sobre los bytes devueltos por `digest()` frente a los caracteres hexadecimales de `hexdigest()`, evitando desvirtuar el concepto criptográfico del efecto avalancha.
+- **Análisis de tiempo constante:** El estudio de ataques de canal lateral (*timing attacks*) permitió comprender por qué la comparación byte a byte mediante `==` expone información crítica y por qué es mandatorio utilizar `hmac.compare_digest()`.
 
 ---
 
 ## Distribución del trabajo
 
-*Quién hizo qué. Tiene que ser consistente con el historial de commits.*
-
 | Integrante | Aportes |
 |---|---|
-| | |
-| | |
-| | |
-| | |
-| | |
+| Alejo De Miguel (@AlejoDM) | Parte A, apertura: Investigación histórica del Morris Worm, redacción de A.1 (Cronología verificada) y A.2 (Activo afectado y justificación). |
+| María Belén Benito (@belubenito603-byte) | Parte A, cierre: Matriz CIA (A.3), Encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), Controles mitigantes específicos (A.5) y Fuentes A.6. |
+| Tomás Giudici (@TomasGiudici) | Parte B, manifiesto: Implementación de `generar_manifiesto` y `verificar_manifiesto` en `src/integridad.py`, captura de evidencias obligatorias (manifiesto, verificación, prueba de 1 byte), decisiones de B.2 y Pregunta 1. |
+| Carolina Suppo (@carosuppo) | Parte B, criptografía: Implementación de `distancia_hamming_bits` y `calcular_mac` en `src/integridad.py`, captura de evidencias (avalancha y HMAC), decisiones de B.2 y Preguntas de análisis 2, 3 y 4. |
+| Martín Beccereca (@martinbeccereca) | Mini-research (Tema 3: Disponibilidad y Ransomware), Pregunta de análisis 5 (SHA-256 vs KDFs para contraseñas), armado de `INTEGRANTES.md`, coordinación y cierre del informe, verificación contra rúbrica. |
 
 ---
 
@@ -325,7 +334,7 @@ lee y suma. No es relleno: es donde se ve si entendieron el problema.*
 
 | Herramienta | Para qué se usó | Qué partes del entregable afectó | Cómo se verificó que lo devuelto era correcto |
 |---|---|---|---|
-| Claude Code | Redacción del informe del laboratorio | A.1 — Cronología y A.2 — Activo afectado | Cada fuente fue consultada antes de redactarla |
+| Gemini 3.7 Flash / Gemini Deep Research / Claude Code | Redacción, estructuración y asistencia analítica en el informe y mini-research | A.1, A.2, Pregunta B.5, Mini-research (research.md), secciones de cierre | Cada fuente, cita bibliográfica, cálculo y concepto técnico fue verificado accediendo a los textos primarios originales y corriendo las pruebas correspondientes. |
 
 **Declaración:**
 
@@ -337,9 +346,6 @@ independientemente de la asistencia recibida.
 
 ## Fuentes consultadas (general)
 
-*Las fuentes de la Parte B, Mini-research y demás secciones las agregan
-Personas 2 a 5 a continuación de esta lista.*
-
 1. United States v. Morris, 928 F.2d 504 (2d Cir. 1991).
    https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html
 2. Carnegie Mellon University, Software Engineering Institute. (s.f.). *History
@@ -347,3 +353,9 @@ Personas 2 a 5 a continuación de esta lista.*
 3. Lawrence Livermore National Laboratory. (s.f.). *The 1988 Morris worm, the
    internet's first cyberattack*.
    https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack
+4. Cybersecurity and Infrastructure Security Agency, & Federal Bureau of Investigation. (2023). *#StopRansomware Guide*. CISA. https://www.cisa.gov/sites/default/files/2023-05/StopRansomware_Guide_508c%20(1).pdf
+5. National Institute of Standards and Technology. (2010). *Contingency Planning Guide for Federal Information Systems* (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-34r1
+6. Cartwright, A., Cartwright, E., & Webb, J. (2020). An economic analysis of ransomware and its welfare consequences. *Royal Society Open Science*, 7(3), 190023. https://doi.org/10.1098/rsos.190023
+7. Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. *Journal of Information System Security*, 10(3), 21-45. https://www.researchgate.net/publication/317011931_The_CIA_strikes_back_Redefining_confidentiality_integrity_and_availability_in_security
+8. Biryukov, A., Dinu, D., & Khovratovich, D. (2016). *Argon2: New Generation of Memory-Hard Functions for Password Hashing and Other Applications*. In 2016 IEEE European Symposium on Security and Privacy (EuroS&P) (pp. 292-302). IEEE. https://doi.org/10.1109/EuroSP.2016.31
+
