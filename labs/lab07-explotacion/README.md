@@ -239,3 +239,12 @@ Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
 
 Explotación = intrusión. Solo el lab de la cátedra. Ley 26.388. Si encontrás una
 vuln real en otro lado por accidente: no la toques, informá y pará.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.

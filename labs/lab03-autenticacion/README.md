@@ -95,3 +95,12 @@ frena?** ¿Y qué **no** protege el TOTP?
 
 `informe.md` (Parte A + respuestas B) y `src/auth.py` completado.
 Rúbrica en [`docs/rubrica.md`](docs/rubrica.md). Ley 26.388 · uso responsable.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.

@@ -212,10 +212,28 @@ En `informe.md` (a partir de [`docs/informe-forense.md`](docs/informe-forense.md
 
 ---
 
+## Ampliación opcional — automatizá la timeline
+
+Leer 20 líneas de log a ojo se puede. ¿200.000? Ni loco. Por eso el forense
+scriptea. En `src/timeline.py` hay un esqueleto a medio hacer: completás dos
+funciones y tenés tu propia herramienta de línea de tiempo que parsea el log,
+filtra al atacante y etiqueta cada evento por fase.
+
+```bash
+cd labs/lab11-forensia/src
+python3 timeline.py ../caso/logs/access.log --ip 185.220.101.42
+```
+
+No cuenta para las flags, pero el que lo hace reconstruye el ataque en segundos
+en vez de a mano. Esa es la diferencia entre mirar y ANALIZAR.
+
+---
+
 ## Qué se entrega
 
-En `entregas/lab11/grupoXX/`: `informe.md` (informe forense completo) y la captura
-de `./ctf status 11`. Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
+En `entregas/lab11/grupoXX/`: `informe.md` (informe forense completo), tu
+`src/timeline.py` completado (opcional, suma) y la captura de `./ctf status 11`.
+Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
 
 ## Uso responsable
 

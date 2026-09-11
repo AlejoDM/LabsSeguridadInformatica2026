@@ -93,3 +93,12 @@ Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
 ## Uso responsable
 
 Los datos del escenario son ficticios. Ley 26.388 · ver `CONTRIBUTING.md`.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.

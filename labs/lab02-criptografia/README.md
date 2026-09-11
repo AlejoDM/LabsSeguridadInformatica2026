@@ -130,3 +130,12 @@ en claro en el informe. Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
 
 Romper cifrado se practica **solo** sobre los datos de la cátedra. Ver
 [`CONTRIBUTING.md`](../../CONTRIBUTING.md). Ley 26.388.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.
