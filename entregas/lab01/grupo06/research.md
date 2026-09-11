@@ -1,218 +1,84 @@
-# Laboratorio 01 — Mini-research
-
-**Extensión:** 800 a 1000 palabras (sin contar bibliografía)
-**Modalidad:** un tema por grupo, a elección
-**Entrega:** `entregas/lab01/grupoXX/research.md`
-
----
-
-## Por qué se pide esto
-
-Un ingeniero en sistemas que trabaja en seguridad va a tener que leer
-documentación técnica, informes de incidentes y normativa, y va a tener que
-distinguir qué está respaldado de qué es marketing. Esa habilidad no se
-adquiere leyendo resúmenes: se adquiere yendo a la fuente.
-
-No se busca un resumen de Wikipedia con otras palabras. Se busca que tomen una
-posición y la defiendan con evidencia.
-
----
-
-## Temas a elección
-
-Elegí **uno**. Indicá cuál al principio del documento.
-
-### Tema 1 — La evolución del perfil del atacante, 1988 a hoy
-
-De un estudiante de posgrado que libera un gusano por curiosidad a
-organizaciones criminales con estructura empresarial, servicio de atención a
-la víctima y programas de afiliados.
-
-Cuestiones a abordar: qué motivaciones dominaron en cada etapa, cómo cambió la
-relación costo/beneficio del ataque, qué papel jugó la aparición de las
-criptomonedas, y qué implica este cambio para el modelo de amenaza de una PyME
-argentina hoy.
-
-### Tema 2 — La cadena de suministro de software como superficie de ataque
-
-Comprometer al proveedor para llegar a miles de clientes de una sola vez.
-Tomen como referencia el caso SolarWinds/SUNBURST (2020) y el caso Log4Shell
-(2021) — que son distintos entre sí, y esa diferencia es parte del análisis.
-
-Cuestiones a abordar: por qué el modelo de confianza tradicional falla acá,
-qué proponen las iniciativas de **SBOM** (Software Bill of Materials) y
-**SLSA**, y qué límites tienen esas propuestas.
-
-### Tema 3 — La disponibilidad, la propiedad descuidada de la tríada
-
-La confidencialidad se lleva los titulares. Pero para muchas organizaciones, un
-día sin sistemas cuesta más que una filtración de datos.
-
-Cuestiones a abordar: por qué la disponibilidad recibe menos atención en la
-formación y en el presupuesto, cómo el ransomware la convirtió en el vector
-económicamente más rentable, y qué relación tiene con conceptos como RTO, RPO y
-continuidad del negocio.
-
-### Tema 4 — Criptografía post-cuántica
-
-El NIST publicó en 2024 sus primeros estándares de criptografía resistente a
-computadoras cuánticas: **FIPS 203**, **FIPS 204** y **FIPS 205**.
-
-Cuestiones a abordar: qué problema resuelven exactamente (y cuál **no**
-resuelven), qué significa la estrategia *harvest now, decrypt later* para los
-datos que una organización cifra hoy, y qué implica la migración para sistemas
-en producción.
-
-> Ojo con este tema: es el que más ruido tiene en la divulgación. Distinguir lo
-> que dicen los documentos del NIST de lo que dicen los titulares es
-> exactamente el ejercicio.
-
-### Tema 5 — Ley 26.388 y las zonas grises de la divulgación responsable
-
-La Ley 26.388 incorporó al Código Penal argentino las figuras de delitos
-informáticos. La Ley 27.411 aprobó la adhesión al Convenio de Budapest.
-
-Cuestiones a abordar: qué conductas quedaron tipificadas, qué situación tiene
-en la Argentina quien descubre e informa de buena fe una vulnerabilidad en un
-sistema de terceros, y cómo tratan otras jurisdicciones ese mismo problema.
-
-> Trabajen con el texto de la ley, no con notas periodísticas sobre la ley. No
-> hace falta ser abogado; hace falta leer la fuente.
-
----
-
-## Requisitos
-
-### Extensión
-
-Entre **800 y 1000 palabras**, sin contar la bibliografía. Fuera de ese rango
-se penaliza. La restricción es parte del ejercicio: obliga a decidir qué entra
-y qué no.
-
-### Fuentes
-
-- **Mínimo 3 fuentes.**
-- De ellas, **al menos 2 deben ser primarias o arbitradas**.
-
-| Cuenta como primaria o arbitrada | No cuenta |
-|---|---|
-| Documentos del NIST, ISO, IETF (RFC) | Wikipedia |
-| Texto de una ley o resolución oficial | Blogs de divulgación general |
-| Papers con revisión por pares | Notas periodísticas |
-| Informes técnicos oficiales de un fabricante o CERT | Videos de YouTube |
-| Informes forenses de un incidente publicados por la organización afectada | Publicaciones de LinkedIn |
-
-Las fuentes secundarias **se pueden usar** — de hecho son útiles para armar la
-cronología de un hecho. Solo que no cuentan para el mínimo de dos.
-
-### Citación
-
-Formato **APA**. Citas en el cuerpo del texto donde corresponda, y lista
-completa al final.
-
-**Toda fuente citada tiene que existir y ser localizable.** Una cita inventada
-o que no se puede encontrar es **causal de rechazo automático** de la entrega
-completa. Esto no es una formalidad: es lo que distingue un trabajo técnico de
-una opinión.
-
-### Declaración de uso de IA
-
-Obligatoria, al final del documento. Ver el modelo más abajo.
-
-Advertencia específica para este trabajo: **los asistentes de IA fabrican citas
-con mucha facilidad.** Producen referencias con formato impecable, autores
-plausibles y años coherentes que no existen. Si usaste un asistente para
-buscar bibliografía, **verificá cada referencia entrando a la fuente original**
-antes de citarla. Una cita inexistente hunde el trabajo, y la responsabilidad
-es de quien firma.
-
----
-
-## Estructura sugerida
-
-No es obligatoria, pero funciona:
-
-1. **Planteo** (~100 palabras) — cuál es la pregunta y por qué importa.
-2. **Desarrollo** (~600 palabras) — la evidencia, organizada. Acá van las citas.
-3. **Tensión o límite** (~150 palabras) — qué no está resuelto, qué se discute,
-   dónde falla la solución que describiste. Esta sección es la que distingue un
-   trabajo bueno de uno correcto.
-4. **Cierre** (~100 palabras) — qué implica para la práctica profesional.
-
----
-
-## Evaluación
-
-Vale **20 de los 100 puntos** del laboratorio. El desglose está en
-[`rubrica.md`](rubrica.md).
-
-Lo que más pesa: **calidad de las fuentes** y **el análisis propio**. Un
-trabajo que resume correctamente tres fuentes buenas sin agregar nada llega a
-la mitad del puntaje. Lo que sube la nota es la sección de tensión: mostrar que
-entendieron dónde la respuesta no es limpia.
-
----
-
-## Plantilla
-
-```markdown
 # Mini-research — Lab 01
 
-**Grupo:** NN
-**Tema elegido:** N — (título)
-**Cantidad de palabras:** ___ (sin bibliografía)
+**Grupo:** 06
+**Tema elegido:** Tema 3 — La disponibilidad, la propiedad descuidada de la tríada
+**Título:** La disponibilidad como propiedad crítica de la seguridad: economía del ransomware, métricas de continuidad y límites reales de recuperación
+**Cantidad de palabras:** 906 (sin bibliografía ni declaraciones)
 
 ---
 
 ## Planteo
 
-(...)
+Al estudiar la tríada de seguridad (confidencialidad, integridad y disponibilidad), salta a la vista que la confidencialidad siempre recibió la mayor parte de la atención, del presupuesto y del contenido académico [4]. Esta preferencia histórica viene de la época militar en la que se crearon los primeros modelos formales (como Bell-LaPadula), pensados para evitar la fuga de secretos de Estado mediante jerarquías de acceso. En ese marco, se asumía que la integridad y la disponibilidad eran consecuencias de tener hardware confiable o temas a resolver por el equipo de infraestructura.
+
+En las organizaciones actuales la realidad es otra: quedarse sin sistemas suele provocar un daño económico y operativo más inmediato y severo que una filtración de datos. Considerar la disponibilidad como un simple asunto de mantenimiento de servidores deja desprotegidas las funciones críticas ante ataques dirigidos que buscan paralizar las operaciones para extorsionar a la empresa.
+
+---
 
 ## Desarrollo
 
-(...)
+### Separación entre seguridad e infraestructura
+
+La idea de que la disponibilidad no es un tema central de seguridad causó una división en los equipos tecnológicos. Tradicionalmente, ciberseguridad se enfocó en el cifrado, permisos y prevención de intrusiones, mientras que la disponibilidad se delegó a administradores de sistemas y redes [4]. Esto llevó a gestionar la disponibilidad solo con acuerdos de nivel de servicio (SLA) pensados para fallas comunes de hardware o caídas de conectividad, ignorando qué ocurre ante ataques intencionales.
+
+En los modelos iniciales dominó el principio de "necesidad de saber" (need-to-know), descuidando la necesidad de operar en forma continua. Así, durante décadas la disponibilidad fue la propiedad menos comprendida de la tríada, confundiéndose la redundancia clásica de servidores con la capacidad real de resistir un ataque coordinado.
+
+### La economía del ransomware y el costo de la inactividad
+
+El crecimiento del cibercrimen organizado cambió el escenario mediante el ransomware. Cuando un atacante roba datos confidenciales, monetizarlos es complejo: debe buscar compradores en mercados clandestinos, pagar intermediarios y afrontar precios inestables. En cambio, al bloquear el acceso a sistemas productivos, el atacante cobra directamente por el tiempo que la víctima pasa sin operar [3].
+
+Los grupos delictivos fijan sus rescates analizando cuánto cuesta cada hora de inactividad. Si una empresa detiene sus líneas de producción o cobranzas, las pérdidas por facturación caída, penalizaciones contractuales y daño reputacional superan rápido la cifra exigida. Diversos estudios económicos y reportes de incidentes [5] señalan que los costos totales de recuperación suelen triplicar el rescate pedido. Esto convierte a la disponibilidad secuestrada en el modelo de ataque más rentable de la actualidad.
+
+| Aspecto | Filtración de confidencialidad | Ataque de ransomware (Disponibilidad) |
+|---|---|---|
+| **Acción del atacante** | Exfiltración no autorizada de datos | Cifrado masivo y parálisis operativa |
+| **Tiempo de impacto** | Costos diferidos (juicios, multas) | Inmediato (corte total de ingresos) |
+| **Origen del costo principal** | Cantidad y tipo de registros filtrados | Horas de inactividad y lucro cesante |
+| **Métricas clave** | Tiempo de detección y contención | RTO (tiempo límite) y RPO (pérdida máxima) |
+
+### Métricas de continuidad: BIA, RTO y RPO
+
+Para responder a estos riesgos se aplican metodologías formales de continuidad. El estándar NIST SP 800-34 Rev. 1 [2] define el Análisis de Impacto en el Negocio (BIA), un proceso para identificar funciones críticas y establecer dos métricas clave:
+
+1. **RTO (Recovery Time Objective):** Tiempo máximo admisible con los sistemas caídos antes de que la interrupción cause un daño irreparable.
+2. **RPO (Recovery Point Objective):** Pérdida máxima tolerable de datos en el tiempo, lo que define la frecuencia requerida de las copias de seguridad.
+
+Como indican las guías de CISA y el FBI [1], para cumplir estos objetivos hoy no basta con backups convencionales. Es necesario implementar copias inmutables que no puedan borrarse desde la red (como almacenamiento WORM o copias fuera de línea), restringir privilegios y probar periódicamente la restauración integral bajo condiciones de estrés.
+
+---
 
 ## Tensión / límites
 
-(...)
+Al aplicar estos marcos surgen discrepancias entre la teoría documental y las restricciones técnicas reales:
+
+1. **Límite físico de la red frente al RTO:** Fijar en un plan que un sistema se recuperará en 4 horas es irreal si hay que restaurar decenas de terabytes desde la nube con un enlace de comunicaciones estándar. La velocidad de transferencia y la latencia imponen días de descarga, invalidando el RTO acordado con la dirección.
+2. **La trampa de la replicación sincrónica:** Replicar bases de datos en tiempo real entre dos centros de datos para lograr un RPO cercano a cero tiene un riesgo grave: si un ransomware cifra la base primaria, el cambio se replica al instante a la sede secundaria, destruyendo la disponibilidad de ambos sitios a la vez.
+3. **Sabotaje de backups y doble extorsión:** Los atacantes modernos obtienen persistencia previa para localizar y destruir las copias de seguridad antes de cifrar los datos [1]. Además, con la doble extorsión (roban datos antes de cifrarlos), aunque la organización restaure sus sistemas desde backups sanos, persiste la extorsión sobre la confidencialidad.
+
+---
 
 ## Cierre
 
-(...)
+La disponibilidad debe integrarse desde el inicio en el diseño de arquitecturas seguras. No es una tarea periférica de soporte, sino un requisito de subsistencia que demanda copias inmutables, segmentación defensiva y planes de contingencia probados en la práctica. Diseñar plataformas que resguarden la privacidad pero queden inutilizadas ante un ataque frustra el fin principal de la tecnología: asegurar que la organización y las personas sigan funcionando sin interrupciones.
 
 ---
 
 ## Bibliografía
 
-Formato APA. Marcá cada fuente como [PRIMARIA], [ARBITRADA] o [SECUNDARIA].
-
-1. [PRIMARIA] ...
-2. [ARBITRADA] ...
-3. [SECUNDARIA] ...
+1. [PRIMARIA] Cybersecurity and Infrastructure Security Agency, & Federal Bureau of Investigation. (2023). *#StopRansomware Guide*. CISA. https://www.cisa.gov/sites/default/files/2023-05/StopRansomware_Guide_508c%20(1).pdf
+2. [PRIMARIA] National Institute of Standards and Technology. (2010). *Contingency Planning Guide for Federal Information Systems* (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-34r1
+3. [ARBITRADA] Cartwright, A., Cartwright, E., & Webb, J. (2020). An economic analysis of ransomware and its welfare consequences. *Royal Society Open Science*, 7(3), 190023. https://doi.org/10.1098/rsos.190023
+4. [ARBITRADA] Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. *Journal of Information System Security*, 10(3), 21-45. https://www.researchgate.net/publication/317011931_The_CIA_strikes_back_Redefining_confidentiality_integrity_and_availability_in_security
+5. [SECUNDARIA] IBM Security. (2024). *Cost of a Data Breach Report 2024*. IBM. https://www.ibm.com/reports/data-breach
 
 ---
 
 ## Declaración de uso de asistentes de IA
 
-**¿Se usaron asistentes de IA en este trabajo?** Sí / No
+**¿Se usaron asistentes de IA en este trabajo?** Sí
 
 | Herramienta | Para qué | Qué partes afectó | Cómo se verificó |
 |---|---|---|---|
-| | | | |
+| Gemini 3.7 Flash / Gemini Deep Research | Búsqueda inicial de fuentes y asistencia en la organización del texto | Planteo, Desarrollo, Tensión/límites y Cierre | Se revisaron y leyeron de forma directa los documentos citados (guías NIST y CISA, y los artículos de Samonas y Cartwright) para corroborar cada dato y afirmación. |
 
-**Verificación de fuentes:** el grupo declara haber accedido y verificado
-individualmente cada una de las referencias citadas.
-```
-
----
-
-## Cómo contar las palabras
-
-```bash
-# Contar palabras de un archivo markdown, aproximado
-wc -w research.md
-```
-
-Restá a mano lo que ocupan la bibliografía y la declaración de IA, o contá solo
-las secciones de contenido. No hace falta precisión al dígito: si están entre
-780 y 1020 no hay problema. Si entregan 400 o 1800, sí.
+**Verificación de fuentes:** el grupo declara haber accedido y verificado individualmente cada una de las referencias citadas.
