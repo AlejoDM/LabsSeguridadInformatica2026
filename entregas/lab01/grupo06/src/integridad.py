@@ -314,12 +314,12 @@ def distancia_hamming_bits(digest_a: bytes, digest_b: bytes) -> int:
     # TODO 3: implementar la distancia de Hamming EN BITS.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 3 de 4 — distancia_hamming_bits() sin implementar.\n"
-        "  Qué falta: contar en cuántos BITS (no caracteres hex) difieren\n"
-        "  los dos digests recibidos como bytes crudos.\n"
-        "  Leé el docstring de esta función: la advertencia sobre bits vs. hex\n"
-        "  es el punto del ejercicio."
+    if len(digest_a) != len(digest_b):
+        raise ValueError("los digests deben tener el mismo largo")
+
+    return sum(
+        (byte_a ^ byte_b).bit_count()
+        for byte_a, byte_b in zip(digest_a, digest_b)
     )
 
 
@@ -375,13 +375,21 @@ def calcular_mac(clave: bytes, mensaje: bytes, tag_esperado: str | None = None) 
     #         en tiempo constante.
     #         Borrá el `raise` de abajo y escribí tu código.
     # ----------------------------------------------------------------------
-    raise NotImplementedError(
-        "TODO 4 de 4 — calcular_mac() sin implementar.\n"
-        "  Qué falta: calcular el HMAC-SHA256 del mensaje con la clave y,\n"
-        "  si se pasó --verificar, comparar contra el tag esperado usando\n"
-        "  hmac.compare_digest().\n"
-        "  Leé el docstring de esta función: la comparación con == está prohibida."
+    tag_calculado = hmac.new(
+        clave,
+        mensaje,
+        hashlib.sha256,
+    ).hexdigest()
+
+    if tag_esperado is None:
+        return tag_calculado, None
+
+    resultado_verificacion = hmac.compare_digest(
+        tag_calculado,
+        tag_esperado,
     )
+
+    return tag_calculado, resultado_verificacion
 
 
 # ==========================================================================
