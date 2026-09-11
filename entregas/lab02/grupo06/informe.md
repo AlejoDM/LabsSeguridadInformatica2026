@@ -4,7 +4,7 @@
 
 - Beccereca, Martín - martinbeccereca
 - Benito, María Belén
-- De Miguel, Alejo
+- De Miguel, Alejo - AlejoDM
 - Giudici, Tomás
 - Suppo, Carolina - carosuppo
 
@@ -14,10 +14,15 @@
 
 ## 0. Declaración de uso de IA
 
-- **Herramientas utilizadas:** Google Antigravity (asistente de desarrollo, utilizando gemini 3.7 flash).
+**Herramienta: Google Antigravity (Gemini 3.7 Flash)**
 - **Finalidad del uso:** Estructuración del informe Markdown.
 - **Partes generadas o asistidas:** Estructuración del esquema del informe.
 - **Verificación:** Todos los datos históricos, volúmenes de registros expuestos, detalles criptográficos y fuentes bibliográficas fueron contrastados y verificados manualmente contra publicaciones de seguridad primarias.
+
+**Herramienta: Claude Code**
+- **Finalidad del uso:** Apoyo en la redacción del mini-research (investigación con fuentes verificables) y en la consolidación de la bitácora de comandos de la Parte B.
+- **Partes generadas o asistidas:** `research.md` (mini-research, Tema C) y sección 4 — Bitácora del informe.
+- **Verificación:** Las fuentes citadas en el mini-research se consultaron entrando a cada documento antes de citarlas.
 
 ---
 
@@ -137,7 +142,18 @@ Por ejemplo, si el MAC correcto comienza con `a7f3`, un atacante podría realiza
 ## 4. Bitácora
 
 ```bash
-# Registrar comandos ejecutados para validación
+$ python3 src/cripto.py xor --texto hola --clave K
+2324272a
+
+$ python3 src/cripto.py romper --hex $(cat data/muestra/reto_xor.hex)
+clave=0x37
+Memo interno PhantomCorp: la clave del wifi de invitados es Phantom-Guest-2026. No compartir fuera de la empresa.
+
+$ python3 src/cripto.py mac --clave secreta --msg "pago 100" --modo ingenuo
+a8cc54c07b3acb7470c25ab9eea5234bfa2562e37298eee275e39a457004b725
+
+$ python3 src/cripto.py mac --clave secreta --msg "pago 100" --modo hmac
+5ec4a52407221836a66e8d654d914aaa4b18bd31cf31907348bcd292677b902e
 ```
 
 ---
