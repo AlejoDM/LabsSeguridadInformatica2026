@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Fernando Boiero — CyberLab UTN FRVM
 """
 timeline.py — Ampliación del Lab 11. Reconstruí la línea de tiempo del ataque
 automáticamente, en vez de leer el log a ojo. Solo biblioteca estándar.

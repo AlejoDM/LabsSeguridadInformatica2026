@@ -153,6 +153,18 @@ LabsSeguridadInformatica2026/
 
 ---
 
+## Licencia
+
+Doble licencia (ver [`LICENSING.md`](LICENSING.md)):
+
+- **Código** (motor, scripts, targets) → [AGPL-3.0-or-later](LICENSE)
+- **Documentación y material educativo** → [CC-BY-SA-4.0](LICENSE-DOCS)
+
+Copyright © 2026 Fernando Boiero — UTN FRVM. Podés reutilizar el material del
+curso citando la fuente y compartiendo bajo la misma licencia.
+
+---
+
 ## Contacto
 
 Consultas sobre los enunciados: por el canal de la cátedra o abriendo un
