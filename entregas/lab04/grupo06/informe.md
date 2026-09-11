@@ -72,3 +72,33 @@ https://www.nist.gov/cyberframework.
 ### A.3 — Respuesta al riesgo
 ## 2. Parte B — Riesgo cuantitativo (ranking por ALE; ROI del control #1; un riesgo a aceptar/transferir)
 ## 3. Anexo — tu riesgos.json
+
+```json
+[
+  {
+    "nombre": "Compromiso de credenciales de empleados por falta de MFA y política de contraseñas débiles en acceso remoto",
+    "sle": 30000.0,
+    "aro": 1.2
+  },
+  {
+    "nombre": "Exfiltración masiva de datos sensibles de clientes (nombres, DNI, tarjetas) vía vulnerabilidad en servidor web público",
+    "sle": 80000.0,
+    "aro": 0.35
+  },
+  {
+    "nombre": "Intrusión persistente y movimiento lateral no detectado por ausencia de logging y monitoreo centralizado",
+    "sle": 45000.0,
+    "aro": 0.5
+  },
+  {
+    "nombre": "Pérdida irrecuperable de datos por Ransomware o siniestro físico debido a backup único en disco local sin copia externa",
+    "sle": 100000.0,
+    "aro": 0.15
+  },
+  {
+    "nombre": "Interrupción operativa prolongada e improvisación ante incidentes por falta de un plan formal de respuesta",
+    "sle": 15000.0,
+    "aro": 0.6
+  }
+]
+```
