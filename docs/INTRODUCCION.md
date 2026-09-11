@@ -57,6 +57,9 @@ make shell          # entrás a la consola con todas las tools
 ### 4. Escribí el informe
 Cada lab tiene su plantilla de entregable en `docs/entregable.md` (o
 `informe-forense.md` en el 11). Completala con tu análisis y evidencia.
+¿No sabés qué nivel se espera? Mirá el [Informe modelo](INFORME-MODELO.md): un
+ejemplo completo, sobre un objetivo ficticio, con la estructura y calidad que
+evalúa la rúbrica. Ese es el molde.
 
 ### 5. Entregá por fork + Pull Request
 En grupos de 4-5, dentro de `entregas/labNN/grupoXX/`. El flujo completo está en

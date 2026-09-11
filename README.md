@@ -145,7 +145,11 @@ LabsSeguridadInformatica2026/
 - [Guía dinámica de clases](docs/GUIA-DINAMICA-CLASES.md) — cada clase explicada con gancho, ejemplo y dato hacker (para engancharse).
 - [Resumen teórico + referencias](docs/RESUMEN-TEORICO.md) — intro teórica de cada tema y documentación pública libre para profundizar.
 - [Banco de retos bonus](docs/BANCO-DE-RETOS.md) — ~30 desafíos opcionales, progresivos (★/★★/★★★), con más herramientas por lab.
-- [Guía para docentes](docs/PARA-DOCENTES.md) — diseño pedagógico, corrección y cómo crear labs nuevos.
+- [Informe modelo](docs/INFORME-MODELO.md) — el molde de lo que se entrega: un informe de ejemplo con la estructura y calidad que espera la rúbrica.
+- [Cheatsheet de comandos](docs/CHEATSHEET.md) — las tools por fase, listas para copiar (comandos, no respuestas).
+- [Glosario](docs/GLOSARIO.md) — la jerga en criollo + el lab donde aparece cada término.
+- [FAQ y troubleshooting](docs/FAQ.md) — cuando algo no anda: los errores más comunes y cómo salir.
+- [Guía para docentes](docs/PARA-DOCENTES.md) — diseño pedagógico, corrección, rotar flags y cómo crear labs nuevos.
 - [Arquitectura del motor](docs/ARQUITECTURA.md) — cómo funciona por dentro.
 - **[Intro de clase](docs/intro-clase.py)** — presentación CORTA para abrir la clase (novedades + cómo trabajan). `./docs/intro-clase.py`
 - [Presentación (terminal)](docs/presentacion.py) — deck ASCII **bien hacker** (Python/curses): intro con lluvia de Matrix, `./docs/presentacion.py` (← → navegar · `q` salir).
