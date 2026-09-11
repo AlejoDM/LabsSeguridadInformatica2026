@@ -137,6 +137,8 @@ LabsSeguridadInformatica2026/
 
 ## Documentación
 
+- **[Empezá por acá](docs/INTRODUCCION.md)** — introducción: qué hacer en todos los prácticos y qué se agregó desde la última clase.
+
 - **[Novedades](docs/NOVEDADES.md)** — qué cambió desde la última clase y cómo sincronizar tu fork.
 
 - [Guía del curso](docs/GUIA-DEL-CURSO.md) — qué es el práctico, el arco completo y cómo se trabaja.
