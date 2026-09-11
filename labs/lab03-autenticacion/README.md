@@ -91,6 +91,20 @@ frena?** ¿Y qué **no** protege el TOTP?
 
 ---
 
+## Autoevaluación (feedback instantáneo)
+
+Mientras completás los `TODO`, chequeá tu avance sin esperar la corrección:
+
+```bash
+python3 src/verificar.py
+```
+
+**Verde** = va · **rojo** = revisá (te dice qué falló) · **gris** = todavía no lo
+implementaste. No es la nota — es para que **iteres solo**, como con las flags de
+los labs ofensivos.
+
+---
+
 ## Qué se entrega
 
 `informe.md` (Parte A + respuestas B) y `src/auth.py` completado.
