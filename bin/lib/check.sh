@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+# SPDX-License-Identifier: AGPL-3.0-or-later
+# Copyright (C) 2026 Fernando Boiero — CyberLab UTN FRVM
 # check.sh — motor de verificación de retos por flags (SHA-256).
 # El progreso se guarda en .progreso/<lab>.done (una flag-id por línea).
 PROGRESS_DIR="${CTF_ROOT:-.}/.progreso"

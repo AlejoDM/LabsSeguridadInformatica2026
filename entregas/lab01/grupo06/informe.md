@@ -164,7 +164,9 @@ cual sale de la terminal._
 ```
 $ python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
 
-(pegar salida)
+Manifiesto generado: manifest.sha256
+Directorio base:     data\muestra
+Archivos indexados:  4
 ```
 
 ### Verificación sobre un directorio íntegro
@@ -173,7 +175,16 @@ $ python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
 $ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
 $ echo "código de salida: $?"
 
-(pegar salida)
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
+
+  OK             4
+  MODIFICADO     0
+  FALTANTE       0
+  NUEVO          0
+
+INTEGRIDAD VERIFICADA — sin diferencias contra el manifiesto.
+código de salida: 0
 ```
 
 ### Detección de la modificación de un byte
@@ -186,13 +197,63 @@ $ printf 'X' >> data/muestra/transferencia.txt
 $ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
 $ echo "código de salida: $?"
 
-(pegar salida — debe reportar MODIFICADO y salir con 1)
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
+
+  OK             3
+  MODIFICADO     1
+  FALTANTE       0
+  NUEVO          0
+
+Hallazgos:
+  [MODIFICADO] transferencia.txt
+
+INTEGRIDAD COMPROMETIDA — 1 hallazgo(s).
+código de salida: 1
 ```
 
 ### Detección de archivo faltante y de archivo nuevo
 
 ```
-(pegar los comandos que usaron y la salida)
+python3 data/generar_datos.py
+python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
+Remove-Item data/muestra/politica_seguridad.md
+python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+Write-Output "código de salida: $LASTEXITCODE"
+
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
+
+  OK             3
+  MODIFICADO     0
+  FALTANTE       1
+  NUEVO          0
+
+Hallazgos:
+  [FALTANTE] politica_seguridad.md
+
+INTEGRIDAD COMPROMETIDA — 1 hallazgo(s).
+código de salida: 1
+
+python3 data/generar_datos.py
+python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
+Set-Content -Path data/muestra/nuevo.txt -Value "archivo nuevo"
+python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+Write-Output "código de salida: $LASTEXITCODE"
+
+Directorio:  data\muestra
+Manifiesto:  manifest.sha256
+
+  OK             4
+  MODIFICADO     0
+  FALTANTE       0
+  NUEVO          1
+
+Hallazgos:
+  [NUEVO] nuevo.txt
+
+INTEGRIDAD COMPROMETIDA — 1 hallazgo(s).
+código de salida: 1
 ```
 
 ### Efecto avalancha
@@ -253,6 +314,9 @@ está vacío. Una o dos oraciones por decisión._
 
 | Decisión                        | Qué hicimos                                                                                                                            | Por qué                                                                                                                                |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
+| Enlaces simbólicos              | Excluimos los enlaces simbólicos del recorrido.                                                                                        | El manifiesto representa únicamente archivos regulares contenidos en el directorio y evita seguir referencias hacia archivos externos. |
+| Exclusión del manifiesto        | Comparamos las rutas resueltas del archivo recorrido y del manifiesto antes de calcular el hash.                                       | Así evitamos que el manifiesto se incluya a sí mismo o aparezca como un archivo nuevo durante la verificación.                         |
+| Directorio vacío                | Se devuelven las cuatro categorías aunque todas estén vacías.                                                                          | Mantiene siempre la misma estructura de retorno y permite verificar correctamente un directorio sin archivos.                          |
 | Cálculo de distancia de Hamming | Comparamos los digests byte por byte mediante XOR y contamos la cantidad de bits diferentes.                                           | La consigna requiere medir la diferencia en bits, no solamente en bytes.                                                               |
 | Comparación del tag             | Utilizamos hmac.compare_digest() en lugar de == para verificar el tag recibido.                                                        | compare_digest() está diseñado para realizar una comparación resistente a diferencias de tiempo y evitar filtraciones mediante timing. |
 | Verificación opcional           | Si no se proporciona un tag esperado, calculamos y devolvemos solamente el HMAC; si se proporciona, además realizamos la verificación. | Permite utilizar la misma función tanto para generar un tag como para verificar uno recibido.                                          |
@@ -273,7 +337,9 @@ que ese ataque no funcione?_
 
 **Respuesta:**
 
----
+Un manifiesto de hashes permite detectar modificaciones solamente si podemos confiar en que el propio manifiesto no fue alterado. Si un atacante tiene permisos para modificar tanto los archivos protegidos como manifest.sha256, nada le impide cambiar un archivo y luego regenerar el manifiesto con el nuevo hash. Al verificarlo posteriormente, el digest calculado coincidiría con el valor manipulado y el sistema informaría incorrectamente que la integridad está verificada.
+
+Para evitarlo, el manifiesto debe protegerse de forma independiente. Por ejemplo, podría almacenarse en una ubicación de solo lectura para el atacante o autenticarse mediante un HMAC cuya clave secreta no esté disponible en el directorio protegido. Otra alternativa es firmarlo digitalmente manteniendo la clave privada fuera del alcance del atacante. De esta manera, modificar y regenerar el manifiesto ya no sería suficiente, porque el atacante también tendría que producir una autenticación o firma válida.
 
 ### 2. Qué agrega HMAC y qué no
 

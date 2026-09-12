@@ -223,3 +223,12 @@ key. Rúbrica en [`docs/rubrica.md`](docs/rubrica.md).
 Un agente ofensivo automatiza intrusión: fuera del lab, el daño (y el delito) se
 automatiza con él. El alcance del agente está limitado por código **a propósito**.
 No lo levantes. Solo la cátedra. Ley 26.388.
+
+---
+
+## Retos bonus (opcional)
+
+¿Estas flags te quedaron cortas? En el
+[banco de retos bonus](../../docs/BANCO-DE-RETOS.md) hay **3 desafíos más para
+este lab**, con más herramientas y dificultad progresiva (★ / ★★ / ★★★). No
+cuentan para la aprobación, pero es donde te hacés bueno de verdad.
