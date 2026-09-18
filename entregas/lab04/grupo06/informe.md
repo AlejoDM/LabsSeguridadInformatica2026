@@ -71,6 +71,75 @@ https://www.nist.gov/cyberframework.
 
 ### A.3 — Respuesta al riesgo
 ## 2. Parte B — Riesgo cuantitativo (ranking por ALE; ROI del control #1; un riesgo a aceptar/transferir)
+
+### B.1 — Interpretación del ranking por ALE
+
+Al ejecutar:
+
+`python src/riesgo.py priorizar --archivo riesgos.json`
+
+se obtuvo el siguiente ranking:
+
+1. Compromiso de credenciales de empleados por falta de MFA y políticas de contraseñas débiles: **ALE = $36.000**.
+2. Exfiltración masiva de datos sensibles mediante una vulnerabilidad en el servidor web público: **ALE = $28.000**.
+3. Intrusión persistente y movimiento lateral no detectado por falta de logging y monitoreo centralizado: **ALE = $22.500**.
+4. Pérdida irrecuperable de datos por ransomware o siniestro físico debido a un único backup local: **ALE = $15.000**.
+5. Interrupción operativa por falta de un plan formal de respuesta a incidentes: **ALE = $9.000**.
+
+En términos generales, el ranking coincide con la intuición, ya que el compromiso de credenciales aparece como el riesgo con mayor pérdida anual esperada. La falta de MFA y una política de contraseñas débil, combinadas con el acceso remoto de empleados, aumentan la frecuencia estimada de este tipo de incidente. Aunque su SLE es de $30.000, su ARO de 1,2 hace que alcance el ALE más alto, de $36.000.
+
+Sin embargo, el ranking también muestra un caso que puede resultar menos intuitivo. La pérdida irrecuperable de datos por ransomware o un siniestro físico tiene el SLE más alto de todos los riesgos, de $100.000, pero aparece recién en cuarto lugar porque su ARO es de 0,15. Esto demuestra que un riesgo con consecuencias muy graves no necesariamente tendrá el ALE más alto si su frecuencia anual estimada es baja.
+
+Por lo tanto, el ranking por ALE permite considerar conjuntamente el impacto económico y la frecuencia estimada, en lugar de priorizar los riesgos únicamente por la gravedad de un incidente individual.
+
+### B.2 — Control para el riesgo con mayor ALE
+
+El riesgo ubicado en primer lugar es el compromiso de credenciales de empleados por falta de MFA y políticas de contraseñas débiles en el acceso remoto.
+
+Los valores actuales son:
+
+- **SLE:** $30.000
+- **ARO:** 1,2
+- **ALE actual:** $30.000 × 1,2 = **$36.000**
+
+Como control proponemos implementar autenticación multifactor (MFA) para las cuentas de los empleados y, especialmente, para los accesos remotos.
+
+Para realizar el análisis económico estimamos un costo anual de implementación y mantenimiento del control de **$10.000**. También estimamos que la implementación de MFA permitiría reducir el ARO de 1,2 a 0,2 eventos por año.
+
+Manteniendo el mismo SLE:
+
+**ALE posterior = $30.000 × 0,2 = $6.000**
+
+La reducción anual esperada de las pérdidas sería:
+
+**$36.000 - $6.000 = $30.000**
+
+Aplicando la fórmula utilizada para evaluar el control:
+
+**ROI = (ALE antes - ALE después - costo del control) / costo del control**
+
+**ROI = ($36.000 - $6.000 - $10.000) / $10.000 = 2,0**
+
+El ROI estimado es entonces de **2,0**, equivalente a un **200 %** respecto del costo del control. Bajo estas estimaciones, consideramos conveniente implementar MFA, ya que la reducción anual esperada de las pérdidas supera el costo anual estimado del control.
+
+Tanto el costo de $10.000 como el ARO posterior de 0,2 son estimaciones realizadas para este análisis. En una situación real deberían determinarse utilizando costos concretos de implementación y datos históricos de incidentes de la organización.
+
+### B.3 — Riesgo a aceptar o transferir
+
+Un riesgo que podría evaluarse para una estrategia de **aceptación** es la interrupción operativa prolongada y la improvisación ante incidentes por falta de un plan formal de respuesta.
+
+Sus valores son:
+
+- **SLE:** $15.000
+- **ARO:** 0,6
+- **ALE:** $9.000
+
+Este riesgo presenta el ALE más bajo de los cinco analizados. Podría aceptarse si la organización determina que el costo de aplicar controles adicionales para reducirlo supera el beneficio económico esperado y si el nivel de riesgo se encuentra dentro de su tolerancia al riesgo.
+
+Aceptar un riesgo no significa ignorarlo. La decisión debería quedar documentada y el riesgo tendría que revisarse periódicamente para comprobar que su frecuencia o impacto no hayan aumentado.
+
+En este caso, la aceptación se plantea como una posible respuesta a partir de los valores utilizados en el ejercicio. En una situación real también deberían analizarse las consecuencias operativas, legales y reputacionales antes de tomar la decisión definitiva.
+
 ## 3. Anexo — tu riesgos.json
 
 ```json
