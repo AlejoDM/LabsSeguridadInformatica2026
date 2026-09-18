@@ -72,85 +72,64 @@ recursos en cada host individual, no un activo distinto al principal.
 
 ## A.3 — Matriz CIA
 
-_Una fila por propiedad. La columna «Evidencia» tiene que citar un hecho
-concreto del incidente, no una generalidad._
-
-> **Advertencia.** «No» es una respuesta válida y muchas veces la correcta.
-> El error típico es marcar las tres propiedades en «Sí» porque el incidente
-> fue grave. La gravedad no es una propiedad de la tríada. Si marcás que se
-> violó la integridad, tenés que mostrar **qué dato específico fue alterado**.
-> Si no podés mostrarlo, la respuesta es «No».
-
-| Propiedad            | ¿Se violó?        | Evidencia concreta |
-| -------------------- | ----------------- | ------------------ |
-| **Confidencialidad** | Sí / No / Parcial |                    |
-| **Integridad**       | Sí / No / Parcial |                    |
-| **Disponibilidad**   | Sí / No / Parcial |                    |
+| Propiedad | ¿Se violó? | Evidencia concreta |
+| --- | --- | --- |
+| **Confidencialidad** | No | Las fuentes consultadas describen accesos no autorizados y mecanismos de propagación, pero no documentan que el objetivo o el efecto del gusano haya sido extraer, divulgar o leer información confidencial de los sistemas afectados. |
+| **Integridad** | Parcial | El gusano introdujo y ejecutó copias de sí mismo sin autorización dentro de los sistemas comprometidos, alterando su estado operativo. Sin embargo, las fuentes no documentan destrucción o modificación deliberada de los archivos de usuario como efecto principal del incidente. |
+| **Disponibilidad** | Sí | La replicación excesiva del gusano consumió recursos de CPU, memoria y procesos. Como consecuencia, numerosas máquinas quedaron extremadamente lentas, se bloquearon o dejaron de funcionar normalmente, afectando además la conectividad de distintas instituciones. |
 
 **Justificación ampliada de la propiedad más discutible:**
 
-_De las tres, ¿cuál fue la más difícil de determinar y por qué? Desarrollá._
+La propiedad más difícil de determinar es la **integridad**. El Morris Worm modificó el estado de los sistemas al introducir y ejecutar código no autorizado, por lo que puede considerarse que existió una afectación parcial de la integridad del sistema. Sin embargo, esto no debe confundirse con afirmar que el gusano destruyó o modificó deliberadamente los datos almacenados por los usuarios.
+
+Las fuentes analizadas destacan principalmente el agotamiento de recursos y la interrupción del funcionamiento normal de los equipos. Por eso, la afectación más clara fue sobre la **disponibilidad**, mientras que la integridad puede considerarse parcial por la modificación no autorizada del estado del sistema y la incorporación de procesos del gusano.
 
 ---
 
 ## A.4 — Encadenamiento amenaza → vulnerabilidad → impacto
 
-_Redacción en prosa, no viñetas. Usá los términos con precisión: una amenaza
-no es una vulnerabilidad, un exploit no es una vulnerabilidad, y el impacto
-no es el ataque._
-
-```
-amenaza  →  explota  →  vulnerabilidad  →  sobre  →  activo  →  produce  →  impacto
-```
-
-| Elemento                                                     | En este caso |
-| ------------------------------------------------------------ | ------------ |
-| **Amenaza** _(quién / qué, con qué motivación)_              |              |
-| **Vulnerabilidad** _(la debilidad concreta que se explotó)_  |              |
-| **Activo** _(sobre qué recayó)_                              |              |
-| **Impacto** _(consecuencia sobre el negocio o las personas)_ |              |
+| Elemento | En este caso |
+| --- | --- |
+| **Amenaza** _(quién / qué, con qué motivación)_ | El Morris Worm, desarrollado y liberado por Robert Tappan Morris con el objetivo declarado de demostrar deficiencias de seguridad en las redes de computadoras, aunque su propagación terminó teniendo consecuencias mucho mayores a las previstas. |
+| **Vulnerabilidad** _(la debilidad concreta que se explotó)_ | Fallas de seguridad en servicios de sistemas Unix BSD, principalmente el modo debug de `sendmail` y un desbordamiento de búfer en `fingerd`, además del abuso de relaciones de confianza entre hosts y contraseñas débiles susceptibles de ser adivinadas. |
+| **Activo** _(sobre qué recayó)_ | Los recursos de cómputo y la capacidad operativa de las máquinas Unix conectadas a Internet: CPU, memoria, procesos y, de forma secundaria, la conectividad de red. |
+| **Impacto** _(consecuencia sobre el negocio o las personas)_ | Saturación de recursos, degradación severa del rendimiento, caída o inutilización temporal de equipos y pérdida de disponibilidad de servicios en universidades, organismos gubernamentales, instalaciones militares y otros centros conectados a Internet. |
 
 **Redacción:**
 
-_Un párrafo que encadene los cuatro elementos anteriores._
+La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse automáticamente entre equipos conectados a Internet. Para hacerlo, explotó vulnerabilidades concretas presentes en sistemas Unix derivados de BSD, entre ellas fallas en `sendmail` y `fingerd`, relaciones de confianza entre hosts y contraseñas que podían ser adivinadas. Estas debilidades permitieron acceder sin autorización a otros equipos y ejecutar nuevas copias del gusano sobre los recursos de cómputo de las máquinas afectadas. Debido a un error en el mecanismo destinado a evitar reinfecciones, se ejecutaron múltiples copias en un mismo host, consumiendo CPU, memoria y procesos hasta degradar severamente o impedir su funcionamiento normal. El impacto principal fue, por lo tanto, la pérdida de disponibilidad de los sistemas y servicios afectados.
 
 ---
 
 ## A.5 — Dos controles mitigantes
 
-_Controles que, de haber estado implementados, habrían evitado o reducido el
-incidente. Específicos y justificados contra **este** caso. «Tener antivirus»
-o «capacitar a los usuarios» no califica._
-
 ### Control 1
 
-|                                                     |     |
-| --------------------------------------------------- | --- |
-| **Qué es**                                          |     |
-| **Propiedad de la tríada que protege**              |     |
-| **Por qué habría funcionado en este caso concreto** |     |
+| | |
+| --- | --- |
+| **Qué es** | Aplicar parches y deshabilitar o restringir las funcionalidades vulnerables de servicios como `sendmail` y `fingerd`, especialmente el modo debug de `sendmail` que permitía ejecutar comandos de manera no autorizada. |
+| **Propiedad de la tríada que protege** | Principalmente **Disponibilidad** e **Integridad**. |
+| **Por qué habría funcionado en este caso concreto** | Dos de los mecanismos utilizados por el Morris Worm para ingresar a otros equipos dependían directamente de vulnerabilidades presentes en `sendmail` y `fingerd`. Eliminar esas fallas habría cerrado importantes vías de propagación y reducido la cantidad de equipos que el gusano podía comprometer y saturar. |
 
 ### Control 2
 
-|                                                     |     |
-| --------------------------------------------------- | --- |
-| **Qué es**                                          |     |
-| **Propiedad de la tríada que protege**              |     |
-| **Por qué habría funcionado en este caso concreto** |     |
+| | |
+| --- | --- |
+| **Qué es** | Eliminar relaciones de confianza innecesarias entre hosts y aplicar una política de contraseñas resistentes, evitando accesos automáticos sin autenticación y contraseñas fácilmente adivinables. |
+| **Propiedad de la tríada que protege** | **Confidencialidad**, **Integridad** y, en este incidente, especialmente **Disponibilidad**. |
+| **Por qué habría funcionado en este caso concreto** | El gusano utilizaba las relaciones de confianza de `rsh`/`rexec` y un mecanismo de adivinación de contraseñas para propagarse a nuevas máquinas. Restringir esas relaciones y utilizar contraseñas difíciles de adivinar habría eliminado o reducido otros dos vectores concretos de propagación, limitando el alcance del incidente. |
 
 ---
 
 ## A.6 — Fuentes consultadas (Parte A)
 
-_Formato APA. Indicá para cada una si es primaria (informe oficial, documento
-del fabricante, resolución judicial, paper) o secundaria (nota periodística,
-entrada de blog)._
+1. United States Court of Appeals for the Second Circuit. (1991). *United States v. Morris, 928 F.2d 504 (2d Cir. 1991).* **Fuente primaria: resolución judicial.**
 
-1.
-2.
-3.
+2. Spafford, E. H. (1988). *The Internet Worm Program: An Analysis* (Technical Report CSD-TR-823). Purdue University, Department of Computer Sciences. **Fuente primaria/técnica: informe técnico elaborado a partir del análisis del gusano.**
 
----
+3. Lawrence Livermore National Laboratory. (s. f.). *The 1988 Morris worm, the internet's first cyberattack.* **Fuente secundaria/institucional.**
+
+
 
 # PARTE B — Integridad con funciones de hash
 
