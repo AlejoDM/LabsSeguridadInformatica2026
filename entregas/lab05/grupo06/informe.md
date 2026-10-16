@@ -11,12 +11,7 @@
 | Tomás Giudici | TomasGiudici |
 | Carolina Suppo | carosuppo |
 
-**Fecha:** 16/10/2026
-**Aportes integrados:** reconocimiento de los puertos 21 y 31337 y P1; R3, R4, puerto 80 y P3.
-
 ## 0. Declaración de uso de IA
-
-### Aporte de reconocimiento de puertos 21 y 31337 y P1
 
 **Herramienta: Claude Code**
 - **Finalidad del uso:** Apoyo en la ejecución del recon y en la redacción de las filas del mapa y de P1.
@@ -30,6 +25,30 @@
 
 Ambas fueron aceptadas por el mecanismo ctf. Evidencia cruda: [validación R3](evidencia/salidas/ctf-submit-r3.txt), [validación R4](evidencia/salidas/ctf-submit-r4.txt) y [salida completa de ctf status 05](evidencia/salidas/ctf-status-05.txt). Esta captura corresponde al registro local de R3/R4, no al progreso consolidado del grupo.
 
+Confirmación de R3 y R4 (extractos de las validaciones):
+
+```text
+[ OK ] Reto R3 resuelto: Fuga de informacion en headers HTTP
+[ OK ] Reto R4 resuelto: Enumeracion de rutas via robots.txt
+```
+
+Salida completa de `./ctf status 05` del registro local de R3/R4 (2/5; no representa el progreso consolidado del grupo):
+
+```text
+
+  ╭────────────────────────────────────────────────────────────╮
+  │                     PROGRESO · LAB 05                      │
+  ╰────────────────────────────────────────────────────────────╯
+
+   ·  R1     Puerto oculto en rango alto (barrido completo)
+   ·  R2     Banner grabbing del servicio FTP
+   ✓  R3     Fuga de informacion en headers HTTP
+   ✓  R4     Enumeracion de rutas via robots.txt
+   ·  R5     Servicio dev expuesto en produccion
+
+  ████████████░░░░░░░░░░░░░░░░░░  2/5 (40%)
+```
+
 ## 2. Mapa de superficie de ataque
 
 | Puerto | Servicio | Versión (evidencia) | ¿Cómo lo identificaste? | CVE relevante | CVSS | Criticidad | Justificación (contra ESTE caso) |
@@ -38,6 +57,15 @@ Ambas fueron aceptadas por el mecanismo ctf. Evidencia cruda: [validación R3](e
 | 80/tcp | HTTP | Headers: `Server: PhantomServer/2.4.1` y `X-Powered-By: PhantomCMS 2.4.1`; respuesta `HTTP/1.0 200 OK`. Versiones anunciadas, sin verificación independiente del software. | HEAD a `http://phantomcorp` con curl; GET a `/robots.txt` y a `/panel-interno-9x2f`, todos sobre HTTP sin puerto explícito (80). | No determinado: las respuestas no permiten vincular estos nombres/versiones con un CVE verificable. No se atribuye un CVE por similitud de nombres. | No asignado; no se calculó un vector ni se verificó un CVE aplicable. | Media, valoración cualitativa para la exposición de información observada. | Los headers revelan producto, versión y una flag. robots.txt publica una ruta interna y un comentario de infraestructura; la ruta responde 200 y entrega el panel y otra flag sin credenciales. Esto facilita reconocimiento y expone contenido interno. No se demostró ejecución de comandos, modificación de datos ni acceso a funciones administrativas. |
 | 8080 | | | | | | | |
 | 31337 | Desconocido (nmap lo adivina como `Elite` por el número de puerto) | "PhantomCorp maintenance shell v0.1" — banner de `ncat -w2 phantomcorp 31337`; nmap `-sV`: `31337/tcp open Elite?` | `nmap -sV -p-` no lo reconoció; lo identificamos conectando con `ncat` y leyendo el banner | Ninguno identificado. No pude asociar este banner a un producto con CVE público | N/A | Alta | Es un shell de mantenimiento propio, expuesto a la red y en un puerto clásico de backdoors. Responde sin pedir credenciales y su banner dice "acceso no autorizado prohibido", lo que confirma que no debería estar expuesto. No determiné qué comandos acepta, así que no afirmo más que eso. |
+
+Headers relevantes del puerto 80 (extracto):
+
+```text
+HTTP/1.0 200 OK
+Server: PhantomServer/2.4.1
+X-Powered-By: PhantomCMS 2.4.1
+X-Backend-Flag: FLAG{http_headers_leak_info}
+```
 
 Evidencia completa, sin editar:
 
@@ -85,6 +113,15 @@ Disallow: /panel-interno-9x2f
 
 La ironía es que, al intentar apartar rutas de los rastreadores, el archivo público revela sus nombres exactos a quien está haciendo reconocimiento. El comentario además señala una exposición pendiente de corregir. Seguimos esa pista con `curl -sS -i http://phantomcorp/panel-interno-9x2f`: sin enviar credenciales ni cookies, recibimos `HTTP/1.0 200 OK`, el título «Panel interno PhantomCorp» y `FLAG{recon_hidden_path}`. El texto «Acceso restringido» del HTML no evitó que se entregara ese contenido.
 
+Extracto del cuerpo HTML recibido del panel:
+
+```html
+<h1>Panel interno PhantomCorp</h1>
+<p>Acceso restringido. Si llegaste aca por robots.txt, felicitaciones: acabas
+de hacer enumeracion de rutas. Esa es exactamente la tecnica.</p>
+<pre>FLAG{recon_hidden_path}</pre>
+```
+
 La evidencia demuestra acceso desde el contenedor atacante al panel dentro de la red del laboratorio; el comentario dice «desde afuera», pero no comprobamos exposición a Internet. `/admin` solo se observó listado y no se consultó. La conclusión es que ocultar o desaconsejar el rastreo de una ruta no protege su contenido: el acceso debe controlarse en el servidor. La evidencia de este caso está en las respuestas completas de robots.txt y del panel enlazadas arriba.
 
 **P4 — Pasivo vs. activo.**
@@ -92,6 +129,26 @@ La evidencia demuestra acceso desde el contenedor atacante al panel dentro de la
 **P5 — Ahora sos el defensor.**
 
 ## 4. Bitácora de comandos
+
+Dentro de `cyberlab-attacker`:
+
+```bash
+nmap -Pn phantomcorp > /loot/nmap-default.txt
+nmap -Pn -sV -p- phantomcorp > /loot/nmap-sV-all.txt
+ncat -w2 phantomcorp 31337 </dev/null > /loot/r1-banner-31337.txt
+ncat -w2 phantomcorp 21 </dev/null > /loot/r2-banner-ftp21.txt
+curl -I http://phantomcorp | tee /loot/http80-headers.txt
+curl -sS -i http://phantomcorp/robots.txt | tee /loot/http80-robots.txt
+curl -sS -i http://phantomcorp/panel-interno-9x2f | tee /loot/http80-panel-interno.txt
+```
+
+Desde Bash de Git, en la raíz del repositorio:
+
+```bash
+./ctf submit 05 R3 'FLAG{http_headers_leak_info}'
+./ctf submit 05 R4 'FLAG{recon_hidden_path}'
+./ctf status 05
+```
 
 Ver [evidencia/comandos.txt](evidencia/comandos.txt): separa las acciones previas informadas por el usuario de las ejecutadas en esta continuación e identifica dónde se ejecuta cada comando. Las salidas originales permanecen en `/loot`, montado como `.loot/` del repositorio, y se copiaron sin edición a `evidencia/salidas/` para versionarlas.
 
