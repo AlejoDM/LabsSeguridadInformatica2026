@@ -40,7 +40,7 @@ qué una queda vacía.*
 | 21 | FTP | ProFTPD 1.3.5 — banner `220 ProFTPD 1.3.5 Server (PhantomCorp FTP)`; nmap `-sV`: `21/tcp open ftp ProFTPD 1.3.5` | Banner grabbing con `ncat -w2 phantomcorp 21` y confirmado con `nmap -Pn -sV -p-` | CVE-2015-3306 (`mod_copy`, comandos `SITE CPFR`/`SITE CPTO`) | 9.8 (CVSS v3.x, NVD) | Crítica | El banner confirma la versión 1.3.5, que es la afectada por el CVE. Permite leer y escribir archivos arbitrarios sin autenticarse **si** `mod_copy` está cargado; en este recon no lo probamos, queda para el lab de explotación. Además el banner filtra el nombre de la empresa y una línea `214` que no debería estar. |
 | 80 | | | | | | | |
 | 8080 | | | | | | | |
-| 31337 | | | | | | | |
+| 31337 | Desconocido (nmap lo adivina como `Elite` por el número de puerto) | "PhantomCorp maintenance shell v0.1" — banner de `ncat -w2 phantomcorp 31337`; nmap `-sV`: `31337/tcp open Elite?` | `nmap -sV -p-` no lo reconoció; lo identificamos conectando con `ncat` y leyendo el banner | Ninguno identificado. No pude asociar este banner a un producto con CVE público | N/A | Alta | Es un shell de mantenimiento propio, expuesto a la red y en un puerto clásico de backdoors. Responde sin pedir credenciales y su banner dice "acceso no autorizado prohibido", lo que confirma que no debería estar expuesto. No determiné qué comandos acepta, así que no afirmo más que eso. |
 
 *Evidencia de respaldo: pegá abajo las salidas de comando que sostienen la tabla
 (el `nmap -sV -p-`, los banners, los headers). Guardá los archivos completos en
