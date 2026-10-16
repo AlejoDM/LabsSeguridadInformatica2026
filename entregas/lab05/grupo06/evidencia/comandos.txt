@@ -1,0 +1,8 @@
+# Comandos usados, en orden (desde la consola del atacante: make shell)
+
+nmap -Pn phantomcorp > /loot/nmap-default.txt
+nmap -Pn -sV -p- phantomcorp > /loot/nmap-sV-all.txt
+ncat -w2 phantomcorp 31337 </dev/null > /loot/r1-banner-31337.txt
+ncat -w2 phantomcorp 21 </dev/null > /loot/r2-banner-ftp21.txt
+./ctf submit 05 R1 'FLAG{...}'
+./ctf submit 05 R2 'FLAG{...}'
