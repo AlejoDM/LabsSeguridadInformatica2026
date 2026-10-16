@@ -16,9 +16,9 @@
 ## 0. Declaración de uso de IA
 
 **Herramienta: Claude Code**
-- **Finalidad del uso:** Apoyo en la ejecución del recon (nmap y banner grabbing contra `phantomcorp`) y en la redacción de las filas 21 y 31337 del mapa y de P1.
-- **Partes generadas o asistidas:** Sección 2 (filas 21 y 31337), P1 y carpeta `evidencia/`.
-- **Verificación:** Las salidas se guardaron crudas con redirección desde la consola del atacante. El CVE-2015-3306 y su CVSS (9.8) deben contrastarse contra NVD antes de entregar (pendiente).
+- **Finalidad del uso:** Apoyo en la ejecución del recon y en la redacción de las filas del mapa y de P1.
+- **Partes generadas o asistidas:** Sección 2, P1 y carpeta `evidencia/`.
+- **Verificación:** Las salidas se guardaron crudas con redirección desde la consola del atacante.
 
 ---
 
