@@ -9,14 +9,14 @@
 | **Grupo**                   | 06                                                               |
 | **Caso asignado (Parte A)** | Morris Worm (1988)                                               |
 | **Tema del mini-research**  | Tema 3 — La disponibilidad, la propiedad descuidada de la tríada |
-| **Fecha de entrega**        |                                                                  |
+| **Fecha de entrega**        |    16/10/2026                                                              |
 
 ### Integrantes
 
 | Nombre y apellido  | Legajo | Usuario de GitHub   |
 | ------------------ | ------ | ------------------- |
 | Martín Beccereca   | 15154  | @martinbeccereca    |
-| María Belén Benito | 14625  | @belubenito603-byte |
+| María Belén Benito | 14625  | @belubenito01       |
 | Alejo De Miguel    | 15138  | @AlejoDM            |
 | Tomás Giudici      | 14977  | @TomasGiudici       |
 | Carolina Suppo     | 15057  | @carosuppo          |
@@ -30,43 +30,21 @@
 | Fecha                      | Hecho                                                                                                                                                                                                                                                      | Fuente                                                                                                                                                                                |
 | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 1988-11-02 (noche)         | Robert Tappan Morris, estudiante de posgrado de Cornell, libera el gusano desde una máquina del MIT para disimular su origen real.                                                                                                                         | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
-| 1988-11-02/03              | El gusano se propaga explotando cuatro vectores: un bug en el modo debug de `sendmail`, un desbordamiento en `fingerd`, la función de "trusted hosts" (`rsh`/`rexec`) y adivinación de contraseñas.                                                        | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
-| 1988-11 (horas siguientes) | Un error en su lógica de reinfección (probabilidad de re-copiarse aun en máquinas ya infectadas) provoca que se acumulen decenas de procesos por host, agotando CPU y memoria; ~6.000 de los ~60.000 hosts conectados a Internet (~10 %) quedan afectados. | [Lawrence Livermore National Laboratory, _"The 1988 Morris worm, the internet's first cyberattack"_](https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack) |
+| 1988-11-02/03              | El gusano se propaga explotando cuatro vectores: el modo debug de `sendmail`, desbordamiento de búfer en `fingerd`, relaciones de confianza (`rsh`), credenciales por diccionario (`rexec`).                                                               | [Spafford, E. H., _"The Internet Worm Program: An Analysis"_ (CSD-TR-823)](https://www.cerias.purdue.edu/techreports-ssl/public/823.pdf)                                            |
+| 1988-11 (horas siguientes) | Morris programó deliberadamente que 1 de cada 7 respuestas afirmativas de infección previa fuera ignorada para evitar que simularan estar infectados; subestimó la multiplicación resultante, agotando CPU y procesos (~6.000 de ~60.000 hosts afectados). | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html); [Lawrence Livermore National Laboratory, _"The 1988 Morris worm, the internet's first cyberattack"_](https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack) |
 | 1988-11 (días siguientes)  | DARPA encarga al Software Engineering Institute de Carnegie Mellon la creación de un centro de coordinación de emergencias informáticas; nace así el CERT/CC, en respuesta directa a este incidente.                                                       | [Carnegie Mellon University SEI, _"History of Innovation"_](https://www.sei.cmu.edu/history-of-innovation/)                                                                           |
 | 1990-05-16                 | El tribunal de distrito (juez Howard G. Munson, Distrito Norte de Nueva York) dicta sentencia: 3 años de libertad condicional, 400 horas de servicio comunitario y una multa de USD 10.050.                                                                | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
-| 1991-03-07                 | La Corte de Apelaciones del Segundo Circuito confirma la condena, convirtiendo el caso en la primera confirmada bajo la Computer Fraud and Abuse Act de 1986.                                                                                              | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
+| 1991-03-07                 | La Corte de Apelaciones del Segundo Circuito confirma la condena.                                                                                                                                                            | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
 
 ---
 
 ## A.2 — Activo afectado
 
-**Activo principal:** los recursos de cómputo —ciclos de CPU, memoria y
-espacio en la tabla de procesos— de las máquinas Unix derivadas de BSD (VAX
-y Sun-3, entre otras) conectadas a Internet en noviembre de 1988. No un dato
-puntual, sino la capacidad operativa de esos equipos para seguir prestando
-servicio.
+**Activo principal:** Los recursos de cómputo (tiempo de CPU, memoria RAM y entradas en la tabla de procesos) de estaciones Sun-3 y minicomputadoras VAX ejecutando variantes vulnerables de Unix BSD (4.3BSD y derivadas) conectadas a Internet en noviembre de 1988.
 
-**Por qué es el principal:** es el recurso que el gusano consumió de forma
-directa e incontrolada. El programa reinfectaba repetidamente una misma
-máquina —un fallo en el mecanismo pensado para evitarlo— y cada reinfección
-sumaba un proceso más, hasta un comportamiento equivalente a una bomba de
-forks que agotaba CPU y memoria. La propia [Lawrence Livermore National
-Laboratory](https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack)
-lo resume así: _"the Morris worm did not damage or destroy files, it slowed
-systems to a crawl"_ — es decir, el efecto es enteramente sobre
-disponibilidad, no sobre confidencialidad ni integridad de ningún dato. Los
-cuatro vectores de propagación (bug de `sendmail`, bug de `fingerd`,
-"trusted hosts" y adivinación de contraseñas) documentados en [_United
-States v. Morris_](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)
-fueron el medio para llegar a ese activo, no el activo en sí.
+**Por qué es el principal:** Fue el recurso que el gusano saturó de forma directa. Debido a la lógica deliberada de reinfección (1 de cada 7 veces ignoraba si ya estaba presente), los equipos ejecutaban decenas de copias del programa en paralelo hasta agotar la memoria y bloquear el sistema operativo. Como resume el Lawrence Livermore National Laboratory (LLNL), _"the Morris worm did not damage or destroy files, it slowed systems to a crawl"_. Las fallas explotadas en `sendmail`, `fingerd`, `rsh` y contraseñas débiles sirvieron como vías de entrada, pero el impacto final recayó sobre la capacidad operativa de los equipos.
 
-**Otros activos afectados:** la conectividad operativa de ARPANET/Internet
-como red compartida. Numerosas instituciones —universidades, centros de
-investigación militar— debieron desconectarse preventivamente de la red
-durante horas o días para contener la propagación y desinfectar sus equipos,
-interrumpiendo el intercambio de correo y archivos entre sitios. Es un
-impacto de disponibilidad de segundo orden, derivado del agotamiento de
-recursos en cada host individual, no un activo distinto al principal.
+**Otros activos afectados:** La conectividad de la red en su conjunto. Para frenar la propagación y limpiar los equipos, administradores de universidades y centros de investigación optaron por desconectar temporalmente sus enlaces de ARPANET, interrumpiendo el intercambio de correo y archivos durante horas o días.
 
 ---
 
@@ -74,15 +52,13 @@ recursos en cada host individual, no un activo distinto al principal.
 
 | Propiedad | ¿Se violó? | Evidencia concreta |
 | --- | --- | --- |
-| **Confidencialidad** | No | Las fuentes consultadas describen accesos no autorizados y mecanismos de propagación, pero no documentan que el objetivo o el efecto del gusano haya sido extraer, divulgar o leer información confidencial de los sistemas afectados. |
-| **Integridad** | Parcial | El gusano introdujo y ejecutó copias de sí mismo sin autorización dentro de los sistemas comprometidos, alterando su estado operativo. Sin embargo, las fuentes no documentan destrucción o modificación deliberada de los archivos de usuario como efecto principal del incidente. |
-| **Disponibilidad** | Sí | La replicación excesiva del gusano consumió recursos de CPU, memoria y procesos. Como consecuencia, numerosas máquinas quedaron extremadamente lentas, se bloquearon o dejaron de funcionar normalmente, afectando además la conectividad de distintas instituciones. |
+| **Confidencialidad** | Afectación de credenciales; sin exfiltración documentada hacia terceros | El gusano accedió y leyó archivos locales como `/etc/passwd` (intentando descifrar contraseñas mediante listas de palabras) y tablas de red para propagarse. Las fuentes consultadas (Spafford, 1988) no documentan exfiltración hacia terceros; sí describen lectura de archivos locales y obtención no autorizada de credenciales. |
+| **Integridad** | No respecto de los datos de usuario; sí respecto del estado del sistema | A nivel de datos y archivos de usuario, ningún documento fue destruido, corrompido ni modificado deliberadamente (_"the Morris worm did not damage or destroy files"_, LLNL). A nivel del sistema operativo existieron modificaciones no autorizadas transitorias (creación de archivos en `/tmp`, inyección de código en `fingerd` y alteración de tablas de procesos), pero el impacto predominante del ataque recayó sobre la disponibilidad. |
+| **Disponibilidad** | Sí | La replicación excesiva del gusano consumió recursos de CPU, memoria y tabla de procesos. Como consecuencia, miles de máquinas (~6.000 de las ~60.000 conectadas a Internet) quedaron inutilizables o severamente degradadas, obligando a numerosas instituciones a desconectarse de la red para desinfectar sus equipos. |
 
 **Justificación ampliada de la propiedad más discutible:**
 
-La propiedad más difícil de determinar es la **integridad**. El Morris Worm modificó el estado de los sistemas al introducir y ejecutar código no autorizado, por lo que puede considerarse que existió una afectación parcial de la integridad del sistema. Sin embargo, esto no debe confundirse con afirmar que el gusano destruyó o modificó deliberadamente los datos almacenados por los usuarios.
-
-Las fuentes analizadas destacan principalmente el agotamiento de recursos y la interrupción del funcionamiento normal de los equipos. Por eso, la afectación más clara fue sobre la **disponibilidad**, mientras que la integridad puede considerarse parcial por la modificación no autorizada del estado del sistema y la incorporación de procesos del gusano.
+Al analizar la **integridad** en el grupo, evaluamos si la creación de copias del gusano y de archivos temporales en `/tmp` debía clasificarse como una alteración de integridad. Si se evalúa el estado global del sistema operativo, existieron cambios no autorizados asociados a la infección (procesos en ejecución y desbordamiento de búfer en memoria). Sin embargo, bajo la óptica de los activos de información protegidos, las fuentes consultadas no describen rutinas destinadas a destruir o modificar deliberadamente datos de usuarios. Morris programó el gusano para replicarse sin destruir datos. Lo que se vio comprometido de manera masiva fue el funcionamiento operativo de los equipos por el consumo extremo de CPU y procesos. Por ello, clasificamos la respuesta como **«No respecto de los datos de usuario; sí respecto del estado del sistema»**, reconociendo que el impacto predominante del incidente recayó sobre la **disponibilidad**.
 
 ---
 
@@ -97,7 +73,7 @@ Las fuentes analizadas destacan principalmente el agotamiento de recursos y la i
 
 **Redacción:**
 
-La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse automáticamente entre equipos conectados a Internet. Para hacerlo, explotó vulnerabilidades concretas presentes en sistemas Unix derivados de BSD, entre ellas fallas en `sendmail` y `fingerd`, relaciones de confianza entre hosts y contraseñas que podían ser adivinadas. Estas debilidades permitieron acceder sin autorización a otros equipos y ejecutar nuevas copias del gusano sobre los recursos de cómputo de las máquinas afectadas. Debido a un error en el mecanismo destinado a evitar reinfecciones, se ejecutaron múltiples copias en un mismo host, consumiendo CPU, memoria y procesos hasta degradar severamente o impedir su funcionamiento normal. El impacto principal fue, por lo tanto, la pérdida de disponibilidad de los sistemas y servicios afectados.
+La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse automáticamente entre equipos conectados a Internet. Para hacerlo, explotó vulnerabilidades concretas presentes en sistemas Unix derivados de BSD, entre ellas fallas en `sendmail` y `fingerd`, relaciones de confianza entre hosts y contraseñas que podían ser adivinadas. Estas debilidades permitieron acceder sin autorización a otros equipos y ejecutar nuevas copias del gusano sobre los recursos de cómputo de las máquinas afectadas. Debido a que Morris subestimó la multiplicación producida por la lógica de reinfección (al programar que 1 de cada 7 respuestas afirmativas fuera ignorada), se ejecutaron múltiples copias en un mismo host, consumiendo CPU, memoria y procesos hasta degradar severamente o impedir su funcionamiento normal. El impacto principal fue, por lo tanto, la pérdida de disponibilidad de los sistemas y servicios afectados.
 
 ---
 
@@ -115,9 +91,9 @@ La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse a
 
 | | |
 | --- | --- |
-| **Qué es** | Eliminar relaciones de confianza innecesarias entre hosts y aplicar una política de contraseñas resistentes, evitando accesos automáticos sin autenticación y contraseñas fácilmente adivinables. |
+| **Qué es** | Eliminar relaciones de confianza implícitas entre hosts (archivos `.rhosts` y `/etc/hosts.equiv`) y exigir contraseñas resistentes frente a ataques de diccionario. |
 | **Propiedad de la tríada que protege** | **Confidencialidad**, **Integridad** y, en este incidente, especialmente **Disponibilidad**. |
-| **Por qué habría funcionado en este caso concreto** | El gusano utilizaba las relaciones de confianza de `rsh`/`rexec` y un mecanismo de adivinación de contraseñas para propagarse a nuevas máquinas. Restringir esas relaciones y utilizar contraseñas difíciles de adivinar habría eliminado o reducido otros dos vectores concretos de propagación, limitando el alcance del incidente. |
+| **Por qué habría funcionado en este caso concreto** | El gusano explotaba dos vías distintas de autenticación: `rsh` aprovechaba la confianza configurada en `.rhosts` para ejecutar comandos sin pedir clave, mientras que `rexec` utilizaba credenciales obtenidas al probar listas de palabras contra `/etc/passwd`. Restringir la confianza ciega y fortalecer las contraseñas habría neutralizado ambos vectores de propagación. |
 
 ---
 
@@ -135,12 +111,11 @@ La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse a
 
 ## B.1 — Evidencia de ejecución
 
-_Pegá la salida real de cada comando. No la transcribas a mano: copiala tal
-cual sale de la terminal._
-
 ### Generación del manifiesto
 
-```
+_Terminal: Bash_
+
+```bash
 $ python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
 
 Manifiesto generado: manifest.sha256
@@ -150,7 +125,9 @@ Archivos indexados:  4
 
 ### Verificación sobre un directorio íntegro
 
-```
+_Terminal: Bash_
+
+```bash
 $ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
 $ echo "código de salida: $?"
 
@@ -166,12 +143,11 @@ INTEGRIDAD VERIFICADA — sin diferencias contra el manifiesto.
 código de salida: 0
 ```
 
-### Detección de la modificación de un byte
+### Detección de la incorporación de un byte
 
-_Esta prueba es obligatoria y tiene una penalización específica en la rúbrica
-si falla._
+_Terminal: Bash_
 
-```
+```bash
 $ printf 'X' >> data/muestra/transferencia.txt
 $ python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
 $ echo "código de salida: $?"
@@ -193,12 +169,14 @@ código de salida: 1
 
 ### Detección de archivo faltante y de archivo nuevo
 
-```
-python3 data/generar_datos.py
-python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
-Remove-Item data/muestra/politica_seguridad.md
-python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
-Write-Output "código de salida: $LASTEXITCODE"
+_Terminal: PowerShell_
+
+```powershell
+PS > python data/generar_datos.py
+PS > python src/integridad.py generar --dir data/muestra --salida manifest.sha256
+PS > Remove-Item data/muestra/politica_seguridad.md
+PS > python src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+PS > Write-Output "código de salida: $LASTEXITCODE"
 
 Directorio:  data\muestra
 Manifiesto:  manifest.sha256
@@ -214,11 +192,11 @@ Hallazgos:
 INTEGRIDAD COMPROMETIDA — 1 hallazgo(s).
 código de salida: 1
 
-python3 data/generar_datos.py
-python3 src/integridad.py generar --dir data/muestra --salida manifest.sha256
-Set-Content -Path data/muestra/nuevo.txt -Value "archivo nuevo"
-python3 src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
-Write-Output "código de salida: $LASTEXITCODE"
+PS > python data/generar_datos.py
+PS > python src/integridad.py generar --dir data/muestra --salida manifest.sha256
+PS > Set-Content -Path data/muestra/nuevo.txt -Value "archivo nuevo"
+PS > python src/integridad.py verificar --dir data/muestra --manifiesto manifest.sha256
+PS > Write-Output "código de salida: $LASTEXITCODE"
 
 Directorio:  data\muestra
 Manifiesto:  manifest.sha256
@@ -237,8 +215,10 @@ código de salida: 1
 
 ### Efecto avalancha
 
-```
-$ python3 src/integridad.py avalancha --a "transferencia: $1000" --b "transferencia: $1001"
+_Terminal: Bash_
+
+```bash
+$ python3 src/integridad.py avalancha --a 'transferencia: $1000' --b 'transferencia: $1001'
 
 mensaje A: "transferencia: $1000"
   SHA-256: 341511c4c817d55f30c81e212d0e82b0b16dd5a58d49fe5e45c9d5c998ab794a
@@ -257,39 +237,42 @@ Sí, coincide con lo esperado. Antes de ejecutar la prueba esperábamos que, al 
 
 ### HMAC
 
-```
+_Terminal: Bash_
+
+```bash
 $ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000"
 
 mensaje:      "transferir 1000"
 HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 ```
 
-```
-$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar <tag válido>
-$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar <tag alterado>
+```bash
+$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
+$ echo "código de salida: $?"
 
-Salida 1:
 mensaje:      "transferir 1000"
 HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 tag recibido: 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 
 TAG VÁLIDO — el mensaje es auténtico e íntegro.
+código de salida: 0
+```
 
-Salida 2 (se cambiaron los dos últimos dígitos por gr):
+```bash
+$ python3 src/integridad.py mac --clave "secreto" --mensaje "transferir 1000" --verificar 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9gr
+$ echo "código de salida: $?"
+
+mensaje:      "transferir 1000"
 HMAC-SHA256:  96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9fe
 tag recibido: 96bc66546d55627136aeaaefbcead75520a57e19539834d03e74d705b70ff9gr
 
 TAG INVÁLIDO — el mensaje fue alterado o la clave no es la correcta.
+código de salida: 1
 ```
 
 ---
 
 ## B.2 — Decisiones de implementación
-
-_Qué decisiones tuvieron que tomar que el enunciado no resolvía por ustedes.
-Ejemplos: cómo trataron los enlaces simbólicos, qué hicieron con los archivos
-vacíos, cómo excluyeron el manifiesto del recorrido, qué pasa si el directorio
-está vacío. Una o dos oraciones por decisión._
 
 | Decisión                        | Qué hicimos                                                                                                                            | Por qué                                                                                                                                |
 | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
@@ -304,9 +287,6 @@ está vacío. Una o dos oraciones por decisión._
 
 ## B.3 — Preguntas de análisis
 
-> **Se responden con fundamento técnico, no con opinión.** Dos o tres párrafos
-> cada una. Las respuestas de una línea no suman puntos.
-
 ### 1. El manifiesto por sí solo no alcanza
 
 _Un atacante con acceso de escritura al directorio también puede escribir
@@ -318,7 +298,7 @@ que ese ataque no funcione?_
 
 Un manifiesto de hashes permite detectar modificaciones solamente si podemos confiar en que el propio manifiesto no fue alterado. Si un atacante tiene permisos para modificar tanto los archivos protegidos como manifest.sha256, nada le impide cambiar un archivo y luego regenerar el manifiesto con el nuevo hash. Al verificarlo posteriormente, el digest calculado coincidiría con el valor manipulado y el sistema informaría incorrectamente que la integridad está verificada.
 
-Para evitarlo, el manifiesto debe protegerse de forma independiente. Por ejemplo, podría almacenarse en una ubicación de solo lectura para el atacante o autenticarse mediante un HMAC cuya clave secreta no esté disponible en el directorio protegido. Otra alternativa es firmarlo digitalmente manteniendo la clave privada fuera del alcance del atacante. De esta manera, modificar y regenerar el manifiesto ya no sería suficiente, porque el atacante también tendría que producir una autenticación o firma válida.
+Para evitarlo, el manifiesto debe protegerse de forma independiente. Por ejemplo, podría almacenarse en una ubicación de solo lectura para el atacante o autenticarse mediante un HMAC manteniendo la clave secreta fuera del alcance del atacante. Otra alternativa es firmarlo digitalmente manteniendo la clave privada igualmente fuera del alcance del atacante. De esta manera, modificar y regenerar el manifiesto ya no sería suficiente, porque el atacante también tendría que producir una autenticación o firma válida.
 
 ### 2. Qué agrega HMAC y qué no
 
@@ -346,14 +326,15 @@ La propiedad criptográfica que se considera rota en MD5 y SHA-1 es la resistenc
 
 En SHA-1 también se demostraron colisiones prácticas. NIST señala que esta debilidad afecta especialmente a aplicaciones como las firmas digitales, donde la resistencia a colisiones es fundamental, y recomienda migrar a SHA-2 o SHA-3.
 
-Esto no significa que se hayan demostrado ataques de preimagen equivalentes para ambas funciones. En particular, RFC 6194 señala que no se conocían ataques de preimagen o segunda preimagen específicos contra SHA-1 completo; la debilidad relevante para su desuso criptográfico es la pérdida de resistencia a colisiones.
+Esto no significa que se hayan demostrado ataques de preimagen prácticos para ambas funciones en su versión completa. En particular, el RFC 6194 (fechado en 2011) señalaba que no se conocían ataques de preimagen o segunda preimagen específicos contra SHA-1 completo; la debilidad crítica para su desuso criptográfico es la pérdida de resistencia a colisiones (como demostraron los proyectos SHAttered en 2017 y Shambles en 2020).
 
-Todavía pueden existir usos no criptográficos o de compatibilidad con sistemas antiguos. Por ejemplo, RFC 6151 considera aceptable MD5 cuando se utiliza únicamente como checksum para detectar errores accidentales, no como mecanismo de seguridad. Para SHA-1, NIST permite ciertos usos heredados, como verificar firmas o timestamps antiguos, y algunos usos específicos como HMAC-SHA-1, aunque recomienda abandonar SHA-1 progresivamente. Para aplicaciones criptográficas nuevas, la recomendación es utilizar SHA-256/SHA-2 o SHA-3.
+Todavía pueden existir usos no criptográficos o de compatibilidad heredada. Por ejemplo, el RFC 6151 considera aceptable MD5 cuando se utiliza únicamente como checksum para detectar errores accidentales de transmisión o almacenamiento, sin atribuirle ninguna garantía de seguridad. Para SHA-1, NIST estableció en 2022 la directriz formal de retirar y abandonar por completo su uso en todas las aplicaciones criptográficas federales antes del 31 de diciembre de 2030, recomendando migrar sistemáticamente a familias robustas como SHA-2 (SHA-256/512) o SHA-3.
 
 **Fuente:**
 
-1. RFC 6151 — _Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms._ RFC 6151 — RFC Editor
-2. NIST — _Transitioning Away from SHA-1 for All Applications._ NIST — SHA-1 transition
+1. RFC 6151 — Turner, S., & Chen, L. (2011). _Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms._ IETF. https://doi.org/10.17487/RFC6151
+2. RFC 6194 — _Security Considerations for the SHA-0 and SHA-1 Message-Digest Algorithms._ IETF. https://doi.org/10.17487/RFC6194
+3. NIST — _Transitioning Away from SHA-1 for All Cryptographic Applications._ NIST CSRC Transition Announcement (2022). https://csrc.nist.gov/news/2022/transitioning-away-from-sha-1-for-all-apps
 
 ### 4. Comparación en tiempo constante
 
@@ -363,9 +344,15 @@ concreto que esto previene._
 
 **Respuesta:**
 
-Se utiliza hmac.compare_digest() para comparar el HMAC calculado con el tag recibido porque está diseñado para realizar comparaciones resistentes a ataques basados en diferencias de tiempo. Una comparación convencional mediante == puede finalizar antes cuando encuentra una diferencia, lo que potencialmente puede generar variaciones observables en el tiempo de ejecución.
+El operador == no ofrece garantías de comparación en tiempo constante. Según el tipo de objeto y la implementación, su tiempo de ejecución puede depender del contenido comparado, lo que podría permitir ataques de temporización.
 
-Por ello, en la verificación del HMAC utilizamos hmac.compare_digest() en lugar de ==, reduciendo el riesgo de filtración de información mediante un ataque de timing. Esto se refiere específicamente a la comparación del tag y no significa que todo el programa ejecute todas sus operaciones en tiempo constante.
+El ataque que esto previene es un **ataque de temporización (timing attack)** para forjar un tag de autenticación válido sin conocer la clave secreta. Si un servicio remoto verifica un HMAC usando `==`, un atacante puede enviar candidatos modificando sistemáticamente cada byte y midiendo estadísticamente los tiempos de respuesta para filtrar el ruido de red. Si existe una diferencia temporal medible asociada a la coincidencia de prefijos, el atacante puede ir deduciendo los bytes correctos uno por uno en lugar de tener que adivinar todo el tag simultáneamente.
+
+`hmac.compare_digest()` mitiga este riesgo garantizando una comparación diseñada para evitar la evaluación en cortocircuito en función del contenido del secreto. Cabe señalar que esta protección se aplica a la comparación de contenidos, pero —como documenta la biblioteca estándar de Python— presupone que las secuencias comparadas tengan el mismo tipo y longitud conocida, dado que discrepancias en la longitud o el tipo sí pueden reflejarse en diferencias de tiempo.
+
+**Fuente:**
+
+1. Python Software Foundation. (s. f.). _hmac — Keyed-Hashing for Message Authentication (compare_digest)_. Python 3 Documentation. https://docs.python.org/3/library/hmac.html
 
 ### 5. SHA-256 para contraseñas: mala idea
 
@@ -375,15 +362,18 @@ propiedad tienen esas funciones que SHA-256 no tiene?_
 
 **Respuesta:**
 
-Aunque SHA-256 es una función de hash criptográfica robusta para garantizar la integridad de datos y verificar firmas digitales (resistente a colisiones y preimágenes), resulta una **pésima elección para el almacenamiento de contraseñas**. La razón fundamental radica en que SHA-256 fue expresamente diseñada para ser **computacionalmente rápida y altamente eficiente en hardware**. Dado que las contraseñas elegidas por humanos poseen una entropía intrínsecamente baja, un atacante que obtenga una base de datos de hashes puede aprovechar esta velocidad para ejecutar ataques masivos de fuerza bruta, ataques por diccionario y búsquedas con tablas arcoíris (_rainbow tables_). Utilizando hardware paralelo moderno (como clústeres de GPUs, FPGAs o circuitos integrados dedicados ASICs), un atacante puede calcular **miles de millones de hashes SHA-256 por segundo por dispositivo**, descifrando contraseñas comunes o de longitud media en cuestión de segundos o minutos. Además, un hash simple no incluye intrínsecamente un mecanismo obligatorio de _salt_, lo que permite atacar múltiples usuarios a la vez si no se gestiona manualmente.
+SHA-256 es un algoritmo seguro para verificar la integridad de archivos o firmas digitales, pero no resulta adecuado para almacenar contraseñas. El motivo principal es que fue diseñado para ser muy rápido y eficiente en hardware. Dado que los usuarios suelen elegir contraseñas de entropía limitada, un atacante que obtenga la base de datos de hashes puede aprovechar esa velocidad para **recuperar contraseñas mediante pruebas masivas de candidatos** (ataques de diccionario o fuerza bruta), calculando millones o miles de millones de hashes por segundo con placas de video (GPUs) o hardware dedicado (ASICs). Además, un hash simple no incluye intrínsecamente un valor de sal, lo que expone a los usuarios a búsquedas precalculadas mediante tablas arcoíris.
 
-En su lugar, los estándares modernos de seguridad exigen el uso de **funciones de derivación de claves basadas en contraseñas (KDF)** y algoritmos especializados de hashing de contraseñas, tales como **Argon2id** (estándar recomendado por la _Password Hashing Competition_ e IETF RFC 9106), **bcrypt** (basado en el algoritmo Eksblowfish), **scrypt** y **PBKDF2**.
+En su lugar, los estándares modernos de seguridad exigen el uso de funciones de derivación de claves basadas en contraseñas (KDF) y algoritmos específicos como **Argon2id** (RFC 9106), **bcrypt** o **scrypt**. Estas funciones poseen características diseñadas específicamente para encarecer los ataques:
 
-Estas funciones poseen tres propiedades esenciales que SHA-256 no tiene:
+1. **Costo de cómputo ajustable:** Permiten calibrar la cantidad de iteraciones o trabajo requerido, haciendo que validar un inicio de sesión legítimo tarde una fracción de segundo aceptable (por ejemplo, 100 ms), pero multiplicando drásticamente el tiempo necesario para probar millones de combinaciones en un ataque offline.
+2. **Requerimiento intensivo de memoria (memory-hard):** Algoritmos como Argon2id y scrypt exigen asignar cantidades significativas de memoria RAM rápida para cada cálculo. Esto encarece considerablemente la paralelización masiva en GPUs y ASICs, cuyos núcleos disponen de memoria local limitada por hilo.
+3. **Uso de sal (salt) único:** Siguiendo especificaciones como el RFC 9106, se suministra una sal criptográficamente aleatoria y única para cada contraseña. Esto garantiza que dos usuarios con la misma clave generen hashes distintos, anulando la eficacia de tablas precalculadas y forzando a probar los candidatos contra cada usuario de manera individual.
 
-1. **Factor de trabajo / lentitud configurable (_Work Factor / Cost Parameter_):** Permiten ajustar deliberadamente la cantidad de iteraciones y el tiempo de cómputo necesario para calcular un único hash. Esto permite calibrar el sistema para que verificar un intento de inicio de sesión legítimo tome una fracción de segundo imperceptible para el usuario en el servidor (ej. 100 a 300 ms), pero vuelva computacionalmente inviable para un atacante probar billones de combinaciones. Este parámetro de costo puede incrementarse en el tiempo a medida que el hardware de los atacantes se vuelve más potente.
-2. **Dureza de memoria (_Memory-Hardness_):** Algoritmos como Argon2id y scrypt requieren grandes cantidades de memoria RAM rápida para cada cálculo de hash. Esta característica neutraliza la ventaja de las GPUs y ASICs masivos (que poseen miles de núcleos pero muy poca memoria rápida local por hilo), haciendo que la construcción de hardware paralelo para ataques de fuerza bruta sea económicamente prohibitiva.
-3. **Salteado automático e intrínseco (_Built-in Salting_):** Integran por diseño la generación y almacenamiento de un _salt_ criptográfico aleatorio único por cada contraseña en la propia cadena del hash. Esto garantiza que dos usuarios con la misma contraseña generen hashes completamente distintos y anula por completo la eficacia de ataques precalculados mediante tablas arcoíris.
+**Fuente:**
+
+1. RFC 9106 — Biryukov, A., Dinu, D., Khovratovich, D., & Josefsson, S. (2021). _Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications._ IETF. https://doi.org/10.17487/RFC9106
+2. Biryukov, A., Dinu, D., & Khovratovich, D. (2016). _Argon2: New Generation of Memory-Hard Functions for Password Hashing and Other Applications_. In 2016 IEEE European Symposium on Security and Privacy (EuroS&P) (pp. 292-302). IEEE. https://doi.org/10.1109/EuroSP.2016.31
 
 ---
 
@@ -391,9 +381,9 @@ Estas funciones poseen tres propiedades esenciales que SHA-256 no tiene:
 
 ## Dificultades encontradas
 
-- **Integración de fuentes primarias y rigor histórico/técnico:** En la investigación sobre el Morris Worm y en el mini-research de disponibilidad, la principal dificultad fue filtrar el material de divulgación periodística para centrarse exclusivamente en fuentes primarias, documentos judiciales (_United States v. Morris_), estándares oficiales (NIST SP 800-34 Rev. 1, guías de CISA) y literatura académica arbitrada.
-- **Comprensión de la distancia de Hamming sobre bits crudos:** En la implementación práctica de la Parte B, fue fundamental distinguir el cálculo de bits sobre los bytes devueltos por `digest()` frente a los caracteres hexadecimales de `hexdigest()`, evitando desvirtuar el concepto criptográfico del efecto avalancha.
-- **Análisis de tiempo constante:** El estudio de ataques de canal lateral (_timing attacks_) permitió comprender por qué la comparación byte a byte mediante `==` expone información crítica y por qué es mandatorio utilizar `hmac.compare_digest()`.
+- **Cálculo de la distancia de Hamming en bits:** Al principio intentamos comparar directamente las cadenas devueltas por `hexdigest()`, pero al probar con valores simples nos dimos cuenta de que estábamos midiendo caracteres hexadecimales distintos y no la diferencia en bits reales. Tuvimos que rehacer la función utilizando los bytes crudos devueltos por `digest()`, aplicando la operación XOR entre bytes y contando los bits en 1 con `.bit_count()`.
+- **Manejo de rutas relativas y compatibilidad con Windows:** Al desarrollar sobre Windows, las rutas generadas por defecto incluían barras invertidas (`\`). Tuvimos que asegurarnos de utilizar `Path.relative_to()` junto con `.as_posix()` para que el manifiesto JSON mantuviera el formato con barras inclinadas (`/`), garantizando que pueda verificarse en Linux sin arrojar diferencias espurias.
+- **Exclusión del manifiesto en la verificación:** En la primera versión de `verificar_manifiesto`, el archivo `manifest.sha256` se reportaba como un archivo `NUEVO` cada vez que se ejecutaba la verificación si se guardaba dentro del directorio evaluado. Lo resolvimos comparando las rutas normalizadas con `.resolve()` antes de agregar los archivos a la lista a verificar.
 
 ---
 
@@ -402,7 +392,7 @@ Estas funciones poseen tres propiedades esenciales que SHA-256 no tiene:
 | Integrante                               | Aportes                                                                                                                                                                                                                       |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Alejo De Miguel (@AlejoDM)               | Parte A, apertura: Investigación histórica del Morris Worm, redacción de A.1 (Cronología verificada) y A.2 (Activo afectado y justificación).                                                                                 |
-| María Belén Benito (@belubenito603-byte) | Parte A, cierre: Matriz CIA (A.3), Encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), Controles mitigantes específicos (A.5) y Fuentes A.6.                                                                          |
+| María Belén Benito (@belubenito01)       | Parte A, cierre: Matriz CIA (A.3), Encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), Controles mitigantes específicos (A.5) y Fuentes A.6.                                                                          |
 | Tomás Giudici (@TomasGiudici)            | Parte B, manifiesto: Implementación de `generar_manifiesto` y `verificar_manifiesto` en `src/integridad.py`, captura de evidencias obligatorias (manifiesto, verificación, prueba de 1 byte), decisiones de B.2 y Pregunta 1. |
 | Carolina Suppo (@carosuppo)              | Parte B, criptografía: Implementación de `distancia_hamming_bits` y `calcular_mac` en `src/integridad.py`, captura de evidencias (avalancha y HMAC), decisiones de B.2 y Preguntas de análisis 2, 3 y 4.                      |
 | Martín Beccereca (@martinbeccereca)      | Mini-research (Tema 3: Disponibilidad y Ransomware), Pregunta de análisis 5 (SHA-256 vs KDFs para contraseñas), armado de `INTEGRANTES.md`, coordinación y cierre del informe, verificación contra rúbrica.                   |
@@ -413,9 +403,9 @@ Estas funciones poseen tres propiedades esenciales que SHA-256 no tiene:
 
 **¿El grupo usó asistentes de IA en este trabajo?** Sí
 
-| Herramienta                                           | Para qué se usó                                                                | Qué partes del entregable afectó                                         | Cómo se verificó que lo devuelto era correcto                                                                                                                     |
-| ----------------------------------------------------- | ------------------------------------------------------------------------------ | ------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gemini 3.7 Flash / Gemini Deep Research / Claude Code | Redacción, estructuración y asistencia analítica en el informe y mini-research | A.1, A.2, Pregunta B.5, Mini-research (research.md), secciones de cierre | Cada fuente, cita bibliográfica, cálculo y concepto técnico fue verificado accediendo a los textos primarios originales y corriendo las pruebas correspondientes. |
+| Herramienta                                                    | Para qué se usó                                                                | Qué partes del entregable afectó                                                                                                                                              | Cómo se verificó que lo devuelto era correcto                                                                                                                              |
+| -------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gemini 3.7 Flash / Gemini Deep Research / Claude Code / ChatGPT | Redacción, estructuración y revisión crítica de estilo y precisión conceptual  | Parte A (A.1 cronología, A.2 activo, A.3 matriz CIA, A.4 encadenamiento, A.5 controles), Parte B (B.1 evidencias, B.2 decisiones, B.3.1 a B.3.5), Mini-research, cierre | Se contrastaron las observaciones con las fuentes accesibles (resolución judicial, Spafford, guías NIST) y se verificó el código y cálculos ejecutando las pruebas reales. |
 
 **Declaración:**
 
@@ -429,13 +419,29 @@ independientemente de la asistencia recibida.
 
 1. United States v. Morris, 928 F.2d 504 (2d Cir. 1991).
    https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html
-2. Carnegie Mellon University, Software Engineering Institute. (s.f.). _History
-   of Innovation_. https://www.sei.cmu.edu/history-of-innovation/
-3. Lawrence Livermore National Laboratory. (s.f.). _The 1988 Morris worm, the
-   internet's first cyberattack_.
+2. Spafford, E. H. (1988). _The Internet Worm Program: An Analysis_ (Technical Report CSD-TR-823). Purdue University.
+   https://www.cerias.purdue.edu/techreports-ssl/public/823.pdf
+3. Carnegie Mellon University, Software Engineering Institute. (s.f.). _History of Innovation_.
+   https://www.sei.cmu.edu/history-of-innovation/
+4. Lawrence Livermore National Laboratory. (s.f.). _The 1988 Morris worm, the internet's first cyberattack_.
    https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack
-4. Cybersecurity and Infrastructure Security Agency, & Federal Bureau of Investigation. (2023). _#StopRansomware Guide_. CISA. https://www.cisa.gov/sites/default/files/2023-05/StopRansomware_Guide_508c%20(1).pdf
-5. National Institute of Standards and Technology. (2010). _Contingency Planning Guide for Federal Information Systems_ (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-34r1
-6. Cartwright, A., Cartwright, E., & Webb, J. (2020). An economic analysis of ransomware and its welfare consequences. _Royal Society Open Science_, 7(3), 190023. https://doi.org/10.1098/rsos.190023
-7. Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. _Journal of Information System Security_, 10(3), 21-45. https://www.researchgate.net/publication/317011931_The_CIA_strikes_back_Redefining_confidentiality_integrity_and_availability_in_security
-8. Biryukov, A., Dinu, D., & Khovratovich, D. (2016). _Argon2: New Generation of Memory-Hard Functions for Password Hashing and Other Applications_. In 2016 IEEE European Symposium on Security and Privacy (EuroS&P) (pp. 292-302). IEEE. https://doi.org/10.1109/EuroSP.2016.31
+5. Cybersecurity and Infrastructure Security Agency, & Federal Bureau of Investigation. (2023). _#StopRansomware Guide_. CISA.
+   https://www.cisa.gov/sites/default/files/2023-05/StopRansomware_Guide_508c%20(1).pdf
+6. National Institute of Standards and Technology. (2010). _Contingency Planning Guide for Federal Information Systems_ (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce.
+   https://doi.org/10.6028/NIST.SP.800-34r1
+7. Hernandez-Castro, J., Cartwright, A., & Cartwright, E. (2020). An economic analysis of ransomware and its welfare consequences. _Royal Society Open Science_, 7(3), 190023.
+   https://doi.org/10.1098/rsos.190023
+8. Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. _Journal of Information System Security_, 10(3), 21-45.
+   https://www.researchgate.net/publication/317011931_The_CIA_strikes_back_Redefining_confidentiality_integrity_and_availability_in_security
+9. Biryukov, A., Dinu, D., & Khovratovich, D. (2016). _Argon2: New Generation of Memory-Hard Functions for Password Hashing and Other Applications_. In 2016 IEEE European Symposium on Security and Privacy (EuroS&P) (pp. 292-302). IEEE.
+   https://doi.org/10.1109/EuroSP.2016.31
+10. Turner, S., & Chen, L. (2011). _Updated Security Considerations for the MD5 Message-Digest and the HMAC-MD5 Algorithms_ (RFC 6151). IETF.
+    https://doi.org/10.17487/RFC6151
+11. Polk, T., Chen, L., Turner, S., & Hoffman, P. (2011). _Security Considerations for the SHA-0 and SHA-1 Message-Digest Algorithms_ (RFC 6194). IETF.
+    https://doi.org/10.17487/RFC6194
+12. Biryukov, A., Dinu, D., Khovratovich, D., & Josefsson, S. (2021). _Argon2 Memory-Hard Function for Password Hashing and Proof-of-Work Applications_ (RFC 9106). IETF.
+    https://doi.org/10.17487/RFC9106
+13. Python Software Foundation. (s. f.). _hmac — Keyed-Hashing for Message Authentication (Python 3 Documentation)_.
+    https://docs.python.org/3/library/hmac.html
+14. National Institute of Standards and Technology. (2022). _Transitioning Away from SHA-1 for All Cryptographic Applications_. NIST CSRC.
+    https://csrc.nist.gov/news/2022/transitioning-away-from-sha-1-for-all-apps
