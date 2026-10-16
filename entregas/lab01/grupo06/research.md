@@ -1,84 +1,87 @@
 # Mini-research — Lab 01
 
-**Grupo:** 06
-**Tema elegido:** Tema 3 — La disponibilidad, la propiedad descuidada de la tríada
+**Grupo:** 06  
+**Tema elegido:** Tema 3 — La disponibilidad, la propiedad descuidada de la tríada  
 **Título:** La disponibilidad como propiedad crítica de la seguridad: economía del ransomware, métricas de continuidad y límites reales de recuperación
-**Cantidad de palabras:** 906 (sin bibliografía ni declaraciones)
-
----
 
 ## Planteo
 
-Al estudiar la tríada de seguridad (confidencialidad, integridad y disponibilidad), salta a la vista que la confidencialidad siempre recibió la mayor parte de la atención, del presupuesto y del contenido académico [4]. Esta preferencia histórica viene de la época militar en la que se crearon los primeros modelos formales (como Bell-LaPadula), pensados para evitar la fuga de secretos de Estado mediante jerarquías de acceso. En ese marco, se asumía que la integridad y la disponibilidad eran consecuencias de tener hardware confiable o temas a resolver por el equipo de infraestructura.
+Al estudiar la evolución histórica de la seguridad, diversos autores destacan el foco inicial en la confidencialidad. Samonas y Coss (2014) [4] describen la influencia del ámbito militar en los primeros modelos formales, como Bell-LaPadula, orientados a proteger información clasificada. También explican la evolución del interés hacia la integridad y la disponibilidad, con antecedentes como el modelo Biba y el reconocimiento de la denegación de uso como amenaza.
 
-En las organizaciones actuales la realidad es otra: quedarse sin sistemas suele provocar un daño económico y operativo más inmediato y severo que una filtración de datos. Considerar la disponibilidad como un simple asunto de mantenimiento de servidores deja desprotegidas las funciones críticas ante ataques dirigidos que buscan paralizar las operaciones para extorsionar a la empresa.
-
----
+En organizaciones cuyos procesos dependen de la operación continua, como centros de salud, bancos o empresas de logística, una interrupción de los sistemas puede generar consecuencias económicas y operativas inmediatas. Por eso, gestionar la disponibilidad exige contemplar tanto las fallas de infraestructura como los ataques intencionales que buscan paralizar las operaciones.
 
 ## Desarrollo
 
-### Separación entre seguridad e infraestructura
+### Continuidad operativa frente a fallas y adversarios
 
-La idea de que la disponibilidad no es un tema central de seguridad causó una división en los equipos tecnológicos. Tradicionalmente, ciberseguridad se enfocó en el cifrado, permisos y prevención de intrusiones, mientras que la disponibilidad se delegó a administradores de sistemas y redes [4]. Esto llevó a gestionar la disponibilidad solo con acuerdos de nivel de servicio (SLA) pensados para fallas comunes de hardware o caídas de conectividad, ignorando qué ocurre ante ataques intencionales.
+Para este análisis, interesa distinguir la protección frente a fallas de componentes de la protección frente a acciones deliberadas. Ambas requieren coordinar controles de seguridad y mecanismos de continuidad.
 
-En los modelos iniciales dominó el principio de "necesidad de saber" (need-to-know), descuidando la necesidad de operar en forma continua. Así, durante décadas la disponibilidad fue la propiedad menos comprendida de la tríada, confundiéndose la redundancia clásica de servidores con la capacidad real de resistir un ataque coordinado.
+La redundancia de equipamiento permite afrontar situaciones como la rotura de un disco o la caída de un servidor. Sin embargo, no basta por sí sola frente a un adversario que obtiene credenciales privilegiadas y puede actuar sobre varios componentes. Dos servidores redundantes pueden quedar comprometidos si comparten cuentas administrativas o dependen del mismo entorno de gestión.
+
+Los acuerdos de nivel de servicio (SLA) establecen compromisos de prestación, pero deben acompañarse de mecanismos técnicos y procedimientos que permitan sostenerlos ante incidentes de seguridad.
 
 ### La economía del ransomware y el costo de la inactividad
 
-El crecimiento del cibercrimen organizado cambió el escenario mediante el ransomware. Cuando un atacante roba datos confidenciales, monetizarlos es complejo: debe buscar compradores en mercados clandestinos, pagar intermediarios y afrontar precios inestables. En cambio, al bloquear el acceso a sistemas productivos, el atacante cobra directamente por el tiempo que la víctima pasa sin operar [3].
+El ransomware permite exigir un rescate mediante la interrupción del acceso a datos o sistemas necesarios para operar. La presión económica depende, entre otros factores, de las alternativas de recuperación disponibles para la víctima.
 
-Los grupos delictivos fijan sus rescates analizando cuánto cuesta cada hora de inactividad. Si una empresa detiene sus líneas de producción o cobranzas, las pérdidas por facturación caída, penalizaciones contractuales y daño reputacional superan rápido la cifra exigida. Diversos estudios económicos y reportes de incidentes [5] señalan que los costos totales de recuperación suelen triplicar el rescate pedido. Esto convierte a la disponibilidad secuestrada en el modelo de ataque más rentable de la actualidad.
+Hernandez-Castro et al. (2020) [3] analizan esta dinámica mediante modelos de fijación de precios de monopolio y discriminación de precios. La disposición a pagar depende del valor asignado a los archivos, la existencia de respaldos utilizables, los recursos disponibles y la confianza en que el delincuente permita recuperarlos.
 
-| Aspecto | Filtración de confidencialidad | Ataque de ransomware (Disponibilidad) |
+Aplicado al contexto organizacional, las pérdidas por interrupción de ventas, prestación de servicios y cumplimiento contractual pueden aumentar el incentivo económico para considerar el pago. Esto no garantiza que pagar permita recuperar los sistemas ni elimina los demás costos del incidente.
+
+Por su parte, IBM (2024) [5] identifica el negocio perdido y las actividades posteriores a una brecha entre los principales componentes del impacto económico. Por tanto, evaluar el daño únicamente a partir del rescate solicitado deja fuera una parte importante de sus consecuencias.
+
+| Aspecto | Foco en confidencialidad, como una filtración | Foco en disponibilidad, como el ransomware |
 |---|---|---|
-| **Acción del atacante** | Exfiltración no autorizada de datos | Cifrado masivo y parálisis operativa |
-| **Tiempo de impacto** | Costos diferidos (juicios, multas) | Inmediato (corte total de ingresos) |
-| **Origen del costo principal** | Cantidad y tipo de registros filtrados | Horas de inactividad y lucro cesante |
-| **Métricas clave** | Tiempo de detección y contención | RTO (tiempo límite) y RPO (pérdida máxima) |
+| Efecto principal | Exposición de datos sensibles | Cifrado o bloqueo de datos y servicios |
+| Dinámica del impacto | Costos inmediatos y posteriores, como investigación, litigios y daño reputacional | Costos operativos durante la interrupción y recuperación |
+| Factores relevantes del daño | Tipo, volumen y sensibilidad de los datos | Duración de la interrupción y criticidad de los servicios |
+| Métricas y objetivos relevantes | Tiempos de detección y contención | Objetivos de recuperación: RTO y RPO |
+
+Estas categorías no son excluyentes: la doble extorsión combina la interrupción operativa con amenazas de divulgación de información.
 
 ### Métricas de continuidad: BIA, RTO y RPO
 
-Para responder a estos riesgos se aplican metodologías formales de continuidad. El estándar NIST SP 800-34 Rev. 1 [2] define el Análisis de Impacto en el Negocio (BIA), un proceso para identificar funciones críticas y establecer dos métricas clave:
+La guía NIST SP 800-34 Rev. 1 [2] utiliza el Análisis de Impacto en el Negocio (BIA) para identificar procesos críticos, dependencias y prioridades de recuperación. Entre los parámetros considerados se encuentran:
 
-1. **RTO (Recovery Time Objective):** Tiempo máximo admisible con los sistemas caídos antes de que la interrupción cause un daño irreparable.
-2. **RPO (Recovery Point Objective):** Pérdida máxima tolerable de datos en el tiempo, lo que define la frecuencia requerida de las copias de seguridad.
+1. **RTO (Recovery Time Objective):** tiempo máximo que un recurso del sistema puede permanecer indisponible sin producir un impacto inaceptable. Debe permitir que la recuperación no supere el tiempo máximo tolerable de interrupción del proceso de negocio (MTD).
+2. **RPO (Recovery Point Objective):** punto temporal al que deben recuperarse los datos tras una interrupción. Expresa la pérdida tolerable en términos de tiempo y condiciona la estrategia de respaldo y replicación.
 
-Como indican las guías de CISA y el FBI [1], para cumplir estos objetivos hoy no basta con backups convencionales. Es necesario implementar copias inmutables que no puedan borrarse desde la red (como almacenamiento WORM o copias fuera de línea), restringir privilegios y probar periódicamente la restauración integral bajo condiciones de estrés.
-
----
+La guía conjunta *#StopRansomware* [1] recomienda mantener respaldos fuera de línea y cifrados, probar su disponibilidad e integridad y protegerlos frente al acceso del atacante. También contempla soluciones de almacenamiento inmutable. Estas medidas deben complementarse con separación de privilegios y procedimientos de recuperación.
 
 ## Tensión / límites
 
-Al aplicar estos marcos surgen discrepancias entre la teoría documental y las restricciones técnicas reales:
+Los objetivos documentados deben contrastarse con las capacidades reales de recuperación:
 
-1. **Límite físico de la red frente al RTO:** Fijar en un plan que un sistema se recuperará en 4 horas es irreal si hay que restaurar decenas de terabytes desde la nube con un enlace de comunicaciones estándar. La velocidad de transferencia y la latencia imponen días de descarga, invalidando el RTO acordado con la dirección.
-2. **La trampa de la replicación sincrónica:** Replicar bases de datos en tiempo real entre dos centros de datos para lograr un RPO cercano a cero tiene un riesgo grave: si un ransomware cifra la base primaria, el cambio se replica al instante a la sede secundaria, destruyendo la disponibilidad de ambos sitios a la vez.
-3. **Sabotaje de backups y doble extorsión:** Los atacantes modernos obtienen persistencia previa para localizar y destruir las copias de seguridad antes de cifrar los datos [1]. Además, con la doble extorsión (roban datos antes de cifrarlos), aunque la organización restaure sus sistemas desde backups sanos, persiste la extorsión sobre la confidencialidad.
+1. **Transferencia frente al RTO:** un plazo resulta inviable si el tiempo mínimo de descarga ya lo supera. Transferir 20 TB decimales a 100 Mb/s requiere aproximadamente 444 horas —18,5 días—; a 1 Gb/s, unas 44 horas. Este cálculo ilustrativo supone velocidad constante y excluye congestión, sobrecargas y tareas posteriores de restauración.
 
----
+2. **Replicación del daño:** replicar continuamente puede reducir la pérdida de datos ante una falla, pero también puede propagar cambios maliciosos. Si se replican bloques o archivos cifrados sin conservar versiones recuperables y protegidas, el entorno secundario puede recibir el mismo daño. La replicación no sustituye automáticamente a un respaldo independiente.
+
+3. **Sabotaje y doble extorsión:** los atacantes pueden localizar y borrar o cifrar respaldos accesibles para dificultar la recuperación [1]. Además, si sustrajeron información, restaurar los servicios no elimina la amenaza de divulgación. Recuperar disponibilidad resuelve una parte del incidente, pero no revierte la exposición de datos.
 
 ## Cierre
 
-La disponibilidad debe integrarse desde el inicio en el diseño de arquitecturas seguras. No es una tarea periférica de soporte, sino un requisito de subsistencia que demanda copias inmutables, segmentación defensiva y planes de contingencia probados en la práctica. Diseñar plataformas que resguarden la privacidad pero queden inutilizadas ante un ataque frustra el fin principal de la tecnología: asegurar que la organización y las personas sigan funcionando sin interrupciones.
+La disponibilidad requiere integrar seguridad y continuidad operativa. La redundancia y los acuerdos de servicio deben acompañarse de respaldos protegidos, segmentación de red, separación de privilegios y procedimientos de restauración probados.
 
----
+El análisis también muestra que definir un RTO o un RPO no garantiza cumplirlo. Es necesario medir tiempos de transferencia y recuperación, comprobar qué versiones pueden restaurarse y evaluar si un atacante podría comprometer tanto la producción como los respaldos. Estas verificaciones permiten ajustar los objetivos a las necesidades del negocio y a las capacidades técnicas disponibles.
 
 ## Bibliografía
 
-1. [PRIMARIA] Cybersecurity and Infrastructure Security Agency, & Federal Bureau of Investigation. (2023). *#StopRansomware Guide*. CISA. https://www.cisa.gov/sites/default/files/2023-05/StopRansomware_Guide_508c%20(1).pdf
-2. [PRIMARIA] National Institute of Standards and Technology. (2010). *Contingency Planning Guide for Federal Information Systems* (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-34r1
-3. [ARBITRADA] Cartwright, A., Cartwright, E., & Webb, J. (2020). An economic analysis of ransomware and its welfare consequences. *Royal Society Open Science*, 7(3), 190023. https://doi.org/10.1098/rsos.190023
-4. [ARBITRADA] Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. *Journal of Information System Security*, 10(3), 21-45. https://www.researchgate.net/publication/317011931_The_CIA_strikes_back_Redefining_confidentiality_integrity_and_availability_in_security
-5. [SECUNDARIA] IBM Security. (2024). *Cost of a Data Breach Report 2024*. IBM. https://www.ibm.com/reports/data-breach
+1. **[PRIMARIA]** Cybersecurity and Infrastructure Security Agency et al. (2023). *#StopRansomware Guide*. [Guía conjunta, copia alojada por el Departamento de Defensa de Estados Unidos](https://media.defense.gov/2023/May/23/2003227891/-1/-1/0/CSI-StopRansomware-Guide.PDF).
 
----
+2. **[PRIMARIA]** National Institute of Standards and Technology. (2010). *Contingency Planning Guide for Federal Information Systems* (NIST Special Publication 800-34, Rev. 1). U.S. Department of Commerce. https://doi.org/10.6028/NIST.SP.800-34r1
+
+3. **[ARBITRADA]** Hernandez-Castro, J., Cartwright, A., & Cartwright, E. (2020). An economic analysis of ransomware and its welfare consequences. *Royal Society Open Science, 7*(3), 190023. https://doi.org/10.1098/rsos.190023
+
+4. **[ARBITRADA]** Samonas, S., & Coss, D. (2014). The CIA strikes back: Redefining confidentiality, integrity and availability in security. *Journal of Information System Security, 10*(3), 21–45. [Página del artículo](https://www.jissec.org/Contents/V10/N3/V10N3-Samonas.html).
+
+5. **[SECUNDARIA]** IBM. (2024). *Surging data breach disruption drives costs to record highs*. IBM Think. https://www.ibm.com/think/insights/whats-new-2024-cost-of-a-data-breach-report
 
 ## Declaración de uso de asistentes de IA
 
-**¿Se usaron asistentes de IA en este trabajo?** Sí
+**¿Se usaron asistentes de IA en este trabajo?** Sí.
 
-| Herramienta | Para qué | Qué partes afectó | Cómo se verificó |
+| Herramienta | Para qué se utilizó | Qué partes afectó | Cómo se revisaron los aportes |
 |---|---|---|---|
-| Gemini 3.7 Flash / Gemini Deep Research | Búsqueda inicial de fuentes y asistencia en la organización del texto | Planteo, Desarrollo, Tensión/límites y Cierre | Se revisaron y leyeron de forma directa los documentos citados (guías NIST y CISA, y los artículos de Samonas y Cartwright) para corroborar cada dato y afirmación. |
+| Gemini / Gemini Deep Research / ChatGPT | Búsqueda inicial de fuentes, redacción preliminar y revisión de estilo y consistencia conceptual | Planteo, desarrollo, tensión y límites, cierre y bibliografía | Se contrastaron las observaciones con las fuentes accesibles, se revisó el cálculo ilustrativo de transferencia y se ajustaron las afirmaciones para explicitar su alcance. |
 
-**Verificación de fuentes:** el grupo declara haber accedido y verificado individualmente cada una de las referencias citadas.
+El grupo declara comprender el contenido presentado y poder explicar sus argumentos, cálculos y limitaciones, independientemente de la asistencia recibida.
