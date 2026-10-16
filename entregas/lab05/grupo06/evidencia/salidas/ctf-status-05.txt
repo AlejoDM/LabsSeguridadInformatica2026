@@ -1,0 +1,13 @@
+
+  ╭────────────────────────────────────────────────────────────╮
+  │                     PROGRESO · LAB 05                      │
+  ╰────────────────────────────────────────────────────────────╯
+
+   ·  R1     Puerto oculto en rango alto (barrido completo)
+   ·  R2     Banner grabbing del servicio FTP
+   ✓  R3     Fuga de informacion en headers HTTP
+   ✓  R4     Enumeracion de rutas via robots.txt
+   ·  R5     Servicio dev expuesto en produccion
+
+  ████████████░░░░░░░░░░░░░░░░░░  2/5 (40%)
+
