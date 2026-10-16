@@ -37,7 +37,7 @@ qué una queda vacía.*
 
 | Puerto | Servicio | Versión (evidencia) | ¿Cómo lo identificaste? | CVE relevante | CVSS | Criticidad | Justificación (contra ESTE caso) |
 |---|---|---|---|---|---|---|---|
-| 21 | | | | | | | |
+| 21 | FTP | ProFTPD 1.3.5 — banner `220 ProFTPD 1.3.5 Server (PhantomCorp FTP)`; nmap `-sV`: `21/tcp open ftp ProFTPD 1.3.5` | Banner grabbing con `ncat -w2 phantomcorp 21` y confirmado con `nmap -Pn -sV -p-` | CVE-2015-3306 (`mod_copy`, comandos `SITE CPFR`/`SITE CPTO`) | 9.8 (CVSS v3.x, NVD) | Crítica | El banner confirma la versión 1.3.5, que es la afectada por el CVE. Permite leer y escribir archivos arbitrarios sin autenticarse **si** `mod_copy` está cargado; en este recon no lo probamos, queda para el lab de explotación. Además el banner filtra el nombre de la empresa y una línea `214` que no debería estar. |
 | 80 | | | | | | | |
 | 8080 | | | | | | | |
 | 31337 | | | | | | | |
