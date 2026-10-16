@@ -55,7 +55,18 @@ qué una queda vacía.*
 ## 3. Preguntas de análisis
 
 **P1 — El puerto que el escaneo default se perdió.**
-*¿Por qué `-p-` lo encontró y el escaneo común no? ¿Qué regla operativa sacás?*
+En nuestra corrida el escaneo default (`nmap -Pn phantomcorp`, 1000 puertos) y el
+completo (`nmap -Pn -sV -p- phantomcorp`) encontraron los mismos cuatro puertos:
+21, 80, 8080 y 31337. El 31337 aparece en el default porque nmap incluye en su
+lista de los 1000 más frecuentes a ese puerto histórico de backdoors. Lo que el
+default sí se perdió fue la **identificación**: sin `-sV` el puerto figuró como
+`Elite` (un nombre que nmap deduce solo del número de puerto) y recién con `-sV`
+vimos que ahí responde un "maintenance shell" de PhantomCorp. Entonces `-p-` no
+nos sumó un puerto nuevo en este caso, pero la lección operativa es la misma:
+el default cubre 1000 de 65535 puertos, así que cualquier servicio fuera de esa
+lista pasa desapercibido, y un puerto abierto sin versión no es un hallazgo.
+Para los próximos recon hacemos siempre `-p-` con `-sV`, y confiamos en la
+columna VERSION y en el banner, no en la columna SERVICE.
 
 **P2 — El servicio dev en producción.**
 *¿Qué evidencia concreta te dice que no era para producción? ¿Por qué es un
