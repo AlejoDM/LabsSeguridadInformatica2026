@@ -1,9 +1,11 @@
 # Integrantes — Laboratorio 03
 
-**Grupo:** 06
+**Grupo:** 06 · **Integrantes:**
 
-- Beccereca, Martín — GitHub: martinbeccereca
-- Benito, María Belén — GitHub: belubenito603
-- De Miguel, Alejo — GitHub: AlejoDM
-- Giudici, Tomás — GitHub: TomasGiudici
-- Suppo, Carolina — GitHub: carosuppo
+| Nombre y apellido  | Legajo | Usuario de GitHub |
+| ------------------ | ------ | ----------------- |
+| Martín Beccereca   | 15154  | @martinbeccereca  |
+| María Belén Benito | 14625  | @belubenito01     |
+| Alejo De Miguel    | 15138  | @AlejoDM          |
+| Tomás Giudici      | 14977  | @TomasGiudici     |
+| Carolina Suppo     | 15057  | @carosuppo        |
