@@ -2,144 +2,167 @@
 
 **Grupo:** 06 · **Integrantes:**
 
-- Beccereca, Martín - martinbeccereca
-- Benito, María Belén
-- De Miguel, Alejo - AlejoDM
-- Giudici, Tomás
-- Suppo, Carolina - carosuppo
+| Nombre y apellido  | Legajo | Usuario de GitHub |
+| ------------------ | ------ | ----------------- |
+| Martín Beccereca   | 15154  | @martinbeccereca  |
+| María Belén Benito | 14625  | @belubenito01     |
+| Alejo De Miguel    | 15138  | @AlejoDM          |
+| Tomás Giudici      | 14977  | @TomasGiudici     |
+| Carolina Suppo     | 15057  | @carosuppo        |
 
-**Fecha:** 04/09/2026
-
----
+**Fecha:** 16/10/2026
 
 ## 0. Declaración de uso de IA
 
-**Herramienta: Google Antigravity (Gemini 3.7 Flash)**
-- **Finalidad del uso:** Estructuración del informe Markdown.
-- **Partes generadas o asistidas:** Estructuración del esquema del informe.
-- **Verificación:** Todos los datos históricos, volúmenes de registros expuestos, detalles criptográficos y fuentes bibliográficas fueron contrastados y verificados manualmente contra publicaciones de seguridad primarias.
+- **Google Antigravity (Gemini 3.7 Flash):** se utilizó para estructurar
+  inicialmente el informe en Markdown. Su uso se limitó a la organización del
+  documento; no se le atribuye la verificación de afirmaciones técnicas o
+  históricas.
 
-**Herramienta: Claude Code**
-- **Finalidad del uso:** Apoyo en la redacción del mini-research (investigación con fuentes verificables) y en la consolidación de la bitácora de comandos de la Parte B.
-- **Partes generadas o asistidas:** `research.md` (mini-research, Tema C) y sección 4 — Bitácora del informe.
-- **Verificación:** Las fuentes citadas en el mini-research se consultaron entrando a cada documento antes de citarlas.
+- **Claude Code:** se utilizó como apoyo para redactar y organizar el
+  mini-research sobre derivación de claves desde contraseñas. Las fuentes
+  incluidas fueron revisadas y se corrigieron las afirmaciones que no contaban
+  con respaldo suficiente.
 
----
+- **Codex:** se utilizó para revisar el formato Markdown, ordenar la
+  bibliografía, comprobar la correspondencia entre citas y fuentes, y revisar
+  la coherencia técnica de las explicaciones y de la bitácora.
 
 ## 1. Parte A — Análisis de la falla
 
-**Caso:** Adobe 2013 (Cifrado simétrico 3DES en modo ECB de contraseñas y almacenamiento de pistas en texto claro)
+**Caso:** Adobe 2013: almacenamiento reversible de contraseñas, pistas en texto claro y cifrado determinista.
 
-### A.1 — Qué prometía el sistema y Cronología de hechos
+### A.1 — Qué protegía el sistema
 
-#### Promesa del sistema
+Adobe ID administraba credenciales de cuentas de clientes. Por lo tanto, las
+contraseñas y los datos asociados debían preservarse de modo que una persona sin
+autorización no pudiera recuperar ni reutilizar las credenciales.
 
-El sistema de gestión de identidades de Adobe (Adobe ID / _Identity Management Services_) prometía garantizar la confidencialidad, autenticidad y resguardo seguro de las credenciales de acceso de sus usuarios registrados frente a intrusiones externas, asegurando que las contraseñas no pudieran ser leídas en claro ni reconstruidas por terceros no autorizados, al tiempo que garantizaba la integridad y protección de la propiedad intelectual de sus productos comerciales [3, 7].
+En su comunicado del 3 de octubre de 2013, Adobe informó que atacantes habían
+accedido a IDs de clientes y contraseñas cifradas. También comunicó la extracción
+de datos de pedidos de aproximadamente 2,9 millones de clientes, incluidos
+nombres, números de tarjetas de crédito o débito cifrados y fechas de vencimiento
+[1].
 
-#### Cronología (Hitos principales)
+Una investigación posterior de la Office of the Privacy Commissioner of Canada
+registró que la información accedida incluía nombres de usuario, contraseñas
+cifradas, pistas de contraseña en texto claro, nombres, direcciones, correos
+electrónicos y números de tarjetas cifrados [2, párr. 11].
 
-1. **Mediados de 2013:** Atacantes vulneran la red interna de Adobe (vía servidores con vulnerabilidades en ColdFusion) y exfiltran repositorios y la base de identidades [1].
-2. **17/09/2013:** Los investigadores Alex Holden y Brian Krebs descubren en un servidor clandestino 40 GB de código fuente y una base masiva de usuarios de Adobe [2].
-3. **03/10/2013:** Adobe publica su anuncio oficial admitiendo el acceso no autorizado a 2.9 millones de cuentas activas y robo de código fuente de Acrobat, ColdFusion y Photoshop [3].
-4. **Finales de Octubre 2013:** Se filtra públicamente en internet el volcado `users.tar.gz` (3.8 GB) con 152.989.508 registros de cuentas [4].
-5. **04/11/2013:** Análisis de seguridad revelan el ranking de contraseñas más comunes exponiendo la vulnerabilidad del cifrado simétrico por repetición de patrones [5].
-6. **Noviembre 2013:** Investigadores criptográficos confirman el mal uso de 3DES en modo ECB sin sal (_salt_) y el almacenamiento de pistas en texto plano [6].
-7. **2014–Presente:** Estudios académicos consolidan el caso como el ejemplo paradigmático de falla por preservar patrones y sustitución inadecuada de funciones hash unidireccionales [7].
+### A.2 — Mal uso criptográfico
+
+El problema relevante para las contraseñas no fue una ruptura criptanalítica
+demostrada de 3DES, sino el diseño de almacenamiento:
+
+- Se usó un mecanismo reversible para contraseñas, cuando un sistema de
+  autenticación normalmente necesita verificar una contraseña, no recuperarla.
+- Las pistas de contraseña se guardaron en texto claro. La autoridad canadiense
+  observó que algunas podían contener la contraseña o una indicación muy directa
+  de ella [2, párr. 17].
+- Contraseñas idénticas producían el mismo resultado cifrado. Esto permitió
+  agrupar cuentas con la misma contraseña y relacionar algunas de ellas con las
+  pistas expuestas [2, párr. 17]. Un informe contemporáneo de CERT-FR describió
+  el esquema como cifrado reversible, presumiblemente 3DES, y señaló ECB y la
+  ausencia de salt [3, sección 4].
+
+No se afirma aquí que se haya comprobado una clave global única, porque las
+fuentes consultadas no lo demuestran.
+
+### A.3 — Propiedad afectada y explotación
+
+La propiedad afectada fue principalmente la **confidencialidad** de las
+credenciales. La filtración permitió a terceros obtener contraseñas cifradas,
+pistas en texto claro y otros datos de cuenta. La combinación de pistas y
+criptogramas repetidos redujo la dificultad de identificar contraseñas frecuentes
+o evidentes.
+
+El riesgo posterior era el acceso no autorizado a cuentas cuya contraseña pudiera
+inferirse y, si la misma contraseña se reutilizaba en otros servicios, el riesgo
+de reutilización de credenciales. Las fuentes consultadas permiten afirmar ese
+riesgo; no permiten afirmar, sin evidencia adicional, que se haya accedido a
+todas las cuentas afectadas.
 
 ---
 
-### A.2 — Activo afectado y contexto del mal uso
+### A.4 — Medida correcta
 
-#### Activos concretos comprometidos:
-
-1. **Base de Datos de Credenciales de Adobe ID (`users.tar.gz`):**
-   - 152.989.508 registros de usuarios, conteniendo cada uno: identificador único interno, dirección de correo electrónico, nombre de usuario, contraseña cifrada simétricamente en bloques fijos y pistas de contraseña almacenadas en texto plano sin cifrar [4, 6].
-2. **Información Financiera Parcial de Clientes:**
-   - 38 millones de registros de transacciones activas con números de tarjetas de crédito/débito cifrados, fechas de vencimiento y nombres asociados [2, 3].
-3. **Propiedad Intelectual y Código Fuente:**
-   - Repositorios de código fuente privativo de herramientas comerciales críticas: Adobe Acrobat, Adobe ColdFusion / ColdFusion Builder y Adobe Photoshop [2, 3].
-
-#### Contexto del mal uso criptográfico:
-
-La falla no radicó en una debilidad matemática intrínseca del algoritmo de cifrado en sí (Triple DES / 3DES), sino en un grave error de diseño y mal uso conceptual de las primitivas criptográficas:
-
-- Cifrado reversible en vez de hashing unidireccional: Se utilizó cifrado simétrico reversible para guardar contraseñas en lugar de una función de derivación de claves / hashing unidireccional lento y con sal aleatoria (salted password hashing como bcrypt, PBKDF2 o scrypt) [6, 7].
-- Modo ECB (Electronic Codebook) y misma clave global: Al cifrar con una única clave en modo ECB sin vector de inicialización (IV) ni salting, bloques idénticos de texto plano producen bloques idénticos de texto cifrado [6, 7].
-- Pistas en texto plano vinculadas: Al incluir pistas de contraseña en texto claro junto con los bloques cifrados idénticos, los atacantes pudieron descifrar por correlación y análisis de frecuencia millones de contraseñas de toda la base (por ejemplo, identificando qué criptograma correspondía a contraseñas universales como "123456" o "password" y cruzándolo con las pistas de los usuarios) [5, 6].
-
----
-
-### A.3 — Propiedad rota y explotación
-
-_(A completar por el integrante asignado)_
-
----
-
-### A.4 — Lo correcto
-
-_(A completar por el integrante asignado)_
+Las contraseñas deben almacenarse mediante una función de hashing adaptativa y
+lenta para contraseñas, con un salt único por contraseña; no mediante cifrado
+reversible. OWASP recomienda Argon2id cuando está disponible y, según el
+contexto, alternativas como scrypt, bcrypt o PBKDF2 [4, “Password Hashing
+Algorithms”].
 
 ---
 
 ## 2. Parte B.1 — Romper el XOR
 
-La clave hallada es `0x37` y el mensaje es `Memo interno PhantomCorp: la clave del wifi de invitados es Phantom-Guest-2026. No compartir fuera de la empresa.`.
+Para el archivo de reto, la clave recuperada es `0x37` y el texto claro es:
 
-### ¿Por qué falla un cifrado clásico de clave corta?
+> Memo interno PhantomCorp: la clave del wifi de invitados es
+> Phantom-Guest-2026. No compartir fuera de la empresa.
 
-Un XOR con una clave de un solo byte no proporciona una cantidad suficiente de incertidumbre criptográfica. Aunque el XOR sea una operación matemáticamente válida para cifrar y descifrar, utilizar una clave de solamente 8 bits deja únicamente 2^8 = 256 claves posibles.
+Una clave de un byte tiene 8 bits, por lo que existen:
 
-Por lo tanto, un atacante puede probar todas las claves mediante fuerza bruta y utilizar características estadísticas del lenguaje para identificar automáticamente el texto correcto. El problema principal no es XOR en sí mismo, sino el uso de una clave extremadamente corta y repetida.
+`2^8 = 256` claves posibles.
 
-Este ejemplo demuestra que un cifrado con un espacio de claves pequeño no ofrece confidencialidad frente a un atacante que pueda realizar una búsqueda exhaustiva.
+El programa prueba esas 256 posibilidades y asigna mayor puntaje a los resultados
+con letras y espacios. En este archivo, ese criterio selecciona el texto claro
+correcto. El problema no es la operación XOR por sí sola: es reutilizar una clave
+de solo un byte, lo que deja un espacio de búsqueda exhaustiva muy pequeño.
 
 ---
 
 ## 3. Parte B.2 — Autenticación
 
-### B.2.1 — ¿Por qué `sha256(clave || mensaje)` permite un ataque de length-extension?
+### B.2.1 — Length-extension
 
-Utilizar `sha256(clave || mensaje)` como MAC es inseguro debido a la forma en que SHA-256 procesa la información. El algoritmo trabaja con el mensaje en bloques sucesivos y el hash final depende del estado interno obtenido después de procesarlos.
-
-Si un atacante conoce un mensaje y su MAC correspondiente:
-
-`MAC = SHA256(clave || mensaje)`
-
-puede utilizar ese hash como punto de partida para continuar el cálculo y agregar nuevos datos al final del mensaje. Para realizar el ataque no necesita conocer el contenido de la clave secreta, aunque sí debe conocer o estimar su longitud para poder reproducir correctamente el padding utilizado por SHA-256.
-
-De esta forma, puede construir un mensaje como:
+La construcción `SHA-256(clave || mensaje)` no es una MAC adecuada. SHA-256
+procesa el mensaje por bloques y aplica padding al finalizar. Si una persona
+atacante conoce un mensaje y el digest correspondiente, puede tratar el digest
+como estado intermedio y calcular un valor para:
 
 `mensaje || padding || contenido_agregado`
 
-y obtener un MAC válido para ese mensaje extendido sin conocer la clave.
+sin conocer la clave, siempre que conozca o estime correctamente la longitud de
+la clave para reconstruir el padding. No puede modificar arbitrariamente el
+mensaje original: el ataque permite extenderlo al final.
 
-Por ejemplo, si un sistema autentica el mensaje `usuario=123&accion=consultar`, un atacante que conozca el MAC podría intentar agregar al final `&admin=true` y calcular un nuevo MAC válido. Esto no significa que pueda modificar libremente cualquier parte del mensaje original, sino que puede extenderlo agregando información al final.
+Por ejemplo, un sistema que autenticara
+`usuario=123&accion=consultar` podría ser vulnerable si interpreta como válida
+la extensión `&admin=true`.
 
-Por este motivo, utilizar directamente `sha256(clave || mensaje)` no es una forma segura de construir un MAC.
+### B.2.2 — Cómo lo resuelve HMAC
 
-### B.2.2 — ¿Cómo lo resuelve HMAC estructuralmente?
+HMAC usa dos aplicaciones de la función hash:
 
-HMAC evita este problema porque no se limita a concatenar la clave con el mensaje y calcular un único hash. Utiliza una construcción de dos niveles en la que la clave secreta interviene dos veces, combinada con dos valores diferentes denominados `ipad` y `opad`.
+`H((K0 ⊕ opad) || H((K0 ⊕ ipad) || mensaje))`
 
-De forma simplificada, HMAC tiene la siguiente estructura:
+donde `K0` es la clave ajustada al tamaño de bloque, e `ipad` y `opad` son
+constantes diferentes. La construcción estándar está definida en RFC 2104,
+sección 2 [5].
 
-`H((K ⊕ opad) || H((K ⊕ ipad) || mensaje))`
+El digest externo no permite calcular un HMAC de un mensaje extendido sin volver
+a aplicar la capa externa con la clave secreta. Por eso, HMAC-SHA-256 no hereda
+el ataque de extensión de longitud de la concatenación ingenua.
 
-Primero se calcula un hash interno utilizando la clave combinada con `ipad` y el mensaje. Luego, el resultado de ese hash se utiliza como entrada de un segundo hash, donde vuelve a intervenir la clave, esta vez combinada con `opad`.
+### B.2.3 — Comparación en tiempo constante
 
-Esto hace que el valor final que recibe un atacante sea el resultado del hash externo y no un estado interno que pueda reutilizar directamente para continuar procesando datos. Por lo tanto, aunque se utilice SHA-256 dentro de HMAC, un atacante no puede aprovechar un ataque de length-extension para generar un HMAC válido de un mensaje extendido, ya que para calcular correctamente el hash externo sigue necesitando conocer la clave secreta.
+`hmac.compare_digest()` está diseñada para evitar comparaciones con cortocircuito
+dependientes del contenido; Python recomienda usarla al comparar un digest
+recibido externamente para reducir el riesgo de ataques de temporización [6].
 
-### B.2.3 — ¿Qué ataque evita `hmac.compare_digest()`?
+Por ejemplo, si una comparación ordinaria detiene su recorrido ante el primer
+carácter distinto, respuestas ligeramente más lentas para prefijos correctos
+podrían ayudar a inferir un MAC carácter por carácter. La comparación constante
+reduce esa señal.
 
-`hmac.compare_digest()` se utiliza para reducir el riesgo de ataques de temporización o _timing attacks_ durante la verificación de un MAC.
-
-Una comparación convencional puede detenerse cuando encuentra el primer byte diferente. Esto puede generar pequeñas variaciones en el tiempo de respuesta dependiendo de cuántos bytes iniciales coincidan con el valor correcto.
-
-Por ejemplo, si el MAC correcto comienza con `a7f3`, un atacante podría realizar muchas pruebas con valores como `0000`, `a000`, `a700` o `a7f0`. Si las comparaciones que tienen más bytes correctos al comienzo tardan ligeramente más, podría utilizar esas diferencias de tiempo para ir deduciendo progresivamente el MAC esperado.
-
-## `hmac.compare_digest()` está diseñado para realizar la comparación sin que el tiempo dependa de la posición del primer byte diferente. De esta manera se reduce la información que puede obtener un atacante midiendo los tiempos de respuesta y se evita que esa diferencia funcione como un canal lateral para intentar descubrir un MAC válido.
+La reducción no es absoluta: Python advierte que una diferencia de tipo o
+longitud puede filtrar esos metadatos. En este programa se comparan dos cadenas
+hexadecimales de HMAC-SHA-256, por lo que ambas deben tener 64 caracteres.
 
 ## 4. Bitácora
+
+Comandos y salidas obtenidos en una terminal Bash con Python 3:
 
 ```bash
 $ python3 src/cripto.py xor --texto hola --clave K
@@ -160,10 +183,27 @@ $ python3 src/cripto.py mac --clave secreta --msg "pago 100" --modo hmac
 
 ## 5. Fuentes consultadas
 
-1. **Huntress Threat Library:** [Adobe Data Breach Analysis](https://www.huntress.com/threat-library/data-breach/adobe-data-breach) — Análisis del vector de ataque y exfiltración de código fuente.
-2. **KrebsOnSecurity (Brian Krebs, 03/10/2013):** [Adobe to Announce Cyberattack, Exfiltration of Customer Data and Source Code](https://krebsonsecurity.com/2013/10/adobe-to-announce-cyberattack-exfiltration-of-customer-data-and-source-code/) — Reporte del hallazgo del servidor con los datos exfiltrados.
-3. **Adobe Systems Inc. (Brad Arkin, CSO, 03/10/2013):** [Important Customer Security Announcement](https://www.adobe.com) — Comunicado oficial de seguridad de Adobe.
-4. **Have I Been Pwned (Troy Hunt):** [Adobe Data Breach Details](https://haveibeenpwned.com/Breach/Adobe) — Verificación de los 152.989.508 registros comprometidos y estructura de datos expuesta.
-5. **KrebsOnSecurity (Brian Krebs, 04/11/2013):** [Top 100 Most Common Passwords from Adobe Hack](https://krebsonsecurity.com/2013/11/top-100-most-common-passwords-from-adobe-hack/) — Análisis de repetición de patrones y frecuencias en contraseñas cifradas.
-6. **DeHashed Insights:** [Adobe Data Breach October 2013 Analysis](https://dehashed.com/insights/adobe-data-breach-2013-october) — Análisis técnico del esquema de cifrado 3DES en modo ECB y el impacto de las pistas en texto plano.
-7. **ResearchGate Case Study:** [Adobe Cyberattack 2013: Case study](https://www.researchgate.net/publication/388499862_Adobe_Cyberattack_2013_Case_study) — Estudio académico sobre la arquitectura, fallas de diseño criptográfico y consecuencias del incidente.
+1. Arkin, Brad. “Important Customer Security Announcement.” Adobe,
+   3 de octubre de 2013.  
+   https://blog.adobe.com/en/publish/2013/10/03/important-customer-security-announcement
+
+2. Office of the Privacy Commissioner of Canada. “PIPEDA Report of Findings
+   #2014-015: After a Significant Adobe Data Breach…”, 2014, párrs. 10–17 y
+   31–36.  
+   https://www.priv.gc.ca/en/opc-actions-and-decisions/investigations/investigations-into-businesses/2014/pipeda-2014-015/
+
+3. CERT-FR. “Compromission d’Adobe et fuite de mots de passe”, sección 4, 2013.  
+   https://www.cert.ssi.gouv.fr/actualite/CERTA-2013-ACT-046
+
+4. OWASP Foundation. “Password Storage Cheat Sheet”, secciones “Background” y
+   “Password Hashing Algorithms”. Consultado el 16/10/2026.  
+   https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+
+5. Krawczyk, H.; Bellare, M.; Canetti, R. “HMAC: Keyed-Hashing for Message
+   Authentication.” RFC 2104, febrero de 1997, sección 2.
+   DOI: 10.17487/RFC2104.  
+   https://www.rfc-editor.org/rfc/rfc2104.html
+
+6. Python Software Foundation. “hmac — Keyed-Hashing for Message
+   Authentication”, apartado `hmac.compare_digest`.  
+   https://docs.python.org/3/library/hmac.html
