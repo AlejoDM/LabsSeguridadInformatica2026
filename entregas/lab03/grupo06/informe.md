@@ -1,163 +1,177 @@
 # Informe — Laboratorio 03 · Autenticación
 
-_Grupo:_ 06 · _Integrantes:_
+**Grupo:** 06 · **Integrantes:**
 
-- Beccereca, Martín - martinbeccereca
-- Benito, María Belén
-- De Miguel, Alejo - AlejoDM
-- Giudici, Tomás - TomasGiudici
-- Suppo, Carolina - carosuppo
+| Nombre y apellido  | Legajo | Usuario de GitHub |
+| ------------------ | ------ | ----------------- |
+| Martín Beccereca   | 15154  | @martinbeccereca  |
+| María Belén Benito | 14625  | @belubenito01     |
+| Alejo De Miguel    | 15138  | @AlejoDM          |
+| Tomás Giudici      | 14977  | @TomasGiudici     |
+| Carolina Suppo     | 15057  | @carosuppo        |
 
-_Fecha:_
+**Fecha:** 16/10/2026
 
 ---
 
 ## 0. Declaración de uso de IA
 
-- **Herramientas utilizadas:** Claude Code y ChatGPT (OpenAI).
+- **Claude Code:** se utilizó como apoyo para estructurar el informe en Markdown,
+  organizar el mini-research y revisar la rúbrica.
 
--- **Finalidad del uso:** Se utilizó como herramienta de apoyo para la estructuración del informe en formato Markdown, la búsqueda y selección inicial de fuentes de consulta, la organización del texto correspondiente al mini-research, la revisión de la rúbrica y la organización de la bitácora de pruebas.
+- **ChatGPT/Codex (OpenAI):** se utilizó para revisar el formato del informe,
+  organizar la bibliografía, contrastar la correspondencia entre afirmaciones y
+  fuentes, y mejorar la precisión técnica de la redacción.
 
-- **Partes generadas o asistidas:** Estructuración del esquema del informe y asistencia en la organización y redacción del contenido del mini-research.
-
-- **Verificación:** La información y las fuentes obtenidas con asistencia de IA fueron revisadas y verificadas por los integrantes del grupo antes de incorporarlas a la entrega. Los conceptos técnicos y el contenido final fueron contrastados con las fuentes bibliográficas citadas.
+Las herramientas de IA se utilizaron como asistencia. El grupo revisó el
+contenido final, las fuentes citadas y las pruebas declaradas en la bitácora.
 
 ---
 
 ## 1. Parte A — Análisis de la brecha: Credential stuffing
 
-**Caso asignado:** Credential stuffing — grupo 06, `número de grupo mod 4 = 2`
-sobre la tabla del enunciado.
+**Caso asignado:** Credential stuffing — grupo 06, ya que `6 mod 4 = 2`.
 
-### Qué se explota (la falla)
+### Qué se explota
 
-El _credential stuffing_ no rompe ningún algoritmo criptográfico ni explota una
-vulnerabilidad de software: explota una práctica humana, el reuso de
-contraseñas entre sitios distintos. El atacante no adivina contraseñas al
-azar (eso sería fuerza bruta clásica) ni prueba una única contraseña contra
-muchas cuentas (eso sería _password spraying_); en cambio, automatiza el
-ingreso de pares usuario/contraseña reales, filtrados previamente en la
-brecha de otro servicio no relacionado, contra el sistema objetivo. La
-apuesta del atacante es estadística: si una fracción de esos usuarios reusó su
-contraseña en el sitio objetivo, cada intento fallido no cuesta nada y cada
-acierto entrega una cuenta válida.
+El _credential stuffing_ no rompe un algoritmo criptográfico ni requiere una
+vulnerabilidad en el sistema objetivo. Consiste en automatizar intentos de inicio
+de sesión con pares de usuario y contraseña obtenidos en filtraciones previas de
+otros servicios. Su éxito depende de que una parte de los usuarios reutilice la
+misma contraseña en más de un sitio [1].
 
-La falla, entonces, no está en un componente técnico roto sino en la ausencia
-de controles que asuman que esto va a pasar: falta de un segundo factor de
-autenticación, falta de verificación de la contraseña contra listas de
-credenciales ya filtradas, y falta de límites al ritmo de intentos de login
-(OWASP Foundation, s.f.).
+No debe confundirse con la fuerza bruta, que prueba muchas contraseñas para una
+cuenta, ni con el _password spraying_, que prueba pocas contraseñas frecuentes
+contra muchas cuentas. En credential stuffing, las credenciales ya son reales:
+el atacante intenta comprobar si continúan siendo válidas en otro servicio.
 
-### Cómo se explotó: el caso Zoom (abril de 2020)
+La efectividad del ataque aumenta cuando el servicio objetivo carece de
+autenticación multifactor, límites eficaces de intentos y mecanismos para
+detectar actividad automatizada [1].
 
-Un caso documentado de esta técnica es el de Zoom en abril de 2020. La
-firma de inteligencia de amenazas Cyble detectó, alrededor del 1 de abril
-de 2020, la venta de más de 500.000 credenciales de cuentas de Zoom en foros
-de la dark web, a un precio de apenas USD 0,002 por cuenta (en varios casos,
-directamente regaladas para ganar reputación en esos foros). Cada credencial
-incluía el correo electrónico, la contraseña, la URL de la reunión personal y
-la "Host Key" de la cuenta.
+### Cómo se explotó: el caso Zoom, abril de 2020
 
-Según la cobertura técnica del incidente, las credenciales no salieron de
-un hackeo a los servidores de Zoom: fueron recopiladas de brechas
-anteriores y no relacionadas, sufridas por otros servicios. Los atacantes
-automatizaron el intento de esos pares usuario/contraseña contra Zoom,
-aprovechando el pico de uso de la plataforma durante los primeros meses de la
-pandemia. El éxito del ataque dependió pura y exclusivamente de cuántos
-usuarios habían reutilizado, en Zoom, una contraseña ya filtrada en otro
-lado (BleepingComputer, 2020).
+En abril de 2020, BleepingComputer informó que se ofrecían en foros más de
+500.000 credenciales de Zoom. Según Cyble, se adquirieron aproximadamente
+530.000 credenciales por USD 0,002 por cuenta. Los registros incluían dirección
+de correo electrónico, contraseña, URL personal de reunión y Host Key [2].
 
-Esto muestra el patrón típico de un credential stuffing: no hace falta
-vulnerar el sistema objetivo en absoluto si el eslabón débil es la conducta
-del usuario en otros sistemas.
+La fuente indicó que las credenciales se obtenían mediante credential stuffing:
+atacantes probaban en Zoom combinaciones de correo y contraseña expuestas en
+brechas anteriores. Los inicios de sesión exitosos se recopilaban y luego se
+ofrecían o vendían en foros [2].
 
-### La forma correcta: qué lo frena
+El caso ilustra que un servicio puede ser afectado sin que se haya producido una
+intrusión directa en sus servidores: el reuso de una contraseña filtrada en otro
+sitio puede permitir el acceso a una cuenta válida.
 
-**Autenticación multifactor (MFA/2FA).** Es la mitigación más efectiva contra
-este ataque, porque incluso si el par usuario/contraseña es válido, al
-atacante le falta el segundo factor. Según cita la OWASP Foundation, un
-análisis de Microsoft estima que el MFA habría prevenido el 99,9% de los
-compromisos de cuentas por este tipo de ataque (OWASP Cheat Sheet Series,
-s.f.). Esta es exactamente la mitigación que implementa la Parte B.2 de este
-mismo laboratorio (TOTP): un atacante que solo tiene la contraseña filtrada
-queda frenado porque no tiene el secreto compartido necesario para generar el
-código de un solo uso.
+### La forma correcta: mitigaciones
 
-**Verificación contra contraseñas comprometidas.** El estándar NIST SP
-800-63B-4 (parte de las _Digital Identity Guidelines_ Rev. 4, publicadas en
-su versión final en julio de 2025) exige explícitamente que el verificador
-rechace contraseñas conocidas por haber sido filtradas: "Verifiers SHALL
-compare the prospective secret against a blocklist that contains known
-commonly used, expected, or compromised passwords", blocklist que debe
-incluir "passwords obtained from previous breach corpuses" (NIST, 2025,
-§3.1.1.2). Es la mitigación que ataca la causa raíz: si la contraseña que un
-usuario intenta registrar ya apareció en una brecha pública, el sistema la
-rechaza antes de que pueda ser reutilizada.
+**Autenticación multifactor.** Si una persona atacante posee una contraseña
+válida, un segundo factor agrega una condición adicional para iniciar sesión.
+OWASP señala que MFA es una defensa importante frente a credential stuffing y
+password spraying; cita un análisis de Microsoft según el cual podría haber
+evitado el 99,9 % de los compromisos de cuentas [1]. Esta cifra es una
+estimación citada por OWASP, no una garantía aplicable a cualquier sistema.
 
-**Límite de intentos (rate limiting).** El mismo estándar exige que el
-verificador limite los intentos fallidos consecutivos de autenticación a no
-más de 100 antes de bloquear ese autenticador (NIST, 2025, §3.2.2), lo que
-vuelve inviable probar millones de credenciales filtradas en tiempo
-razonable. OWASP agrega, como defensas complementarias en capas, CAPTCHA,
-huella digital de dispositivo/conexión y bloqueo de tráfico proveniente de
-proveedores de hosting o redes de proxy conocidas por alojar bots (OWASP
-Cheat Sheet Series, s.f.).
+**Bloqueo de contraseñas comprometidas.** NIST SP 800-63B establece que, al
+crear o cambiar una contraseña, el verificador debe compararla con una lista de
+valores comunes, previsibles o comprometidos. Esa lista puede incluir
+contraseñas presentes en filtraciones anteriores [3, §3.1.1.2].
 
-Ninguna de estas tres mitigaciones es suficiente por sí sola, de ahí que las
-tres guías coincidan en un enfoque de defensa en capas. Pero el MFA es,
-de las tres, la que corta el ataque incluso cuando la contraseña filtrada es
-válida.
+**Límite de intentos.** NIST también requiere limitar los intentos consecutivos
+fallidos de autenticación por cuenta; salvo que se especifique otra condición,
+el máximo es 100 antes de deshabilitar el autenticador [3, §3.2.2]. OWASP suma
+medidas complementarias como detección de bots, CAPTCHA y análisis de señales de
+riesgo [1].
+
+Estas defensas se complementan: MFA reduce el valor de una contraseña reutilizada;
+las blocklists disminuyen la probabilidad de registrarla; y el rate limiting
+reduce la capacidad de automatizar intentos masivos.
+
+---
 
 ## 2. Parte B.1 — Contraseñas
 
-### Por qué el salt tiene que ser único por usuario
+### Por qué el salt debe ser único por usuario
 
-El _salt_ es un valor pseudoaleatorio criptográficamente seguro (generado mediante `secrets.token_bytes`) que se combina con la contraseña antes de aplicar la función de derivación de clave. Debe ser único para cada usuario y registro por dos razones fundamentales:
+El _salt_ es un valor no secreto y aleatorio que se combina con la contraseña
+antes de aplicar la función de derivación. En esta implementación se genera con
+`secrets.token_bytes(16)`, por lo que cada registro recibe un salt de 16 bytes.
 
-1. **Evitar la deducción de contraseñas idénticas entre usuarios:**
-   Si dos usuarios eligen la misma contraseña en un esquema sin salt o con un salt global fijo, sus hashes resultantes en la base de datos serían idénticos.
-   Esto permite a cualquier atacante que acceda a la base de datos deducir de inmediato qué usuarios comparten clave sin necesidad de haberla crackeado previamente. Al emplear un salt aleatorio independiente por usuario, la salida criptográfica es completamente distinta:
-   El atacante no puede correlacionar registros ni inferir igualdad de contraseñas.
+Un salt único evita que dos personas con la misma contraseña produzcan el mismo
+valor almacenado. Sin salt, o con un salt global fijo, una persona atacante que
+obtenga la base de datos puede identificar inmediatamente qué usuarios comparten
+contraseña. Con un salt independiente, debe trabajar contra cada registro por
+separado.
 
-2. **Mitigación de ataques masivos y tablas precomputadas:**
-   Sin un salt por usuario, un atacante puede precomputar una tabla de contraseñas comunes y sus hashes una única vez, y utilizarla para atacar a todos los usuarios de la base de datos en simultáneo. Con un salt único por usuario, las tablas precalculadas quedan completamente inutilizadas: el atacante está forzado a recalcular el espacio de búsqueda completo de forma individual para cada salt específico, multiplicando el esfuerzo por la cantidad $N$ de usuarios comprometidos.
-
----
+Además, el salt impide reutilizar una única tabla precalculada para atacar todos
+los registros de una base de datos. No evita un ataque dirigido contra un salt
+concreto, pero obliga a recalcular los intentos para ese registro [4, §§5.1–5.3].
 
 ### Por qué conviene un número alto de iteraciones
 
-Las funciones criptográficas de hash generales (como SHA-256 o MD5) fueron diseñadas para procesar grandes volúmenes de datos a máxima velocidad y con mínimo consumo de recursos. Esta característica, ideal para verificar integridad de archivos, es una debilidad crítica cuando se almacenan contraseñas:
+Las funciones hash generales, como SHA-256, están diseñadas para ser rápidas.
+Esa propiedad es útil al verificar la integridad de archivos, pero no al
+almacenar contraseñas: una vez filtrada la base, una persona atacante puede
+probar candidatos fuera de línea.
 
-1. **Asimetría frente a hardware acelerador:**
-   Un atacante con hardware masivamente paralelo puede calcular miles de millones de hashes SHA-256 directos por segundo en un ataque de fuerza bruta offline contra una base de datos filtrada.
-2. **Estiramiento de clave y factor de trabajo:**
-   PBKDF2 (_Password-Based Key Derivation Function 2_) introduce un costo computacional parametrizable mediante un número de iteraciones. La función encadena repetidamente HMAC-SHA256, forzando a calcular 200.000 derivaciones consecutivas para un solo intento de contraseña.
-
-3. **Impacto asimétrico (Defensa vs. Ataque):**
-   - **Para el servidor legítimo:** Calcular 200.000 iteraciones toma aproximadamente entre 30ms y 80ms en un hilo de CPU estándar. Este tiempo es completamente imperceptible para un usuario humano que inicia sesión una sola vez.
-   - **Para el atacante:** Un ataque de diccionario de 10^8 palabras candidatas, que con SHA-256 simple tomaría fracciones de segundo en GPU, con 200.000 iteraciones de PBKDF2 pasa a requerir días o semanas de cómputo continuo y un costo energético masivo, volviendo la fuerza bruta económicamente inviable.
-
----
+PBKDF2 incorpora un número de iteraciones configurable. Cada intento de
+contraseña debe repetir la función derivadora, por lo que una base filtrada
+resulta más costosa de atacar que si se almacenara `sha256(password)`
+directamente. El valor de 200.000 iteraciones usado en este laboratorio
+representa un factor de trabajo; su impacto concreto debe medirse en el entorno
+de despliegue [4, §5.2].
 
 ### Comparación en tiempo constante
 
-En `verify_password()`, la comparación entre el hash calculado y el almacenado se realiza estrictamente con `hmac.compare_digest()` en lugar del operador de igualdad estándar `==`. El operador `==` compara byte a byte y retorna `False` al encontrar el primer byte discordante (_early exit_), produciendo variaciones medibles en el tiempo de respuesta. Un atacante podría explotar esta fuga mediante un canal lateral de temporización (_timing attack_) para reconstruir el hash derivado byte a byte. `hmac.compare_digest()` garantiza que la comparación tome exactamente el mismo tiempo independientemente de cuántos bytes coincidan.
+En `verify_password()`, el hash calculado se compara con el valor almacenado
+mediante `hmac.compare_digest()` y no mediante `==`. Python recomienda esa
+función al comparar un digest recibido externamente porque está diseñada para
+evitar el cortocircuito basado en el contenido y reducir el riesgo de ataques de
+temporización [5].
+
+No garantiza que toda comparación tarde exactamente lo mismo: diferencias de
+tipo o longitud pueden revelar esos metadatos. Sin embargo, en este programa se
+comparan dos valores de tipo `bytes` y de longitud esperada equivalente, por lo
+que se evita una comparación que termine al encontrar el primer byte diferente.
 
 ---
 
 ## 3. Parte B.2 — TOTP
 
-## Por qué TOTP frena el robo de una contraseña
+### Por qué TOTP frena el robo de una contraseña
 
-TOTP agrega un segundo factor de autenticación basado en un código temporal generado a partir de un secreto compartido. Por eso, aunque un atacante robe la contraseña, no puede iniciar sesión si no posee también el secreto necesario para generar el código TOTP válido. Esto permite frenar ataques como el credential stuffing analizado en la Parte A.
+TOTP genera códigos temporales a partir de un secreto compartido y del tiempo.
+El algoritmo usa HOTP con el tiempo dividido en intervalos; RFC 6238 recomienda
+un intervalo de 30 segundos como valor predeterminado [6, §§4–5].
 
-## Qué no protege TOTP
+Si un atacante obtiene una contraseña mediante credential stuffing, todavía debe
+presentar un TOTP válido para completar una autenticación que requiera ambos
+factores. Por eso, conocer solo la contraseña no es suficiente mientras el
+atacante no posea también el secreto TOTP o el dispositivo autenticador.
 
-TOTP no protege frente a todos los ataques. Por ejemplo, un atacante puede realizar phishing en tiempo real y reutilizar el código antes de que expire. Tampoco protege si se compromete el dispositivo o el secreto TOTP, ni frente al robo de una sesión ya autenticada.
+El script del laboratorio demuestra la generación de un TOTP. Una implementación
+completa de MFA también debe verificar el código en el servidor, proteger el
+secreto compartido y aplicar límites a los intentos fallidos.
+
+### Qué no protege TOTP
+
+TOTP no es resistente al phishing en tiempo real. Una persona atacante puede
+crear un sitio falso, solicitar el código a la víctima y reenviarlo al servicio
+legítimo antes de que venza. NIST indica que los autenticadores que requieren
+ingresar manualmente una salida, incluidos OTP, no se consideran resistentes al
+phishing porque la salida no queda vinculada a la sesión específica [3, §3.2.5].
+
+TOTP tampoco protege si se compromete el secreto compartido o el dispositivo que
+lo contiene. Además, no protege frente al robo de una sesión ya autenticada.
+
+---
 
 ## 4. Bitácora de pruebas
 
-Para verificar el funcionamiento de las implementaciones correspondientes a B.1 y B.2 se ejecutaron pruebas desde la terminal.
+Para verificar el funcionamiento de las implementaciones correspondientes a B.1
+y B.2 se ejecutaron pruebas desde la terminal.
 
 ### Prueba de generación de hash PBKDF2
 
@@ -214,12 +228,32 @@ Resultado:
 287082
 ```
 
-El resultado coincide con el vector esperado, verificando el funcionamiento de la implementación TOTP.
+El resultado coincide con el código de seis dígitos del vector oficial de RFC 6238. El valor de ocho dígitos correspondiente es 94287082 [6, apéndice B].
 
 ## 5. Fuentes consultadas
 
-1. OWASP Cheat Sheet Series. (s.f.). _Credential Stuffing Prevention Cheat Sheet_. OWASP Foundation. https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html
-2. OWASP Foundation. (s.f.). _Credential stuffing_. https://owasp.org/www-community/attacks/Credential_stuffing
-3. OWASP Cheat Sheet Series. (s.f.). _Password Storage Cheat Sheet_. OWASP Foundation. https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
-4. National Institute of Standards and Technology. (2025). _NIST SP 800-63B-4 — Digital Identity Guidelines: Authentication and Authenticator Management, Revision 4_. https://pages.nist.gov/800-63-4/sp800-63b.html
-5. BleepingComputer. (2020, 13 de abril). _Over 500,000 Zoom accounts sold on hacker forums, the dark web_. https://www.bleepingcomputer.com/news/security/over-500-000-zoom-accounts-sold-on-hacker-forums-the-dark-web/
+1. OWASP Foundation. “Credential Stuffing Prevention Cheat Sheet”, sección
+   “Multi-Factor Authentication”. Consultado el 16/10/2026.
+   https://cheatsheetseries.owasp.org/cheatsheets/Credential_Stuffing_Prevention_Cheat_Sheet.html
+
+2. Abrams, Lawrence. “Over 500,000 Zoom Accounts Sold on Hacker Forums, the
+   Dark Web.” BleepingComputer, 13 de abril de 2020.
+   https://www.bleepingcomputer.com/news/security/over-500-000-zoom-accounts-sold-on-hacker-forums-the-dark-web/
+
+3. National Institute of Standards and Technology. Digital Identity
+   Guidelines: Authentication and Authenticator Management. NIST SP 800-63B-4,
+   2025, §§3.1.1.2, 3.2.2 y 3.2.5.
+   https://pages.nist.gov/800-63-4/sp800-63b.html
+
+4. Turan, M. S., Barker, E., Burr, W. y Chen, L. Recommendation for
+   Password-Based Key Derivation: Part 1: Storage Applications. NIST SP
+   800-132, diciembre de 2010, §§5.1–5.3.
+   https://nvlpubs.nist.gov/nistpubs/Legacy/SP/nistspecialpublication800-132.pdf
+
+5. Python Software Foundation. “hmac — Keyed-Hashing for Message
+   Authentication”, apartado hmac.compare_digest.
+   https://docs.python.org/3/library/hmac.html
+
+6. M'Raihi, D.; Machani, S.; Pei, M.; Rydell, J. “TOTP: Time-Based One-Time
+   Password Algorithm.” RFC 6238, mayo de 2011. DOI: 10.17487/RFC6238.
+   https://www.rfc-editor.org/rfc/rfc6238.html
