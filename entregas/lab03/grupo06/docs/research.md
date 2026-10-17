@@ -1,6 +1,6 @@
 # Mini-research — Laboratorio 03
 
-**Tema elegido:** _(uno)_
+**Tema elegido:** B — TOTP vs FIDO2/WebAuthn: por qué las passkeys ofrecen mayor resistencia al phishing que TOTP.
 
 - [ ] **A.** PBKDF2 vs bcrypt vs scrypt vs Argon2: por qué existen "hashes lentos".
 - [x] **B.** TOTP vs FIDO2/WebAuthn: por qué las passkeys superan al TOTP.
@@ -11,48 +11,91 @@
 
 ### TOTP como segundo factor
 
-TOTP (Time-Based One-Time Password) está definido en RFC 6238 y permite generar códigos de un solo uso a partir de un secreto compartido y del tiempo actual. En una implementación como la desarrollada en este laboratorio, el usuario introduce manualmente el código generado por su aplicación autenticadora.
+TOTP (_Time-Based One-Time Password_) es un mecanismo que genera contraseñas de
+un solo uso a partir de un secreto compartido y del tiempo. RFC 6238 lo define
+como una variante de HOTP en la que el contador se deriva del tiempo actual y
+del tamaño del intervalo; el valor predeterminado recomendado para ese intervalo
+es 30 segundos [1, §§4–5].
 
-Incorporar TOTP mejora la seguridad frente a una autenticación basada únicamente en contraseña. Por ejemplo, si un atacante obtiene una contraseña mediante credential stuffing, todavía necesita el segundo factor para completar el inicio de sesión.
+Cuando se utiliza junto con una contraseña, TOTP agrega un segundo factor: aunque
+una persona atacante conozca la contraseña, necesita también generar o capturar
+un código válido. Por ello puede reducir el impacto de credential stuffing,
+siempre que el atacante no posea el secreto TOTP ni el dispositivo autenticador.
 
-Sin embargo, TOTP presenta una limitación frente al phishing: el código debe ser introducido por el usuario y no está vinculado criptográficamente al sitio al que se está autenticando. Un atacante puede solicitar el código desde una página falsa y utilizarlo inmediatamente contra el sitio legítimo, mientras todavía sea válido. Por este motivo, NIST no considera a los OTP introducidos manualmente como mecanismos resistentes al phishing.
-
-En consecuencia, TOTP es eficaz para mitigar el credential stuffing, pero no proporciona protección completa frente al phishing.
+Sin embargo, TOTP no es resistente al phishing en tiempo real. El usuario debe
+ingresar manualmente el código y ese valor no queda vinculado criptográficamente
+al sitio ni a la sesión que lo solicita. Un sitio falso puede pedir el código y
+reenviarlo inmediatamente al servicio legítimo antes de que expire. NIST indica
+que los autenticadores con ingreso manual de una salida, incluidos OTP, no se
+consideran resistentes al phishing [2, §3.2.5].
 
 ### FIDO2 y WebAuthn
 
-FIDO2 es un conjunto de estándares de autenticación basado en criptografía de clave pública. Incluye WebAuthn, que permite a sitios web utilizar credenciales de clave pública, y CTAP, que permite la comunicación entre navegadores o sistemas operativos y determinados autenticadores.
+FIDO2 combina WebAuthn, la API web estandarizada por W3C, y CTAP, el protocolo
+que permite la comunicación entre clientes y autenticadores. WebAuthn permite
+registrar y usar credenciales de clave pública para autenticar usuarios en
+aplicaciones web [3].
 
-A diferencia de TOTP, FIDO2/WebAuthn no depende de un secreto que deba ser compartido con el servidor ni de un código que el usuario tenga que introducir. Durante el registro se genera un par de claves criptográficas: una clave pública y una clave privada. La clave privada permanece protegida por el autenticador, mientras que el servidor almacena la clave pública.
+Durante el registro, el autenticador crea un par de claves para el servicio. La
+clave privada permanece en el autenticador y la clave pública se entrega al
+servidor. Durante la autenticación, el servidor envía un desafío y el
+autenticador produce una respuesta firmada; el servidor la verifica con la clave
+pública registrada [3, §§1 y 5].
 
-Durante la autenticación, el servidor genera un desafío (challenge) y el autenticador utiliza la clave privada para generar una respuesta criptográfica. El servidor verifica esa respuesta mediante la clave pública registrada. De esta manera, se demuestra la posesión de la clave privada sin transmitirla al servidor.
+La credencial está vinculada al _Relying Party_ y a su origen. Por ello, una
+credencial registrada para un dominio no debe poder utilizarse en otro dominio.
+La validación correcta del origen por parte del servidor es parte esencial de
+esa protección [3, §13.4.9].
 
-Una característica fundamental de WebAuthn es la vinculación de la credencial con el servicio para el que fue registrada, conocido como Relying Party. El origen del sitio forma parte de los datos considerados durante la autenticación, lo que permite detectar que una solicitud proviene de un sitio diferente al registrado.
+Las passkeys son credenciales FIDO basadas en pares de claves. Pueden estar
+vinculadas a un dispositivo o sincronizarse entre dispositivos del usuario,
+según la implementación. No transmiten la clave privada al servidor y están
+diseñadas para autenticar frente al servicio al que se encuentran vinculadas
+[4].
 
-Las passkeys utilizan esta tecnología para ofrecer una forma de autenticación basada en claves criptográficas, evitando que el usuario tenga que recordar contraseñas o introducir códigos OTP.
+### Por qué las passkeys ofrecen ventajas frente a TOTP
 
-### Por qué las passkeys superan al TOTP
+La principal diferencia es la resistencia al phishing. TOTP requiere introducir
+un código temporal que puede ser solicitado por un sitio fraudulento y reutilizado
+por una persona atacante dentro de su período de validez. En cambio, WebAuthn
+utiliza una respuesta criptográfica asociada al desafío y al servicio
+correspondiente.
 
-La principal diferencia entre ambos mecanismos está en su resistencia al phishing. TOTP requiere que el usuario introduzca un código temporal que puede ser capturado y utilizado por un atacante antes de que expire.
+Las passkeys también pueden reemplazar el uso de una contraseña como factor
+principal. Esto elimina el riesgo específico de reuso de contraseñas entre
+servicios, que es la condición necesaria para credential stuffing. FIDO Alliance
+describe las passkeys como credenciales de clave pública, únicas por servicio y
+diseñadas para resistir phishing [4].
 
-Las passkeys, en cambio, utilizan las credenciales de clave pública de FIDO2/WebAuthn y vinculan la autenticación con el servicio correspondiente. La autenticación se realiza mediante una respuesta criptográfica al desafío generado por el servidor, sin revelar la clave privada ni introducir un código que pueda ser interceptado.
-
-Por esta razón, las passkeys ofrecen una ventaja importante frente a TOTP: son resistentes al phishing. TOTP continúa siendo un segundo factor eficaz para mitigar ataques como el credential stuffing, pero las passkeys proporcionan una protección adicional frente a la captura y reutilización de credenciales mediante sitios fraudulentos.
+Esto no significa que las passkeys eliminen todos los riesgos: la recuperación
+de cuentas, el compromiso del dispositivo, una implementación incorrecta de la
+validación de origen o ingeniería social siguen siendo aspectos relevantes. Su
+ventaja principal frente a TOTP es que evitan depender de un código que el
+usuario pueda entregar a un sitio falso.
 
 ## Fuentes (mín. 3)
 
-1. M'Raihi, D. et al. (2011). _RFC 6238 — TOTP: Time-Based One-Time Password Algorithm_. IETF / RFC Editor.  
+1. M'Raihi, D.; Machani, S.; Pei, M.; Rydell, J. (2011). _TOTP: Time-Based
+   One-Time Password Algorithm_. RFC 6238. DOI: 10.17487/RFC6238.
    https://www.rfc-editor.org/rfc/rfc6238.html
 
-2. W3C Web Authentication Working Group (2026). _Web Authentication: An API for accessing Public Key Credentials — Level 3_. W3C.  
+2. National Institute of Standards and Technology. (2025). _Digital Identity
+   Guidelines: Authentication and Authenticator Management_. NIST SP 800-63B-4,
+   sección 3.2.5.
+   https://pages.nist.gov/800-63-4/sp800-63b.html
+
+3. W3C Web Authentication Working Group. (2026). _Web Authentication: An API
+   for Accessing Public Key Credentials — Level 3_. W3C Recommendation,
+   25 de agosto de 2026.
    https://www.w3.org/TR/webauthn-3/
 
-3. FIDO Alliance. _FIDO User Authentication Specifications_.  
+4. FIDO Alliance. (s.f.). _FIDO User Authentication Specifications_.
    https://fidoalliance.org/specifications/
-
-4. FIDO Alliance. _Passkeys — Passwordless Authentication_.  
-   https://fidoalliance.org/passkeys/
 
 ## Reflexión
 
-La comparación muestra que la seguridad de un método de autenticación depende también de las amenazas que busca enfrentar. TOTP representa una mejora frente a la autenticación basada únicamente en contraseñas, mientras que las passkeys incorporan mecanismos que dificultan ataques de phishing. Por eso, la elección del método debe considerar no solo su facilidad de implementación, sino también el nivel de protección que ofrece.
+TOTP representa una mejora importante frente a usar únicamente una contraseña,
+pero su ingreso manual permite ataques de phishing en tiempo real. Las passkeys
+reducen ese riesgo mediante credenciales de clave pública vinculadas al servicio.
+La elección de un método de autenticación debe considerar tanto la resistencia
+técnica como la recuperación de cuentas y la experiencia del usuario.
