@@ -17,6 +17,10 @@
 - **Finalidad del uso:** Apoyo en la ejecución del recon y en la redacción de las filas del mapa y de P1.
 - **Partes generadas o asistidas:** Sección 2, P1 y carpeta `evidencia/`.
 - **Verificación:** Las salidas se guardaron crudas con redirección desde la consola del atacante.
+**Herramienta: ChatGPT**
+- **Finalidad del uso:** Apoyo en la investigación sobre OSINT y reconocimiento pasivo, interpretación de los comandos `whois` y `dig`, y redacción de la respuesta P4.
+- **Partes asistidas:** Archivo `research.md` y pregunta P4 de `informe.md`.
+- **Verificación:** Se ejecutaron los comandos en el entorno Docker del laboratorio y se guardaron sus resultados en `evidencia/salidas/`.
 
 ## 1. Parte práctica — flags capturadas
 
@@ -124,7 +128,21 @@ de hacer enumeracion de rutas. Esa es exactamente la tecnica.</p>
 
 La evidencia demuestra acceso desde el contenedor atacante al panel dentro de la red del laboratorio; el comentario dice «desde afuera», pero no comprobamos exposición a Internet. `/admin` solo se observó listado y no se consultó. La conclusión es que ocultar o desaconsejar el rastreo de una ruta no protege su contenido: el acceso debe controlarse en el servidor. La evidencia de este caso está en las respuestas completas de robots.txt y del panel enlazadas arriba.
 
+
 **P4 — Pasivo vs. activo.**
+
+El reconocimiento pasivo consiste en recopilar información de un objetivo sin interactuar directamente con sus sistemas. En este laboratorio lo practicamos utilizando `whois nmap.org`, con el que obtuvimos datos del registro del dominio, como su fecha de creación y servidores DNS. También utilizamos `dig scanme.nmap.org A`, que nos permitió identificar su dirección IP mediante una consulta DNS.
+
+En cambio, el reconocimiento activo implica comunicarse directamente con el objetivo para obtener información. Un ejemplo de esto fue el uso de `nmap` contra PhantomCorp para identificar puertos abiertos y servicios, y de `curl` para consultar las cabeceras HTTP y el archivo `robots.txt`.
+
+La principal diferencia es la huella que dejamos. Las consultas de WHOIS y DNS se realizaron a servicios externos y no directamente a PhantomCorp, mientras que los escaneos de `nmap`, las conexiones con `ncat` y las solicitudes de `curl` generaron tráfico hacia sus servicios. Estas últimas acciones podrían haber quedado registradas en los logs de PhantomCorp, dependiendo de la configuración del servidor.
+
+Esto nos permitió entender que el reconocimiento pasivo sirve para reunir información inicial con menor interacción directa, mientras que el activo permite conocer con más detalle los servicios expuestos, pero genera tráfico que puede ser detectado.
+
+**Evidencias del reconocimiento pasivo:**
+
+- [Consulta WHOIS de nmap.org](evidencia/salidas/p4-whois.txt).
+- [Consulta DNS de scanme.nmap.org](evidencia/salidas/p4-dig.txt).
 
 **P5 — Ahora sos el defensor.**
 
