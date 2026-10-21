@@ -1,8 +1,5 @@
 # Mini-research — Laboratorio 05
 
-> Copiala a `entregas/lab05/grupoXX/research.md`. Elegí **un** tema y hacé una
-> investigación breve pero real (media a una carilla). Fuentes verificables.
-
 **Grupo:** 06
 **Tema elegido:** _(marcá uno)_
 
@@ -42,7 +39,7 @@ En el Laboratorio 05 se utilizaron `nmap` y `curl` para identificar servicios y 
 
 ## Reflexión
 
-La distinción principal es que información pública no significa obtención pasiva. Para clasificar una actividad hay que observar con quién interactúa la herramienta y de dónde provienen los datos. Además, los resultados históricos deben tratarse como indicios que requieren contexto, no como pruebas de que un servicio sigue activo o una cuenta continúa comprometida.
+La distinción principal es que información pública no significa obtención pasiva. Para clasificar una actividad hay que observar con quién interactúa la herramienta y de dónde provienen los datos. En PhantomCorp, `nmap` y `curl` fueron activos porque se comunicaron con el target, mientras que las consultas sobre dominios de prueba sirvieron para analizar el alcance y las huellas de WHOIS y DNS. Además, los resultados históricos deben tratarse como indicios que requieren contexto, no como pruebas de que un servicio sigue activo o una cuenta continúa comprometida.
 
 ## Fuentes
 
