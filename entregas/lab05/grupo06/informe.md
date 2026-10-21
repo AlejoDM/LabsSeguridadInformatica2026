@@ -11,6 +11,8 @@
 | Tomás Giudici        | TomasGiudici      |
 | Carolina Suppo       | carosuppo         |
 
+**Fecha:** 21/10/2026
+
 ## 0. Declaración de uso de IA
 
 **Herramienta: Claude Code**
@@ -21,9 +23,9 @@
 
 **Herramienta: ChatGPT**
 
-- **Finalidad del uso:** Apoyo en la investigación sobre OSINT y reconocimiento pasivo, interpretación de los comandos `whois` y `dig`, y redacción de la respuesta P4.
-- **Partes asistidas:** Archivo `research.md` y pregunta P4 de `informe.md`.
-- **Verificación:** Se ejecutaron los comandos en el entorno Docker del laboratorio y se guardaron sus resultados en `evidencia/salidas/`.
+- **Finalidad del uso:** Apoyo en la investigación sobre OSINT y reconocimiento pasivo, interpretación de `whois` y `dig`, redacción de P4 y revisión de consistencia del informe.
+- **Partes asistidas:** Archivo `research.md`, pregunta P4 y observaciones para revisar el informe.
+- **Verificación:** Las salidas crudas acreditan las observaciones de los comandos; las interpretaciones se contrastaron además con la rúbrica y las fuentes indicadas. Conservar una salida no sustituye esa revisión.
 
 **Herramienta: Opencode**
 
@@ -31,23 +33,21 @@
 - **Partes asistidas:** R5, sección 2 (fila 8080), P2 y sección 4 de `informe.md`; el análisis de los hallazgos, las decisiones y la validación final fueron del grupo.
 - **Verificación:** El grupo revisó y validó los comandos y sus salidas; se corrieron en `cyberlab-attacker` y se guardaron crudas con `tee` en `/loot`, copiadas sin edición a `evidencia/salidas/`.
 
+**Herramienta: Codex**
+
+- **Finalidad del uso:** Revisión de consistencia entre informe, rúbrica y evidencia; apoyo para precisar el alcance de las conclusiones.
+- **Partes asistidas:** Secciones 1 y 2, P1, P2, P4, P5, bitácora y referencias técnicas.
+- **Verificación:** Cada afirmación se contrastó con las salidas crudas enlazadas en este informe; se distinguieron los datos observados de las inferencias y de lo no evaluado.
+
 ## 1. Parte práctica — flags capturadas
 
-- **R3:** `FLAG{http_headers_leak_info}`, encontrada por el usuario en `X-Backend-Flag` al ejecutar `curl -I http://phantomcorp`. Se conservó su evidencia original sin sobrescribirla.
-- **R4:** `FLAG{recon_hidden_path}`, encontrada en el cuerpo HTML de `/panel-interno-9x2f`, ruta publicada en `/robots.txt`.
-- **R5:** `FLAG{dev_service_exposed}`, devuelta por el endpoint `/status` del servicio de desarrollo del puerto 8080. Evidencia: [respuesta de /status](evidencia/salidas/http8080-status.txt) y [validación R5](evidencia/salidas/ctf-submit-r5.txt).
+- **R1:** `FLAG{high_port_secret_service}`, observada en el banner del puerto 31337. Evidencia: [banner de 31337](evidencia/salidas/r1-banner-31337.txt).
+- **R2:** `FLAG{banner_grab_proftpd_135}`, observada en el banner FTP del puerto 21. Evidencia: [banner FTP](evidencia/salidas/r2-banner-ftp21.txt).
+- **R3:** `FLAG{http_headers_leak_info}`, observada en `X-Backend-Flag` al consultar los headers HTTP. Evidencia: [headers HTTP](evidencia/salidas/http80-headers.txt).
+- **R4:** `FLAG{recon_hidden_path}`, observada en el cuerpo de `/panel-interno-9x2f`, ruta publicada en `/robots.txt`. Evidencia: [respuesta del panel](evidencia/salidas/http80-panel-interno.txt).
+- **R5:** `FLAG{dev_service_exposed}`, observada en la respuesta de `/status` del servicio del puerto 8080. Evidencia: [respuesta de /status](evidencia/salidas/http8080-status.txt).
 
-R3, R4 y R5 fueron aceptadas por el mecanismo ctf. Evidencia cruda: [validación R3](evidencia/salidas/ctf-submit-r3.txt), [validación R4](evidencia/salidas/ctf-submit-r4.txt), [validación R5](evidencia/salidas/ctf-submit-r5.txt) y [salida completa de ctf status 05](evidencia/salidas/ctf-status-05.txt). Esta captura corresponde al registro histórico de R3/R4 (2/5) y no al progreso consolidado del grupo.
-
-Confirmación de R3, R4 y R5 (extractos de las validaciones):
-
-```text
-[ OK ] Reto R3 resuelto: Fuga de informacion en headers HTTP
-[ OK ] Reto R4 resuelto: Enumeracion de rutas via robots.txt
-[ OK ] Reto R5 resuelto: Servicio dev expuesto en produccion
-```
-
-Salida de `./ctf status 05` del registro histórico de R3/R4 (2/5; la captura consolidada con las 5 flags queda para la integración final):
+La evidencia consolidada es la [salida final de `./ctf status 05`](evidencia/salidas/ctf-status-05-final.txt), que muestra las cinco flags aceptadas:
 
 ```text
 
@@ -55,23 +55,23 @@ Salida de `./ctf status 05` del registro histórico de R3/R4 (2/5; la captura co
   │                     PROGRESO · LAB 05                      │
   ╰────────────────────────────────────────────────────────────╯
 
-   ·  R1     Puerto oculto en rango alto (barrido completo)
-   ·  R2     Banner grabbing del servicio FTP
+   ✓  R1     Puerto oculto en rango alto (barrido completo)
+   ✓  R2     Banner grabbing del servicio FTP
    ✓  R3     Fuga de informacion en headers HTTP
    ✓  R4     Enumeracion de rutas via robots.txt
-   ·  R5     Servicio dev expuesto en produccion
+   ✓  R5     Servicio dev expuesto en produccion
 
-  ████████████░░░░░░░░░░░░░░░░░░  2/5 (40%)
+  ██████████████████████████████  5/5 (100%)
 ```
 
 ## 2. Mapa de superficie de ataque
 
-| Puerto | Servicio                                                           | Versión (evidencia)                                                                                                                                                        | ¿Cómo lo identificaste?                                                                                                                                                 | CVE relevante                                                                                                                                       | CVSS                                                                  | Criticidad                                                                 | Justificación (contra ESTE caso)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| ------ | ------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 21     | FTP                                                                | ProFTPD 1.3.5 — banner `220 ProFTPD 1.3.5 Server (PhantomCorp FTP)`; nmap `-sV`: `21/tcp open ftp ProFTPD 1.3.5`                                                           | Banner grabbing con `ncat -w2 phantomcorp 21` y confirmado con `nmap -Pn -sV -p-`                                                                                       | CVE-2015-3306 (`mod_copy`, comandos `SITE CPFR`/`SITE CPTO`)                                                                                        | 9.8 (CVSS v3.x, NVD)                                                  | Crítica                                                                    | El banner confirma la versión 1.3.5, que es la afectada por el CVE. Permite leer y escribir archivos arbitrarios sin autenticarse **si** `mod_copy` está cargado; en este recon no lo probamos, queda para el lab de explotación. Además el banner filtra el nombre de la empresa y una línea `214` que no debería estar.                                                                                                                                                                                                                                                                                                                               |
-| 80/tcp | HTTP                                                               | Headers: `Server: PhantomServer/2.4.1` y `X-Powered-By: PhantomCMS 2.4.1`; respuesta `HTTP/1.0 200 OK`. Versiones anunciadas, sin verificación independiente del software. | HEAD a `http://phantomcorp` con curl; GET a `/robots.txt` y a `/panel-interno-9x2f`, todos sobre HTTP sin puerto explícito (80).                                        | No determinado: las respuestas no permiten vincular estos nombres/versiones con un CVE verificable. No se atribuye un CVE por similitud de nombres. | No asignado; no se calculó un vector ni se verificó un CVE aplicable. | Media, valoración cualitativa para la exposición de información observada. | Los headers revelan producto, versión y una flag. robots.txt publica una ruta interna y un comentario de infraestructura; la ruta responde 200 y entrega el panel y otra flag sin credenciales. Esto facilita reconocimiento y expone contenido interno. No se demostró ejecución de comandos, modificación de datos ni acceso a funciones administrativas.                                                                                                                                                                                                                                                                                             |
-| 8080   | HTTP / API de desarrollo (`phantom-dev-api`)                       | `Werkzeug/2.0.1 Python/3.9.2` — header `Server:` y nmap `8080/tcp open http Werkzeug httpd 2.0.1 (Python 3.9.2)`; el cuerpo de `/status` agrega `"version":"0.9.3-DEV"`    | `nmap -Pn -sV -p 8080 phantomcorp` para producto/versión; `curl -sS -i http://phantomcorp:8080/` (raíz) y `curl -sS -i http://phantomcorp:8080/status` para el endpoint | No determinado: no se vinculó la versión anunciada a un CVE verificado y no se atribuye un CVE por similitud de nombres.                            | N/A (sin CVE verificado)                                              | Alta                                                                       | El servicio se identifica como API de desarrollo (`phantom-dev-api`, versión `0.9.3-DEV`) y expone `/status` sin autenticación con `"debug":true`, la versión interna y la flag. Corre sobre el servidor de desarrollo de Werkzeug, no sobre un WSGI de producción, en un puerto no estándar (8080) que queda fuera del portal corporativo del 80. Aunque no se haya verificado un CVE, el problema es concreto: entrega información de configuración y de versión, confirma que hay código de desarrollo en producción y facilita el reconocimiento. No se probó ejecución de comandos ni acceso al debugger; solo se comprobó la fuga de información. |
-| 31337  | Desconocido (nmap lo adivina como `Elite` por el número de puerto) | "PhantomCorp maintenance shell v0.1" — banner de `ncat -w2 phantomcorp 31337`; nmap `-sV`: `31337/tcp open Elite?`                                                         | `nmap -sV -p-` no lo reconoció; lo identificamos conectando con `ncat` y leyendo el banner                                                                              | Ninguno identificado. No pude asociar este banner a un producto con CVE público                                                                     | N/A                                                                   | Alta                                                                       | Es un shell de mantenimiento propio, expuesto a la red y en un puerto clásico de backdoors. Responde sin pedir credenciales y su banner dice "acceso no autorizado prohibido", lo que confirma que no debería estar expuesto. No determiné qué comandos acepta, así que no afirmo más que eso.                                                                                                                                                                                                                                                                                                                                                          |
+| Puerto | Servicio                                                                        | Versión (evidencia)                                                                                                                                                                      | ¿Cómo lo identificaste?                                                                                                          | CVE relevante                                                                                                                                       | CVSS                                                                  | Criticidad                                                                 | Justificación (contra ESTE caso)                                                                                                                                                                                                                                                                                                                                                                   |
+| ------ | ------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------- | -------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 21     | FTP                                                                             | El servicio anuncia `ProFTPD 1.3.5`: banner `220 ProFTPD 1.3.5 Server (PhantomCorp FTP)`; nmap `-sV`: `21/tcp open ftp ProFTPD 1.3.5`                                                    | Banner grabbing con `ncat -w2 phantomcorp 21`; resultado consistente con `nmap -Pn -sV -p-`                                      | CVE-2015-3306 (`mod_copy`, comandos `SITE CPFR`/`SITE CPTO`)                                                                                        | 9.8 (CVSS v3.1; NVD, ver referencias)                                 | Alta, condicionada a la configuración                                      | La versión anunciada está entre las afectadas por el CVE, cuya aplicabilidad depende de que `mod_copy` esté habilitado; no se evaluó ese módulo ni se intentó explotar el servicio. El banner también expone el nombre de la empresa y una flag mediante una respuesta `214`; el problema observado es la fuga de información, no la validez del código FTP.                                       |
+| 80/tcp | HTTP                                                                            | Headers: `Server: PhantomServer/2.4.1` y `X-Powered-By: PhantomCMS 2.4.1`; respuesta `HTTP/1.0 200 OK`. Versiones anunciadas, sin verificación independiente del software.               | HEAD a `http://phantomcorp` con curl; GET a `/robots.txt` y a `/panel-interno-9x2f`, todos sobre HTTP sin puerto explícito (80). | No determinado: las respuestas no permiten vincular estos nombres/versiones con un CVE verificable. No se atribuye un CVE por similitud de nombres. | No asignado; no se calculó un vector ni se verificó un CVE aplicable. | Media, valoración cualitativa para la exposición de información observada. | Los headers revelan producto, versión y una flag. robots.txt publica una ruta interna y un comentario de infraestructura; la ruta responde 200 y entrega el panel y otra flag sin credenciales. Esto facilita reconocimiento y expone contenido interno. No se demostró ejecución de comandos, modificación de datos ni acceso a funciones administrativas.                                        |
+| 8080   | HTTP / API de desarrollo (`phantom-dev-api`)                                    | Header `Server:`: `Werkzeug/2.0.1 Python/3.9.2`; nmap: `Werkzeug httpd 2.0.1 (Python 3.9.2)`. JSON de `/status`: `"service":"phantom-dev-api"`, `"version":"0.9.3-DEV"`, `"debug":true`. | `nmap -Pn -sV -p 8080 phantomcorp`; `curl -sS -i http://phantomcorp:8080/` y `curl -sS -i http://phantomcorp:8080/status`        | No determinado: no se vinculó la versión anunciada a un CVE verificado.                                                                             | N/A (sin CVE verificado)                                              | Media, valoración provisional                                              | Desde la red del laboratorio, `/status` respondió 200 sin credenciales y reveló nombre, versión, `debug:true` y una flag. El header identifica Werkzeug y la documentación desaconseja utilizar su servidor de desarrollo en producción. No se verificó que el debugger interactivo estuviera accesible, que el servicio estuviera publicado en Internet, ni sus controles de parcheo o monitoreo. |
+| 31337  | Servicio no identificado; nmap lo etiqueta como `Elite` por el número de puerto | Banner: `PhantomCorp maintenance shell v0.1`; nmap `-sV`: `31337/tcp open Elite?`                                                                                                        | `nmap -sV -p-` no lo clasificó; `ncat -w2 phantomcorp 31337` permitió leer el banner directamente.                               | No identificado: el banner no permite asociarlo de forma verificable a un producto/CVE público.                                                     | N/A                                                                   | Media, valoración provisional                                              | Una conexión TCP recibió un banner que se anuncia como servicio de mantenimiento y expone una flag. No se evaluaron comandos disponibles, autenticación, controles de acceso ni impacto; por ello no se lo clasifica como backdoor ni se afirma que sea una shell utilizable. Requiere inventario y revisión de necesidad, acceso y exposición.                                                    |
 
 Headers relevantes del puerto 80 (extracto):
 
@@ -91,6 +91,7 @@ Evidencia completa, sin editar:
 - [Detección de versión del puerto 8080](evidencia/salidas/nmap-8080.txt).
 - [Respuesta de la raíz del 8080](evidencia/salidas/http8080-root.txt).
 - [Respuesta del endpoint /status del 8080](evidencia/salidas/http8080-status.txt).
+- [Estado final de las cinco flags](evidencia/salidas/ctf-status-05-final.txt).
 
 - [Headers originales de R3](evidencia/salidas/http80-headers.txt).
 - [Respuesta de robots.txt](evidencia/salidas/http80-robots.txt).
@@ -106,21 +107,36 @@ completo (`nmap -Pn -sV -p- phantomcorp`) encontraron los mismos cuatro puertos:
 21, 80, 8080 y 31337. El 31337 aparece en el default porque nmap incluye en su
 lista de los 1000 más frecuentes a ese puerto histórico de backdoors. Lo que el
 default sí se perdió fue la **identificación**: sin `-sV` el puerto figuró como
-`Elite` (un nombre que nmap deduce solo del número de puerto) y recién con `-sV`
-vimos que ahí responde un "maintenance shell" de PhantomCorp. Entonces `-p-` no
-nos sumó un puerto nuevo en este caso, pero la lección operativa es la misma:
-el default cubre 1000 de 65535 puertos, así que cualquier servicio fuera de esa
-lista pasa desapercibido, y un puerto abierto sin versión no es un hallazgo.
-Para los próximos recon hacemos siempre `-p-` con `-sV`, y confiamos en la
-columna VERSION y en el banner, no en la columna SERVICE.
+`Elite` (un nombre que nmap deduce solo del número de puerto). El escaneo con
+`-sV` tampoco clasificó formalmente el servicio: lo mostró como `Elite?`, aunque
+registró su respuesta en el fingerprint. La conexión con `ncat` permitió leer
+el banner directamente y observar que se anuncia como “maintenance shell”.
+
+Entonces `-p-` no sumó un puerto nuevo en esta corrida, pero la lección
+operativa es la misma: el escaneo default cubre 1000 de 65535 puertos y puede
+omitir servicios fuera de esa lista. Un puerto abierto sin versión sigue siendo
+un hallazgo inicial; requiere identificación adicional antes de atribuir
+producto, vulnerabilidad o impacto. En próximos reconocimientos conviene
+combinar `-p-`, `-sV` y verificación manual de los banners, distinguiendo el
+nombre inferido por número de puerto de la identificación obtenida por sondeo.
 
 **P2 — El servicio dev en producción.**
 
-La evidencia concreta está en lo que devuelve el propio servicio. `nmap -Pn -sV -p 8080 phantomcorp` lo identifica como `Werkzeug httpd 2.0.1 (Python 3.9.2)`, que es el servidor de desarrollo de Flask/Werkzeug, no un servidor WSGI de producción como Gunicorn o uWSGI. El header confirma lo mismo: `Server: Werkzeug/2.0.1 Python/3.9.2`. Al pedir la raíz, `curl -sS -i http://phantomcorp:8080/` responde `phantom-dev-api. Proba /status`, y `/status` devuelve JSON con `"version":"0.9.3-DEV"` y `"debug":true`.
+La evidencia concreta está en lo que devuelve el propio servicio. `nmap -Pn -sV -p 8080 phantomcorp` lo identifica como `Werkzeug httpd 2.0.1 (Python 3.9.2)`, que es el servidor de desarrollo de Flask/Werkzeug, no un servidor WSGI de producción como Gunicorn o uWSGI. El encabezado anuncia los mismos datos: `Server: Werkzeug/2.0.1 Python/3.9.2`. Al pedir la raíz, `curl -sS -i http://phantomcorp:8080/` responde `phantom-dev-api. Proba /status`, y `/status` devuelve JSON con `"version":"0.9.3-DEV"` y `"debug":true`.
 
-Esos tres indicios —prefijo `dev`, sufijo `-DEV` y `debug:true`— dicen que es una API de desarrollo. Además corre en el puerto 8080, fuera del 80 del portal corporativo, lo que sugiere que se levantó como excepción y no pasó por los controles del sitio principal.
+Los nombres `phantom-dev-api` y `0.9.3-DEV`, junto con el campo `debug:true`,
+son indicadores observados de una API de desarrollo. La documentación de
+Werkzeug desaconseja usar su servidor de desarrollo para producción (ver
+referencias). Sin embargo, en este laboratorio solo verificamos acceso desde
+la red del laboratorio: no comprobamos publicación en Internet ni el contexto
+real de despliegue.
 
-Es un problema aunque no tenga un CVE conocido porque el riesgo no depende de una vulnerabilidad concreta: el servicio no pide credenciales, expone su estado interno y anuncia producto y versión. Un atacante puede usarlo como punto de entrada para probar el modo debug o para buscar fallas en una versión de desarrollo que nunca fue endurecida. Además, un servicio dev en producción suele quedar fuera de los parches, del monitoreo y de los logs del portal principal. La respuesta `/status` ya incluye `"debug":true` y la flag, así que la fuga de información es real y verificada; no afirmamos ejecución de comandos porque no la probamos.
+El riesgo observado no depende de un CVE: `/status` responde 200 sin
+credenciales y divulga información de producto, versión y configuración, además
+de una flag. Esa información facilita reconocimiento posterior. El campo
+`debug:true` es un dato anunciado por la aplicación; no se verificó que el
+debugger interactivo de Werkzeug estuviera habilitado o accesible. Tampoco se
+evaluaron parches, monitoreo, registros ni ejecución de comandos.
 
 **P3 — La ironía de robots.txt.**
 
@@ -152,20 +168,49 @@ La evidencia demuestra acceso desde el contenedor atacante al panel dentro de la
 
 **P4 — Pasivo vs. activo.**
 
-El reconocimiento pasivo consiste en recopilar información de un objetivo sin interactuar directamente con sus sistemas. En este laboratorio lo practicamos utilizando `whois nmap.org`, con el que obtuvimos datos del registro del dominio, como su fecha de creación y servidores DNS. También utilizamos `dig scanme.nmap.org A`, que nos permitió identificar su dirección IP mediante una consulta DNS.
+El reconocimiento pasivo reúne información ya publicada o recopilada por
+terceros sin enviar solicitudes a la infraestructura del objetivo. El activo,
+en cambio, interactúa con el objetivo para obtener información. En este lab,
+`nmap` contra PhantomCorp, las conexiones `ncat` y las solicitudes `curl`
+fueron reconocimiento activo: generaron tráfico hacia los servicios del target
+y podrían quedar registrados por ellos.
 
-En cambio, el reconocimiento activo implica comunicarse directamente con el objetivo para obtener información. Un ejemplo de esto fue el uso de `nmap` contra PhantomCorp para identificar puertos abiertos y servicios, y de `curl` para consultar las cabeceras HTTP y el archivo `robots.txt`.
+Como práctica separada sobre dominios de prueba, ejecutamos `whois nmap.org` y
+`dig scanme.nmap.org A`; no son acciones de reconocimiento sobre PhantomCorp.
+La consulta WHOIS se dirigió a un servicio de registro. La salida de `dig`
+indica que respondió el resolvedor Docker `127.0.0.11`; por eso, con esta
+evidencia no podemos afirmar si hubo contacto con un servidor autoritativo de
+`scanme.nmap.org` o si la respuesta provenía de caché. Una consulta DNS no es
+automáticamente pasiva: depende de a qué servidor alcance y de qué datos se
+usen. Esta distinción coincide con el análisis desarrollado en `research.md`.
 
-La principal diferencia es la huella que dejamos. Las consultas de WHOIS y DNS se realizaron a servicios externos y no directamente a PhantomCorp, mientras que los escaneos de `nmap`, las conexiones con `ncat` y las solicitudes de `curl` generaron tráfico hacia sus servicios. Estas últimas acciones podrían haber quedado registradas en los logs de PhantomCorp, dependiendo de la configuración del servidor.
-
-Esto nos permitió entender que el reconocimiento pasivo sirve para reunir información inicial con menor interacción directa, mientras que el activo permite conocer con más detalle los servicios expuestos, pero genera tráfico que puede ser detectado.
-
-**Evidencias del reconocimiento pasivo:**
+**Evidencias de consultas WHOIS y DNS:**
 
 - [Consulta WHOIS de nmap.org](evidencia/salidas/p4-whois.txt).
 - [Consulta DNS de scanme.nmap.org](evidencia/salidas/p4-dig.txt).
 
 **P5 — Ahora sos el defensor.**
+
+1. **API de desarrollo en 8080.** Retirar el servicio de desarrollo de la red
+   accesible desde el entorno de usuarios y publicar solamente la aplicación
+   necesaria mediante el canal de producción definido por PhantomCorp. Si
+   `/status` es indispensable para operación, limitarlo a la red de monitoreo
+   o a una VPN y exigir autenticación; la respuesta no debe incluir versión,
+   configuración de depuración ni datos sensibles. Como verificación, desde
+   una red no autorizada el puerto 8080 no debe aparecer abierto. Desde la red
+   autorizada de operación, `/status` debe requerir autenticación y devolver
+   únicamente información mínima. Esta medida reduce la superficie que hoy
+   expone sin credenciales el nombre, versión y estado anunciados por la API.
+
+2. **Servicio no identificado en 31337.** Inventariar el proceso que entrega
+   el banner de mantenimiento y definir si es necesario. Si no lo es, debe
+   deshabilitarse; si es necesario para administración, debe quedar accesible
+   únicamente desde una red administrativa o VPN, con autenticación y registro
+   de accesos. Como verificación, un escaneo desde la red de usuarios no debe
+   encontrar el puerto abierto y el banner no debe divulgar información interna.
+   Esta medida no presupone que el servicio sea una backdoor: reduce la
+   exposición de un componente cuya función y controles no se determinaron en
+   el reconocimiento.
 
 ## 4. Bitácora de comandos
 
@@ -184,7 +229,7 @@ curl -sS -i http://phantomcorp:8080/ | tee /loot/http8080-root.txt
 curl -sS -i http://phantomcorp:8080/status | tee /loot/http8080-status.txt
 ```
 
-Desde Bash de Git, en la raíz del repositorio:
+Desde Bash de Git, en una sesión anterior del laboratorio:
 
 ```bash
 ./ctf submit 05 R3 'FLAG{http_headers_leak_info}'
@@ -193,6 +238,31 @@ Desde Bash de Git, en la raíz del repositorio:
 ./ctf status 05
 ```
 
-Ver [evidencia/comandos.txt](evidencia/comandos.txt): separa las acciones previas informadas por el usuario de las ejecutadas en esta continuación e identifica dónde se ejecuta cada comando. Las salidas originales permanecen en `/loot`, montado como `.loot/` del repositorio, y se copiaron sin edición a `evidencia/salidas/` para versionarlas.
+En una sesión posterior de la consola atacante se repitieron el escaneo completo
+y los banners de R1/R2, que coincidieron con las salidas ya versionadas:
 
-## Pendientes de integración del grupo
+```bash
+nmap -Pn -sV -p- phantomcorp | tee /loot/nmap-sV-all-final.txt
+ncat -w2 phantomcorp 31337 </dev/null | tee /loot/r1-banner-31337-final.txt
+ncat -w2 phantomcorp 21 </dev/null | tee /loot/r2-banner-ftp21-final.txt
+```
+
+Para consolidar el registro de flags se utilizó un checkout temporal con finales
+de línea LF. Allí se enviaron R1 a R5 con `./ctf submit 05 <reto> 'FLAG{...}'`
+y se registró el resultado con:
+
+```bash
+./ctf status 05 | tee .loot/ctf-status-05-final.txt
+```
+
+La salida final se copió a `evidencia/salidas/ctf-status-05-final.txt`.
+
+Ver [evidencia/comandos.txt](evidencia/comandos.txt), que registra acciones de distintas sesiones del laboratorio e identifica dónde se ejecutó cada comando. Las salidas originales permanecieron en `/loot`, montado como `.loot/` del repositorio, y se copiaron sin edición a `evidencia/salidas/` para versionarlas.
+
+## 5. Referencias técnicas
+
+1. NIST National Vulnerability Database. [CVE-2015-3306](https://nvd.nist.gov/vuln/detail/CVE-2015-3306).
+2. Pallets. [Deploying to Production — Werkzeug Documentation](https://werkzeug.palletsprojects.com/en/stable/deployment/).
+3. IETF. [RFC 959 — File Transfer Protocol](https://www.rfc-editor.org/rfc/rfc959).
+4. IETF. [RFC 9309 — Robots Exclusion Protocol](https://www.rfc-editor.org/rfc/rfc9309).
+5. Nmap Project. [Service and Version Detection](https://nmap.org/book/man-version-detection.html).
