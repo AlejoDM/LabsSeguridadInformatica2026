@@ -2,21 +2,32 @@
 
 ## Aporte remoto: escaneos y banners de R1/R2
 
-# Comandos usados, en orden (desde la consola del atacante: make shell)
+# Comandos usados desde la consola del atacante
 
 nmap -Pn phantomcorp > /loot/nmap-default.txt
 nmap -Pn -sV -p- phantomcorp > /loot/nmap-sV-all.txt
 ncat -w2 phantomcorp 31337 </dev/null > /loot/r1-banner-31337.txt
 ncat -w2 phantomcorp 21 </dev/null > /loot/r2-banner-ftp21.txt
-./ctf submit 05 R1 'FLAG{...}'
-./ctf submit 05 R2 'FLAG{...}'
+
+## Consolidación de flags desde Bash de Git
+
+Para evitar la conversión de finales de línea del checkout principal, el
+registro final se ejecutó en un checkout temporal con archivos LF. Las flags
+fueron las observadas en los banners y respuestas del laboratorio:
+
+./ctf submit 05 R1 'FLAG{high_port_secret_service}'
+./ctf submit 05 R2 'FLAG{banner_grab_proftpd_135}'
+./ctf submit 05 R3 'FLAG{http_headers_leak_info}'
+./ctf submit 05 R4 'FLAG{recon_hidden_path}'
+./ctf submit 05 R5 'FLAG{dev_service_exposed}'
+./ctf status 05 > .loot/ctf-status-05-final.txt
 
 ## Aporte local: R3/R4, puerto 80 y P3
 
 Lab 05 — Grupo 06 — 16/10/2026
 Alcance: R3, R4, puerto 80 y P3. Solo phantomcorp, desde cyberlab-attacker.
 
-1. Acciones previas comunicadas por el usuario, dentro de cyberlab-attacker:
+1. Acciones registradas durante una sesión del laboratorio, dentro de cyberlab-attacker:
    curl -I http://phantomcorp
    curl -I http://phantomcorp | tee /loot/http80-headers.txt
    La segunda salida ya existía; se leyó y conservó sin repetir ni sobrescribir.
