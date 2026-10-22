@@ -125,6 +125,12 @@ Los siguientes comandos se ejecutaron contra el contenedor autorizado `phantomco
 dirb http://phantomcorp/ -S
 curl -sS -i http://phantomcorp/backup
 
+# R2 — Repositorio Git expuesto
+curl -sS -i http://phantomcorp/.git/config
+curl -sS -i http://phantomcorp/.git/HEAD
+curl -sS -i http://phantomcorp/.git/logs/HEAD
+curl -sS -i http://phantomcorp/.git/
+
 # R3 — Enumeración de métodos HTTP
 curl -X OPTIONS -i http://phantomcorp/
 nmap --script http-methods,http-enum phantomcorp
@@ -135,6 +141,9 @@ Desde la raíz del repositorio se registraron las flags observadas y se verific�
 ```bash
 # R1
 ./ctf submit 06 R1 'FLAG{dir_enumeration_backup}'
+
+# R2
+./ctf submit 06 R2 'FLAG{git_repo_exposed}'
 
 # R3
 ./ctf submit 06 R3 'FLAG{http_methods_put_enabled}'
