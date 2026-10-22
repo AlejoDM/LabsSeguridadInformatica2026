@@ -94,7 +94,13 @@ Por lo tanto, el reconocimiento respondió qué servicios existían y dónde est
 
 ### P2 — El `.git` expuesto
 
-_Pendiente de completar con la evidencia de R2._
+El servidor web respondió `200` a una petición directa de `http://phantomcorp/.git/config` y devolvió el contenido del archivo, que incluye la URL del remoto `origin` (`https://git.internal.phantomcorp/intranet.git`). Esto confirma que el directorio `.git` del proyecto, pensado para uso local del control de versiones, quedó accesible por HTTP.
+
+El riesgo no depende de que ese único archivo sea sensible en sí mismo, sino de lo que normalmente contiene un `.git` completo: historial de commits, objetos con el código fuente en versiones anteriores y, en proyectos donde no se cuidó qué se versiona, configuraciones o credenciales que luego se removieron del código pero no de la historia. Si todo el directorio fuera descargable, sería posible reconstruir el repositorio completo con herramientas conocidas para ese fin.
+
+En este caso probamos otras rutas típicas (`/.git/HEAD`, `/.git/logs/HEAD`, el listado de `/.git/`) y las tres devolvieron `404`. Eso es una observación, no una garantía: solo demuestra que esas rutas puntuales no están servidas con la configuración actual del servidor, no que el resto del repositorio sea inaccesible por otras vías no probadas, ni que el `config` filtrado carezca de valor. El dato concreto y verificado es la URL del remoto interno, que por sí sola ya es información de infraestructura que normalmente no debería ser pública: le dice a un atacante dónde vive el repositorio real de PhantomCorp.
+
+Como mitigación, el servidor web no debería servir ningún archivo dentro de `.git/` (se soluciona con una regla de bloqueo a nivel de configuración del servidor, no solo ocultando archivos puntuales), y el directorio de publicación del sitio no debería coincidir con la raíz del repositorio de código.
 
 ### P3 — El método `PUT`
 
