@@ -45,6 +45,7 @@ La salida de estado posterior al R1 registra 1 de 5 retos resueltos. El archivo 
 | --------------------------------------------------- | ----------- | --------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Directorio de respaldos accesible sin autenticación | `/backup`   | Enumeración de directorios con `dirb`; confirmación manual con `curl` | `dirb` reportó `/backup` con `200`; la respuesta HTTP lista `respaldo-db-2024.sql.gz` y `config.old`. Ver [salida de dirb](evidencias/lab06-r1-dirb.txt) y [confirmación de `/backup`](evidencias/lab06-r1-backup.txt). | Un tercero con acceso al servicio puede consultar el índice observado. Los nombres de archivos son indicios de datos y configuraciones potencialmente sensibles; no se descargó ni verificó el contenido de esos archivos. | Orienta el análisis posterior hacia respaldos y configuraciones expuestos. Si alguno fuera accesible y contuviera datos o credenciales, podría habilitar nuevas hipótesis de explotación; esa condición no fue verificada en R1. |
 | Método HTTP `PUT` habilitado | `OPTIONS /` — método `PUT` | Enumeración de métodos HTTP con `curl`; corroboración con scripts NSE de Nmap | La respuesta a `OPTIONS` indicó que `PUT` está habilitado y la enumeración con Nmap corroboró el hallazgo. Ver [respuesta OPTIONS](evidencias/lab06-r3-options.txt) y [enumeración con Nmap](evidencias/lab06-r3-nmap-http.txt). | La habilitación de `PUT` amplía la superficie de ataque porque puede permitir enviar contenido a recursos del servidor. En este lab no se comprobó que permita escritura arbitraria ni ejecución de archivos. | Orienta el Lab 07 a verificar de forma controlada si `PUT` permite crear o reemplazar recursos y, solo si se cumplen las condiciones necesarias, evaluar una posible carga de archivos. |
+| Repositorio Git expuesto por HTTP | `/.git/config` | Petición directa con `curl -i` al archivo de configuración del repositorio; verificación de otras rutas del `.git` (`HEAD`, `logs/HEAD`, listado del directorio) | `curl -sS -i http://phantomcorp/.git/config` devolvió `200` con el contenido del archivo, que incluye la URL del remoto `origin` (`https://git.internal.phantomcorp/intranet.git`). Las mismas pruebas contra `/.git/HEAD`, `/.git/logs/HEAD` y `/.git/` devolvieron `404`. Ver [config filtrado](evidencias/lab06-r2-git-config.txt), [HEAD](evidencias/lab06-r2-git-head.txt), [logs/HEAD](evidencias/lab06-r2-git-logs-head.txt) y [listado del directorio](evidencias/lab06-r2-git-index.txt). | Un `.git/config` accesible confirma que el servidor sirve archivos internos del control de versiones y filtra la URL del repositorio origen, información útil para orientar un ataque dirigido a esa infraestructura. En este caso puntual no se pudo acceder a `HEAD`, a los logs ni al listado del directorio, por lo que no está verificado que el repositorio completo (historia, objetos) sea descargable; solo el archivo `config` lo es. |  Orienta el Lab 07 a intentar, de forma controlada, reconstruir el repositorio accesible (por ejemplo con herramientas de volcado de `.git` vía HTTP) solo si se confirma que más rutas del `.git` están expuestas, y a investigar el remoto `origin` filtrado como posible vector adicional. |
 
 ### Evidencia del R1
 
@@ -64,6 +65,22 @@ Para identificar los métodos HTTP habilitados se realizó una petición `OPTION
 Las salidas completas se conservan en [respuesta OPTIONS](evidencias/lab06-r3-options.txt) y [enumeración HTTP con Nmap](evidencias/lab06-r3-nmap-http.txt).
 
 La evidencia permite afirmar que el método `PUT` está habilitado. No se realizaron cargas mediante este método, por lo que no se verificó si permite crear archivos arbitrarios ni si esos archivos podrían ser ejecutados por el servidor.
+
+### Evidencia del R2
+
+Para comprobar la exposición del repositorio se solicitó directamente el archivo de configuración del control de versiones:
+
+```text
+curl -sS -i http://phantomcorp/.git/config
+HTTP/1.0 200 OK
+...
+[remote "origin"]
+	url = https://git.internal.phantomcorp/intranet.git
+```
+
+El servidor respondió `200` y devolvió el contenido del archivo, incluida la URL del remoto `origin`. Para acotar el alcance de la exposición se probaron además otras rutas típicas de un `.git` servido por HTTP: `/.git/HEAD`, `/.git/logs/HEAD` y el listado del directorio `/.git/`. Las tres devolvieron `404`, lo que indica que, en este caso, no todo el repositorio quedó accesible por esta vía, solo el archivo `config`. Las salidas completas se conservan en [config filtrado](evidencias/lab06-r2-git-config.txt), [HEAD](evidencias/lab06-r2-git-head.txt), [logs/HEAD](evidencias/lab06-r2-git-logs-head.txt) y [listado del directorio](evidencias/lab06-r2-git-index.txt).
+
+No se intentó reconstruir el repositorio con herramientas de volcado (por ejemplo `git-dumper`), porque las rutas necesarias para eso no estaban disponibles; esa validación queda fuera del alcance de este hallazgo y se señala como pendiente.
 
 ## 3. Preguntas de análisis
 
