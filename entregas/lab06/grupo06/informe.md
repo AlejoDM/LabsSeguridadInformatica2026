@@ -27,6 +27,12 @@
 - **Partes asistidas:** fila R3 del inventario, respuesta P3 y organización de la bitácora.
 - **Verificación:** los comandos y pruebas fueron ejecutados contra el contenedor `phantomcorp`; las afirmaciones se contrastaron con las salidas originales conservadas en `evidencias/`.
 
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para ejecutar la enumeración de R2 contra `phantomcorp` y para redactar la fila correspondiente del inventario, la sección de evidencia, P2 y la bitácora.
+- **Partes asistidas:** sección "Evidencia del R2" y comandos de R2 en la bitácora.
+- **Verificación:** las peticiones HTTP se ejecutaron contra el contenedor `phantomcorp` desde la consola atacante; las salidas crudas se conservaron sin editar en `evidencias/`. Se revisó el contenido antes de incorporarlo.
+
 ## 1. Flags capturadas
 
 | Reto                                 | Estado    | Evidencia                                                                                                |
