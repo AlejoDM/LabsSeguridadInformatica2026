@@ -32,7 +32,7 @@
 | Reto                                 | Estado    | Evidencia                                                                                                |
 | ------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------- |
 | R1 — Enumeración de directorios      | Resuelto  | [Envío de R1](evidencias/lab06-r1-submit.txt) y [estado posterior](evidencias/lab06-status-after-r1.txt) |
-| R2 — Repositorio Git expuesto        | Pendiente | —                                                                                                        |
+| R2 — Repositorio Git expuesto        | Resuelto  | [config filtrado](evidencias/lab06-r2-git-config.txt) y [envío de R2](evidencias/lab06-r2-submit.txt)    |
 | R3 — Métodos HTTP peligrosos         | Resuelto | [OPTIONS](evidencias/lab06-r3-options.txt) y [Nmap HTTP](evidencias/lab06-r3-nmap-http.txt)                                                                                                        |
 | R4 — Enumeración de usuarios vía API | Pendiente | —                                                                                                        |
 | R5 — Fingerprinting de tecnología    | Pendiente | —                                                                                                        |
