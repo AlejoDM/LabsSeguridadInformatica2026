@@ -19,6 +19,7 @@ Se utilizó Codex (OpenAI) para asistir en la organización de la evidencia, la 
 
 | Reto      | Estado   | Evidencia                                               |
 | --------- | -------- | ------------------------------------------------------- |
+| R1 — Recon | Obtenida | [Salida cruda de R1](evidencia/salidas/r1-recon-opt.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
 | R2 — Loot | Obtenida | [Salida cruda de R2](evidencia/salidas/r2-loot-env.txt) |
 
 La captura final de `./ctf status 08` queda pendiente de integrar cuando el grupo presente los cinco retos.
