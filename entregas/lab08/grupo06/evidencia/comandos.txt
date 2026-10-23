@@ -1,0 +1,15 @@
+# P2 — comandos ejecutados y contexto
+# Entorno: Lab 08 autorizado de CyberLab; host víctima `phantomcorp` como usuario `operador`.
+# Fecha de ejecución: 2026-10-23
+
+# 1. Confirmación de identidad, ubicación de la configuración y lectura de R2.
+# Ejecutado desde el host anfitrión para entrar como `operador` al contenedor víctima:
+docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; echo '--- /var/www ---'; ls -la /var/www; echo '--- .env ---'; cat /var/www/.env 2>&1"
+
+# 2. Evidencia de apoyo para la respuesta P2 sobre pivoting.
+# Ejecutado desde el host anfitrión para entrar como `operador` al contenedor víctima:
+docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; echo '--- consulta al host interno ---'; curl -sS http://phantomcorp-db/ 2>&1"
+
+# 3. Presentación de flags: pendiente de ejecutar desde una instalación Unix/WSL
+# con finales de línea LF. No se registró una salida de `ctf submit` en esta entrega.
+
