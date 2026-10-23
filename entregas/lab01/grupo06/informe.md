@@ -9,17 +9,17 @@
 | **Grupo**                   | 06                                                               |
 | **Caso asignado (Parte A)** | Morris Worm (1988)                                               |
 | **Tema del mini-research**  | Tema 3 — La disponibilidad, la propiedad descuidada de la tríada |
-| **Fecha de entrega**        |    16/10/2026                                                              |
+| **Fecha de entrega**        | 16/10/2026                                                       |
 
 ### Integrantes
 
-| Nombre y apellido  | Legajo | Usuario de GitHub   |
-| ------------------ | ------ | ------------------- |
-| Martín Beccereca   | 15154  | @martinbeccereca    |
-| María Belén Benito | 14625  | @belubenito01       |
-| Alejo De Miguel    | 15138  | @AlejoDM            |
-| Tomás Giudici      | 14977  | @TomasGiudici       |
-| Carolina Suppo     | 15057  | @carosuppo          |
+| Nombre y apellido  | Legajo | Usuario de GitHub |
+| ------------------ | ------ | ----------------- |
+| Martín Beccereca   | 15154  | @martinbeccereca  |
+| María Belén Benito | 14625  | @belubenito603    |
+| Alejo De Miguel    | 15138  | @AlejoDM          |
+| Tomás Giudici      | 14977  | @TomasGiudici     |
+| Carolina Suppo     | 15057  | @carosuppo        |
 
 ---
 
@@ -27,14 +27,14 @@
 
 ## A.1 — Cronología
 
-| Fecha                      | Hecho                                                                                                                                                                                                                                                      | Fuente                                                                                                                                                                                |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1988-11-02 (noche)         | Robert Tappan Morris, estudiante de posgrado de Cornell, libera el gusano desde una máquina del MIT para disimular su origen real.                                                                                                                         | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
-| 1988-11-02/03              | El gusano se propaga explotando cuatro vectores: el modo debug de `sendmail`, desbordamiento de búfer en `fingerd`, relaciones de confianza (`rsh`), credenciales por diccionario (`rexec`).                                                               | [Spafford, E. H., _"The Internet Worm Program: An Analysis"_ (CSD-TR-823)](https://www.cerias.purdue.edu/techreports-ssl/public/823.pdf)                                            |
+| Fecha                      | Hecho                                                                                                                                                                                                                                                      | Fuente                                                                                                                                                                                                                                                                                                                             |
+| -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1988-11-02 (noche)         | Robert Tappan Morris, estudiante de posgrado de Cornell, libera el gusano desde una máquina del MIT para disimular su origen real.                                                                                                                         | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                                                                                                                                                                        |
+| 1988-11-02/03              | El gusano se propaga explotando cuatro vectores: el modo debug de `sendmail`, desbordamiento de búfer en `fingerd`, relaciones de confianza (`rsh`), credenciales por diccionario (`rexec`).                                                               | [Spafford, E. H., _"The Internet Worm Program: An Analysis"_ (CSD-TR-823)](https://www.cerias.purdue.edu/techreports-ssl/public/823.pdf)                                                                                                                                                                                           |
 | 1988-11 (horas siguientes) | Morris programó deliberadamente que 1 de cada 7 respuestas afirmativas de infección previa fuera ignorada para evitar que simularan estar infectados; subestimó la multiplicación resultante, agotando CPU y procesos (~6.000 de ~60.000 hosts afectados). | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html); [Lawrence Livermore National Laboratory, _"The 1988 Morris worm, the internet's first cyberattack"_](https://st.llnl.gov/news/look-back/1988-morris-worm-internets-first-cyberattack) |
-| 1988-11 (días siguientes)  | DARPA encarga al Software Engineering Institute de Carnegie Mellon la creación de un centro de coordinación de emergencias informáticas; nace así el CERT/CC, en respuesta directa a este incidente.                                                       | [Carnegie Mellon University SEI, _"History of Innovation"_](https://www.sei.cmu.edu/history-of-innovation/)                                                                           |
-| 1990-05-16                 | El tribunal de distrito (juez Howard G. Munson, Distrito Norte de Nueva York) dicta sentencia: 3 años de libertad condicional, 400 horas de servicio comunitario y una multa de USD 10.050.                                                                | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
-| 1991-03-07                 | La Corte de Apelaciones del Segundo Circuito confirma la condena.                                                                                                                                                            | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                           |
+| 1988-11 (días siguientes)  | DARPA encarga al Software Engineering Institute de Carnegie Mellon la creación de un centro de coordinación de emergencias informáticas; nace así el CERT/CC, en respuesta directa a este incidente.                                                       | [Carnegie Mellon University SEI, _"History of Innovation"_](https://www.sei.cmu.edu/history-of-innovation/)                                                                                                                                                                                                                        |
+| 1990-05-16                 | El tribunal de distrito (juez Howard G. Munson, Distrito Norte de Nueva York) dicta sentencia: 3 años de libertad condicional, 400 horas de servicio comunitario y una multa de USD 10.050.                                                                | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                                                                                                                                                                        |
+| 1991-03-07                 | La Corte de Apelaciones del Segundo Circuito confirma la condena.                                                                                                                                                                                          | [_United States v. Morris_, 928 F.2d 504 (2d Cir. 1991)](https://law.resource.org/pub/us/case/reporter/F2/928/928.F2d.504.90-1336.774.html)                                                                                                                                                                                        |
 
 ---
 
@@ -50,11 +50,11 @@
 
 ## A.3 — Matriz CIA
 
-| Propiedad | ¿Se violó? | Evidencia concreta |
-| --- | --- | --- |
-| **Confidencialidad** | Afectación de credenciales; sin exfiltración documentada hacia terceros | El gusano accedió y leyó archivos locales como `/etc/passwd` (intentando descifrar contraseñas mediante listas de palabras) y tablas de red para propagarse. Las fuentes consultadas (Spafford, 1988) no documentan exfiltración hacia terceros; sí describen lectura de archivos locales y obtención no autorizada de credenciales. |
-| **Integridad** | No respecto de los datos de usuario; sí respecto del estado del sistema | A nivel de datos y archivos de usuario, ningún documento fue destruido, corrompido ni modificado deliberadamente (_"the Morris worm did not damage or destroy files"_, LLNL). A nivel del sistema operativo existieron modificaciones no autorizadas transitorias (creación de archivos en `/tmp`, inyección de código en `fingerd` y alteración de tablas de procesos), pero el impacto predominante del ataque recayó sobre la disponibilidad. |
-| **Disponibilidad** | Sí | La replicación excesiva del gusano consumió recursos de CPU, memoria y tabla de procesos. Como consecuencia, miles de máquinas (~6.000 de las ~60.000 conectadas a Internet) quedaron inutilizables o severamente degradadas, obligando a numerosas instituciones a desconectarse de la red para desinfectar sus equipos. |
+| Propiedad            | ¿Se violó?                                                              | Evidencia concreta                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| -------------------- | ----------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Confidencialidad** | Afectación de credenciales; sin exfiltración documentada hacia terceros | El gusano accedió y leyó archivos locales como `/etc/passwd` (intentando descifrar contraseñas mediante listas de palabras) y tablas de red para propagarse. Las fuentes consultadas (Spafford, 1988) no documentan exfiltración hacia terceros; sí describen lectura de archivos locales y obtención no autorizada de credenciales.                                                                                                             |
+| **Integridad**       | No respecto de los datos de usuario; sí respecto del estado del sistema | A nivel de datos y archivos de usuario, ningún documento fue destruido, corrompido ni modificado deliberadamente (_"the Morris worm did not damage or destroy files"_, LLNL). A nivel del sistema operativo existieron modificaciones no autorizadas transitorias (creación de archivos en `/tmp`, inyección de código en `fingerd` y alteración de tablas de procesos), pero el impacto predominante del ataque recayó sobre la disponibilidad. |
+| **Disponibilidad**   | Sí                                                                      | La replicación excesiva del gusano consumió recursos de CPU, memoria y tabla de procesos. Como consecuencia, miles de máquinas (~6.000 de las ~60.000 conectadas a Internet) quedaron inutilizables o severamente degradadas, obligando a numerosas instituciones a desconectarse de la red para desinfectar sus equipos.                                                                                                                        |
 
 **Justificación ampliada de la propiedad más discutible:**
 
@@ -64,11 +64,11 @@ Al analizar la **integridad** en el grupo, evaluamos si la creación de copias d
 
 ## A.4 — Encadenamiento amenaza → vulnerabilidad → impacto
 
-| Elemento | En este caso |
-| --- | --- |
-| **Amenaza** _(quién / qué, con qué motivación)_ | El Morris Worm, desarrollado y liberado por Robert Tappan Morris con el objetivo declarado de demostrar deficiencias de seguridad en las redes de computadoras, aunque su propagación terminó teniendo consecuencias mucho mayores a las previstas. |
-| **Vulnerabilidad** _(la debilidad concreta que se explotó)_ | Fallas de seguridad en servicios de sistemas Unix BSD, principalmente el modo debug de `sendmail` y un desbordamiento de búfer en `fingerd`, además del abuso de relaciones de confianza entre hosts y contraseñas débiles susceptibles de ser adivinadas. |
-| **Activo** _(sobre qué recayó)_ | Los recursos de cómputo y la capacidad operativa de las máquinas Unix conectadas a Internet: CPU, memoria, procesos y, de forma secundaria, la conectividad de red. |
+| Elemento                                                     | En este caso                                                                                                                                                                                                                                                |
+| ------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Amenaza** _(quién / qué, con qué motivación)_              | El Morris Worm, desarrollado y liberado por Robert Tappan Morris con el objetivo declarado de demostrar deficiencias de seguridad en las redes de computadoras, aunque su propagación terminó teniendo consecuencias mucho mayores a las previstas.         |
+| **Vulnerabilidad** _(la debilidad concreta que se explotó)_  | Fallas de seguridad en servicios de sistemas Unix BSD, principalmente el modo debug de `sendmail` y un desbordamiento de búfer en `fingerd`, además del abuso de relaciones de confianza entre hosts y contraseñas débiles susceptibles de ser adivinadas.  |
+| **Activo** _(sobre qué recayó)_                              | Los recursos de cómputo y la capacidad operativa de las máquinas Unix conectadas a Internet: CPU, memoria, procesos y, de forma secundaria, la conectividad de red.                                                                                         |
 | **Impacto** _(consecuencia sobre el negocio o las personas)_ | Saturación de recursos, degradación severa del rendimiento, caída o inutilización temporal de equipos y pérdida de disponibilidad de servicios en universidades, organismos gubernamentales, instalaciones militares y otros centros conectados a Internet. |
 
 **Redacción:**
@@ -81,31 +81,29 @@ La amenaza estuvo representada por el Morris Worm y su capacidad de propagarse a
 
 ### Control 1
 
-| | |
-| --- | --- |
-| **Qué es** | Aplicar parches y deshabilitar o restringir las funcionalidades vulnerables de servicios como `sendmail` y `fingerd`, especialmente el modo debug de `sendmail` que permitía ejecutar comandos de manera no autorizada. |
-| **Propiedad de la tríada que protege** | Principalmente **Disponibilidad** e **Integridad**. |
+|                                                     |                                                                                                                                                                                                                                                                                                                    |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **Qué es**                                          | Aplicar parches y deshabilitar o restringir las funcionalidades vulnerables de servicios como `sendmail` y `fingerd`, especialmente el modo debug de `sendmail` que permitía ejecutar comandos de manera no autorizada.                                                                                            |
+| **Propiedad de la tríada que protege**              | Principalmente **Disponibilidad** e **Integridad**.                                                                                                                                                                                                                                                                |
 | **Por qué habría funcionado en este caso concreto** | Dos de los mecanismos utilizados por el Morris Worm para ingresar a otros equipos dependían directamente de vulnerabilidades presentes en `sendmail` y `fingerd`. Eliminar esas fallas habría cerrado importantes vías de propagación y reducido la cantidad de equipos que el gusano podía comprometer y saturar. |
 
 ### Control 2
 
-| | |
-| --- | --- |
-| **Qué es** | Eliminar relaciones de confianza implícitas entre hosts (archivos `.rhosts` y `/etc/hosts.equiv`) y exigir contraseñas resistentes frente a ataques de diccionario. |
-| **Propiedad de la tríada que protege** | **Confidencialidad**, **Integridad** y, en este incidente, especialmente **Disponibilidad**. |
+|                                                     |                                                                                                                                                                                                                                                                                                                                                                                 |
+| --------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Qué es**                                          | Eliminar relaciones de confianza implícitas entre hosts (archivos `.rhosts` y `/etc/hosts.equiv`) y exigir contraseñas resistentes frente a ataques de diccionario.                                                                                                                                                                                                             |
+| **Propiedad de la tríada que protege**              | **Confidencialidad**, **Integridad** y, en este incidente, especialmente **Disponibilidad**.                                                                                                                                                                                                                                                                                    |
 | **Por qué habría funcionado en este caso concreto** | El gusano explotaba dos vías distintas de autenticación: `rsh` aprovechaba la confianza configurada en `.rhosts` para ejecutar comandos sin pedir clave, mientras que `rexec` utilizaba credenciales obtenidas al probar listas de palabras contra `/etc/passwd`. Restringir la confianza ciega y fortalecer las contraseñas habría neutralizado ambos vectores de propagación. |
 
 ---
 
 ## A.6 — Fuentes consultadas (Parte A)
 
-1. United States Court of Appeals for the Second Circuit. (1991). *United States v. Morris, 928 F.2d 504 (2d Cir. 1991).* **Fuente primaria: resolución judicial.**
+1. United States Court of Appeals for the Second Circuit. (1991). _United States v. Morris, 928 F.2d 504 (2d Cir. 1991)._ **Fuente primaria: resolución judicial.**
 
-2. Spafford, E. H. (1988). *The Internet Worm Program: An Analysis* (Technical Report CSD-TR-823). Purdue University, Department of Computer Sciences. **Fuente primaria/técnica: informe técnico elaborado a partir del análisis del gusano.**
+2. Spafford, E. H. (1988). _The Internet Worm Program: An Analysis_ (Technical Report CSD-TR-823). Purdue University, Department of Computer Sciences. **Fuente primaria/técnica: informe técnico elaborado a partir del análisis del gusano.**
 
-3. Lawrence Livermore National Laboratory. (s. f.). *The 1988 Morris worm, the internet's first cyberattack.* **Fuente secundaria/institucional.**
-
-
+3. Lawrence Livermore National Laboratory. (s. f.). _The 1988 Morris worm, the internet's first cyberattack._ **Fuente secundaria/institucional.**
 
 # PARTE B — Integridad con funciones de hash
 
@@ -389,13 +387,13 @@ En su lugar, los estándares modernos de seguridad exigen el uso de funciones de
 
 ## Distribución del trabajo
 
-| Integrante                               | Aportes                                                                                                                                                                                                                       |
-| ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Alejo De Miguel (@AlejoDM)               | Parte A, apertura: Investigación histórica del Morris Worm, redacción de A.1 (Cronología verificada) y A.2 (Activo afectado y justificación).                                                                                 |
-| María Belén Benito (@belubenito01)       | Parte A, cierre: Matriz CIA (A.3), Encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), Controles mitigantes específicos (A.5) y Fuentes A.6.                                                                          |
-| Tomás Giudici (@TomasGiudici)            | Parte B, manifiesto: Implementación de `generar_manifiesto` y `verificar_manifiesto` en `src/integridad.py`, captura de evidencias obligatorias (manifiesto, verificación, prueba de 1 byte), decisiones de B.2 y Pregunta 1. |
-| Carolina Suppo (@carosuppo)              | Parte B, criptografía: Implementación de `distancia_hamming_bits` y `calcular_mac` en `src/integridad.py`, captura de evidencias (avalancha y HMAC), decisiones de B.2 y Preguntas de análisis 2, 3 y 4.                      |
-| Martín Beccereca (@martinbeccereca)      | Mini-research (Tema 3: Disponibilidad y Ransomware), Pregunta de análisis 5 (SHA-256 vs KDFs para contraseñas), armado de `INTEGRANTES.md`, coordinación y cierre del informe, verificación contra rúbrica.                   |
+| Integrante                          | Aportes                                                                                                                                                                                                                       |
+| ----------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alejo De Miguel (@AlejoDM)          | Parte A, apertura: Investigación histórica del Morris Worm, redacción de A.1 (Cronología verificada) y A.2 (Activo afectado y justificación).                                                                                 |
+| María Belén Benito (@belubenito603) | Parte A, cierre: Matriz CIA (A.3), Encadenamiento amenaza→vulnerabilidad→activo→impacto (A.4), Controles mitigantes específicos (A.5) y Fuentes A.6.                                                                          |
+| Tomás Giudici (@TomasGiudici)       | Parte B, manifiesto: Implementación de `generar_manifiesto` y `verificar_manifiesto` en `src/integridad.py`, captura de evidencias obligatorias (manifiesto, verificación, prueba de 1 byte), decisiones de B.2 y Pregunta 1. |
+| Carolina Suppo (@carosuppo)         | Parte B, criptografía: Implementación de `distancia_hamming_bits` y `calcular_mac` en `src/integridad.py`, captura de evidencias (avalancha y HMAC), decisiones de B.2 y Preguntas de análisis 2, 3 y 4.                      |
+| Martín Beccereca (@martinbeccereca) | Mini-research (Tema 3: Disponibilidad y Ransomware), Pregunta de análisis 5 (SHA-256 vs KDFs para contraseñas), armado de `INTEGRANTES.md`, coordinación y cierre del informe, verificación contra rúbrica.                   |
 
 ---
 
@@ -403,9 +401,9 @@ En su lugar, los estándares modernos de seguridad exigen el uso de funciones de
 
 **¿El grupo usó asistentes de IA en este trabajo?** Sí
 
-| Herramienta                                                    | Para qué se usó                                                                | Qué partes del entregable afectó                                                                                                                                              | Cómo se verificó que lo devuelto era correcto                                                                                                                              |
-| -------------------------------------------------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Gemini 3.7 Flash / Gemini Deep Research / Claude Code / ChatGPT | Redacción, estructuración y revisión crítica de estilo y precisión conceptual  | Parte A (A.1 cronología, A.2 activo, A.3 matriz CIA, A.4 encadenamiento, A.5 controles), Parte B (B.1 evidencias, B.2 decisiones, B.3.1 a B.3.5), Mini-research, cierre | Se contrastaron las observaciones con las fuentes accesibles (resolución judicial, Spafford, guías NIST) y se verificó el código y cálculos ejecutando las pruebas reales. |
+| Herramienta                                                     | Para qué se usó                                                               | Qué partes del entregable afectó                                                                                                                                        | Cómo se verificó que lo devuelto era correcto                                                                                                                              |
+| --------------------------------------------------------------- | ----------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Gemini 3.7 Flash / Gemini Deep Research / Claude Code / ChatGPT | Redacción, estructuración y revisión crítica de estilo y precisión conceptual | Parte A (A.1 cronología, A.2 activo, A.3 matriz CIA, A.4 encadenamiento, A.5 controles), Parte B (B.1 evidencias, B.2 decisiones, B.3.1 a B.3.5), Mini-research, cierre | Se contrastaron las observaciones con las fuentes accesibles (resolución judicial, Spafford, guías NIST) y se verificó el código y cálculos ejecutando las pruebas reales. |
 
 **Declaración:**
 
