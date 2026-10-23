@@ -14,5 +14,15 @@ docker exec -e LLM_PROVIDER=mock cyberlab-attacker bash -lc "cd /repo/labs/lab09
 # Presentacion de la flag, ejecutada desde la raiz del repositorio:
 ./ctf submit 09 R1 'FLAG{...}'
 
+# --- P2 — R2: enumeración y seguimiento de robots.txt ---
+# Evidencia usada: pasos 3 y 4 de referencia-mock.txt.
+# El agente solicita /robots.txt y, tras observar la directiva Disallow,
+# consulta una única vez /vault-interno-x7.
+
+# Presentación intentada con el verificador oficial desde una copia temporal
+# normalizada a LF; fue rechazada. La salida completa se conserva en
+# evidencia/salidas/r2-submit-rechazado.txt. No se creó progreso para R2.
+./ctf submit 09 R2 'FLAG{agente_ruta_oculta}'
+
 # --- R5 (pendiente, a cargo de otro responsable) ---
 # LLM_PROVIDER=mock python3 agente_esqueleto.py   (desde entregas/lab09/grupo06/src/)
