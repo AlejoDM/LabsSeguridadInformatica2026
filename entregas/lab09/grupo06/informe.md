@@ -20,6 +20,10 @@
 
 *(salida de `./ctf status 09`, pendiente de completar cuando se resuelvan los 5 retos)*
 
+| Reto | Estado | Evidencia |
+|---|---|---|
+| R1 — Recon inicial | Obtenida | [Transcript de referencia](evidencia/salidas/referencia-mock.txt) (pasos 1-2) y [envío de R1](evidencia/salidas/r1-submit.txt) |
+
 ## 2. Tu agente
 
 *Pendiente del responsable de R5: adjuntar `src/agente_esqueleto.py` completado y su salida trayendo el flag R5.*
