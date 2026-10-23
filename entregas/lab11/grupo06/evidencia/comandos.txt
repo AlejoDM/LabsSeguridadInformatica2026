@@ -1,0 +1,16 @@
+# Comandos de analisis forense ejecutados, en orden (solo lectura; nunca se
+# modifico la evidencia original en labs/lab11-forensia/caso/).
+
+# --- Verificacion de integridad previa (regla de oro: verificar antes de tocar) ---
+cd labs/lab11-forensia/caso
+shasum -a 256 -c evidencia.sha256
+# Nota: en el checkout local de Windows da falso FAILED por conversion CRLF
+# del checkout (core.autocrlf=true). Verificacion de control sin ese problema:
+git show HEAD:labs/lab11-forensia/caso/logs/access.log | sha256sum
+
+# --- R1: vector de entrada / RCE en access.log ---
+grep -n -i -E "cmd=|echo|wget" labs/lab11-forensia/caso/logs/access.log
+# linea 19: cmd=echo%20FLAG%7Bdfir_vector_sqli%7D%20%3E%20/tmp/.p  (URL-encoded)
+# decodificado: echo FLAG{dfir_vector_sqli} > /tmp/.p
+
+./ctf submit 11 R1 'FLAG{dfir_vector_sqli}'
