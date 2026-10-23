@@ -31,6 +31,12 @@
 
 ## 3. Preguntas de análisis
 **P1 — por qué funciona el bypass (con la query).**
+
+El login construye, aparentemente, una consulta del estilo `SELECT * FROM usuarios WHERE user='<user>' AND pass='<pass>'`, insertando directamente los valores recibidos del formulario en el texto SQL. Con `user=test` y `pass=test` la respuesta fue `401 Credenciales invalidas`, lo que confirma que, con datos normales, el servidor evalúa ambas condiciones.
+
+Al enviar `user=admin' --` como payload, la consulta reconstruida queda `SELECT * FROM usuarios WHERE user='admin' --' AND pass='cualquiercosa'`. En SQL, `--` inicia un comentario de línea: todo lo que sigue, incluida la comparación `AND pass='cualquiercosa'` y la comilla de cierre que hubiera quedado descolgada, se descarta. La base de datos termina ejecutando, en los hechos, `SELECT * FROM usuarios WHERE user='admin'`, que es verdadera sin importar qué contraseña se haya mandado.
+
+La causa raíz es que el servidor mezcló **datos** (lo que escribió el usuario) con **código** (la sentencia SQL) en el mismo string, sin separar ambos. Por eso el payload no "adivina" la contraseña: la elimina de la ecuación. La respuesta observada (`200 Bienvenido admin (rol: admin)` con la flag) es consistente con esa reconstrucción, aunque el texto exacto de la consulta en el servidor no es visible desde afuera y queda como inferencia razonada, no como hecho confirmado línea por línea.
 **P2 — por qué el UNION necesita igual número de columnas.**
 **P3 — qué sigue después del RCE.**
 **P4 — por qué parametrizar mata la SQLi.**
