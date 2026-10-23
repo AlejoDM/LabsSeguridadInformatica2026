@@ -13,7 +13,11 @@
 
 ## 0. Declaración de uso de IA
 
-*Pendiente de completar por el grupo.*
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para acceder a la vista `/soc` y capturar su línea base antes de cualquier prueba del grupo, y para redactar la estructura inicial del informe, la fila de R1 en la tabla de flags, el contexto de la vista del SOC y la respuesta a P1.
+- **Partes asistidas:** estructura de `entregas/lab10/grupo06/`, fila "R1 — Vista inicial del SOC" en la tabla de flags, subsección "Contexto de la vista `/soc`" y respuesta a P1.
+- **Verificación:** la consulta a `/soc` se ejecutó con `curl` de solo lectura contra `phantomcorp`, dentro del contenedor `cyberlab-attacker`, antes de generar cualquier tráfico de prueba; la salida se guardó cruda y sin editar en `evidencia/salidas/`. La respuesta a P1 describe limitaciones generales de la detección por firma, citando únicamente lo que el ruleset del lab ya hace explícito en el enunciado de R4 (el espacio exigido por `sqli-union`), sin adelantar trabajo de R2-R5 que corresponde a otros responsables. Se revisó el contenido antes de incorporarlo.
 
 ## 1. Flags capturadas (salida de `./ctf status 10`)
 
