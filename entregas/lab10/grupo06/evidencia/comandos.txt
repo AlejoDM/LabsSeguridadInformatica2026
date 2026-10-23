@@ -14,7 +14,15 @@ curl -sS http://phantomcorp/soc
 # Presentacion de la flag, ejecutada desde la raiz del repositorio:
 ./ctf submit 10 R1 'FLAG{...}'
 
-# --- R2 (pendiente, a cargo de otro responsable): request con User-Agent de prueba ---
+# --- P2 — R2: detección controlada por User-Agent ---
+# Ejecutado desde cyberlab-attacker contra el único objetivo autorizado.
+curl -sS -i -A sqlmap http://phantomcorp/
+# Respuesta 403 y alerta en evidencia/salidas/r2-scanner-ua.txt.
+
+# Flag registrada mediante una copia temporal normalizada a LF: se convirtieron
+# ctf, bibliotecas .sh y retos.manifest; solo se persistió .progreso/10.done.
+./ctf submit 10 R2 'FLAG{detection_triggered}'
+
 # --- R3 (pendiente): consulta a /soc/reglas ---
 # --- R4 (pendiente): evasion controlada de sqli-union ---
 # --- R5 (pendiente): correlacion final sobre el log completo del SOC ---
