@@ -34,6 +34,13 @@
 
 **Aciertos y errores:** *(decisión por decisión)*
 
+| Paso | Acción solicitada | Resultado observado | Evaluación humana |
+|---|---|---|---|
+| 1 | `nmap_scan({'host': 'phantomcorp'})` | `error nmap: Command [...] timed out after 60 seconds` (ver `evidencia/salidas/referencia-mock.txt`, paso 1) | Insuficiente, pero razonable como primer intento: `nmap -sV` es una decisión de recon estándar y coherente con lo practicado en el Lab 05. El error es del entorno (timeout), no una decisión incorrecta del agente. Un operador humano habría reintentado con un escaneo más acotado (por ejemplo, menos puertos o sin `-sV`) en vez de abandonar la vía por completo; el agente, en cambio, pasó directamente a otra tool. |
+| 2 | `http_get({'url': 'http://phantomcorp/'})` | `HTTP 200` con header `X-Recon-Flag: FLAG{agente_primer_recon}` y cuerpo "PhantomCorp Capstone. Auditame." (ver paso 2) | Adecuada: ante el fallo de `nmap_scan`, el agente cambió de tool en vez de insistir con la misma acción fallida, y la petición HTTP directa a la raíz del sitio es la alternativa obvia de recon cuando se sabe (de los labs anteriores) que el objetivo expone un servicio web. Encontró la flag en el primer intento con esa tool, sin pasos redundantes. |
+
+**Límite de esta auditoría:** este análisis cubre únicamente los pasos 1 y 2 (R1); no evalúa R2-R5, que corresponden a otros responsables de la tabla según el reparto del grupo. Tampoco demuestra que el agente "razone" de forma general: en modo `mock` la secuencia de decisiones es fija y determinista, no generada por un LLM real; esa distinción se retoma en P2.
+
 **El guardrail (R4):** *(qué pasó y por qué importa; qué otros agregarían)*
 
 ## 4. Preguntas de análisis
