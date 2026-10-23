@@ -45,6 +45,12 @@
 
 ## 4. Preguntas de análisis
 **P1 — el loop de tool-use.**
+
+El loop de tool-use tiene cuatro piezas que se repiten hasta una condición de corte: (1) el LLM (o, en modo `mock`, el motor determinista que lo reemplaza) decide una acción a partir del objetivo y de lo que ya observó; (2) el programa ejecuta únicamente una herramienta de la allowlist, nunca una acción arbitraria elegida libremente por el modelo; (3) el resultado de esa herramienta se devuelve al modelo como nueva observación; y (4) el ciclo vuelve al paso 1 hasta que el modelo decide finalizar o se alcanza un límite de pasos (`MAX_PASOS`).
+
+En la corrida de referencia (`evidencia/salidas/referencia-mock.txt`) esto se ve en los pasos 1 y 2: en el paso 1 el agente decide `nmap_scan({'host': 'phantomcorp'})`, el programa ejecuta esa tool (no otra), el `nmap` falla por timeout y esa falla —no un éxito— es el resultado que se realimenta. En el paso 2, con esa observación disponible, el agente decide una acción distinta, `http_get` a la raíz del sitio, que sí devuelve la flag de R1. Eso es el loop funcionando: cada decisión se toma en función del resultado anterior, no de una secuencia fija escrita de antemano por una persona.
+
+La condición de fin es la otra mitad del diseño: el loop tiene que poder terminar tanto porque el agente decide una acción "final" (como ocurre al cierre del transcript, con el mensaje "Fin: Auditoría simulada completa") como porque se agota `MAX_PASOS`, para que un modelo que nunca decide finalizar no deje el proceso corriendo indefinidamente. El motor `mock` usado en esta corrida no tiene razonamiento real —sus decisiones están prefijadas—, pero respeta exactamente esta misma estructura de loop, que es la pieza que sí se evalúa en R5 con el esqueleto propio del grupo.
 **P2 — LLM vs. script fijo.**
 **P3 — ventaja del diseño agnóstico.**
 **P4 — dos riesgos y su guardrail.**
