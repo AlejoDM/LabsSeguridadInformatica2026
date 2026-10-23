@@ -19,6 +19,14 @@
 
 *Pendiente de completar cuando se resuelvan los 5 retos.*
 
+| Reto | Estado | Evidencia |
+|---|---|---|
+| R1 — Vista inicial del SOC | Obtenida | [Línea base del SOC](evidencia/salidas/r1-soc-inicial.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
+
+### Contexto de la vista `/soc` (línea base, R1)
+
+`GET /soc` devuelve, antes de cualquier prueba del grupo, 120 líneas de tráfico más el mensaje de acceso con la flag de R1. Cada línea tiene la estructura `<origen> - <método> <ruta> <código> <etiqueta>`: una IP de origen, el verbo y la ruta solicitados, el código HTTP de respuesta y una etiqueta `BENIGN` o `ALERT[<firma>]` con, en algunos casos, un comentario adicional. Esta línea base es la referencia contra la que se compara todo lo que el grupo genere después: cualquier evento nuevo que aparezca tras una prueba propia debe poder explicarse por esa prueba, y todo lo que no se explique así es candidato a intrusión real (R5).
+
 ## 2. Tabla de firmas
 
 | Firma | Cómo se evade | Cómo se mejora la detección |
