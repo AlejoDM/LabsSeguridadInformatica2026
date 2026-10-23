@@ -13,7 +13,11 @@
 
 ## 0. Declaración de uso de IA
 
-*Pendiente de completar por el grupo.*
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para redactar la estructura inicial del informe, la fila R1 del inventario, P1 y la bitácora correspondiente.
+- **Partes asistidas:** informe, fila R1 de la tabla de explotación, respuesta P1 y los comandos de R1 en `evidencia/comandos.txt`.
+- **Verificación:** los payloads se enviaron con `curl --data-urlencode` contra el contenedor `phantomcorp` desde la consola atacante; las respuestas HTTP (línea base y bypass) se conservaron sin editar en `evidencia/salidas/`. La reconstrucción de la consulta SQL es una inferencia razonada a partir de esas respuestas, no una lectura del código del servidor. Se revisó el contenido antes de incorporarlo.
 
 ## 1. Flags capturadas
 
