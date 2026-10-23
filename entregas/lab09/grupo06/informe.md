@@ -14,7 +14,11 @@
 
 ## 0. Declaración de uso de IA
 
-*Pendiente de completar por el grupo.*
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para correr el agente de referencia en modo `mock` contra `phantomcorp`, armar la estructura inicial de la entrega y redactar la fila de R1 en la tabla de flags, la auditoría de los pasos 1-2 del transcript y la respuesta a P1.
+- **Partes asistidas:** estructura de `entregas/lab09/grupo06/`, fila "R1 — Recon inicial" en la tabla de flags, filas de los pasos 1-2 en la tabla de auditoría, y respuesta P1.
+- **Verificación:** el agente de referencia (`agente_pentest.py`) se ejecutó sin modificar, con `LLM_PROVIDER=mock` y sin ninguna API key, dentro del contenedor `cyberlab-attacker`; el transcript completo se guardó sin editar en `evidencia/salidas/referencia-mock.txt`. No se tocó `herramientas.py` ni el guardrail de alcance. Se revisó el contenido antes de incorporarlo.
 
 ## 1. Flags capturadas
 
