@@ -53,6 +53,14 @@ Pendiente del responsable de R5: adjuntar `src/recolector.py` completado y su sa
 
 ## 4. Preguntas de análisis
 
+### P1 — ¿Por qué un binario SUID es peligroso? ¿Qué hace el flag `-p`?
+
+El bit SUID (`set-user-ID`) hace que, al ejecutar el binario, el proceso corra con los permisos del **dueño del archivo**, no con los del usuario que lo invocó. Esto existe para casos legítimos y acotados: por ejemplo, `passwd` necesita escribir en `/etc/shadow`, que un usuario común no puede tocar directamente, así que `passwd` es SUID de `root` para esa única operación controlada. El problema aparece cuando el binario con SUID es una herramienta de propósito general (un intérprete, un editor, una utilidad de archivos, etc.) que además permite ejecutar comandos arbitrarios o leer/escribir rutas arbitrarias. Si ese binario pertenece a `root` y tiene SUID activo, cualquier usuario que pueda invocarlo hereda, para esa invocación, los privilegios de `root` — y si la herramienta permite lanzar un shell o leer cualquier archivo, el usuario limitado termina con acceso de administrador. GTFOBins documenta, para decenas de binarios comunes, la invocación exacta que logra ese efecto.
+
+El flag `-p` aparece en varias de esas invocaciones (por ejemplo en intérpretes o editores que de otro modo *bajarían* sus propios privilegios al detectar que corren con un UID efectivo distinto del real, como medida de seguridad del propio binario). `-p` le indica al programa que **preserve** los privilegios efectivos en vez de resignarlos automáticamente; sin esa opción, el binario podría "notar" que fue invocado vía SUID y renunciar por su cuenta a los privilegios elevados antes de ejecutar nada, frustrando el intento de escalada. Con `-p`, el proceso que arranca —por ejemplo un shell— conserva el UID efectivo de `root` en lugar de caer al UID real del usuario que lo invocó.
+
+Esta respuesta describe el mecanismo general de SUID y de `-p`. La identificación del binario SUID no estándar presente en PhantomCorp, la invocación concreta usada contra él y la evidencia de la escalada lograda corresponden a R3 y quedan a cargo de ese responsable; esta sección no reemplaza esa evidencia.
+
 ### P2 — ¿Por qué el atacante no alcanzaba `phantomcorp-db` y sí pudo hacerlo desde la víctima?
 
 El atacante inicial opera desde la red `labnet`, donde solo está expuesto el host `phantomcorp`. La base `phantomcorp-db` pertenece a una red interna separada y no es alcanzable desde esa consola externa. En cambio, el host víctima participa también en la red interna; por eso, una vez obtenido acceso como `operador`, pudo resolver y consultar `http://phantomcorp-db/`. La salida de apoyo de [pivoting](evidencia/salidas/p2-pivot-apoyo.txt) identifica al servicio como una base interna con acceso restringido a la LAN.
