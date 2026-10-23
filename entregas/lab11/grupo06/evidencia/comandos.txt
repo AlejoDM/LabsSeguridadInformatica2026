@@ -14,3 +14,17 @@ grep -n -i -E "cmd=|echo|wget" labs/lab11-forensia/caso/logs/access.log
 # decodificado: echo FLAG{dfir_vector_sqli} > /tmp/.p
 
 ./ctf submit 11 R1 'FLAG{dfir_vector_sqli}'
+
+# --- P2: webshell en disco y correlación log–disco ---
+# Se leyeron los artefactos; no se ejecutó ni modificó shell.php.evidencia.txt.
+Get-Content labs/lab11-forensia/caso/disco/listado.txt
+Get-Content labs/lab11-forensia/caso/disco/var/www/uploads/shell.php.evidencia.txt
+rg -n -i 'shell\.php|uploads|wget' labs/lab11-forensia/caso/logs/access.log
+
+# --- P4: recuperación de comandos luego de history -c ---
+Get-Content labs/lab11-forensia/caso/memoria/bash_history.txt
+
+# Presentación de R2 desde una copia temporal normalizada a LF: se convirtieron
+# el verificador, sus bibliotecas .sh y el manifiesto del Lab 11. Aceptada;
+# solo se persistió .progreso/11.done en el checkout.
+./ctf submit 11 R2 'FLAG{dfir_webshell_hallado}'
