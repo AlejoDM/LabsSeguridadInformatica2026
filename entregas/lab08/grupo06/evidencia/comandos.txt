@@ -1,5 +1,16 @@
-# P2 — comandos ejecutados y contexto
-# Entorno: Lab 08 autorizado de CyberLab; host víctima `phantomcorp` como usuario `operador`.
+# Comandos ejecutados y contexto — Lab 08
+# Entorno: Lab 08 autorizado de CyberLab; host víctima `phantomcorp` (make shell-victima
+# / `docker exec -u operador`), salvo que se indique otro punto de vista.
+
+# --- P1 — R1: reconocimiento del host comprometido ---
+# Fecha de ejecución: 2026-10-23
+# Ejecutado desde el host anfitrión para entrar como `operador` al contenedor víctima:
+docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; hostname -I; echo '--- /opt ---'; ls -la /opt; echo '--- /opt/phantom-deploy ---'; ls -la /opt/phantom-deploy; echo '--- DEPLOY_NOTES.txt ---'; cat /opt/phantom-deploy/DEPLOY_NOTES.txt"
+
+# Presentación de la flag, ejecutada desde la raíz del repositorio:
+./ctf submit 08 R1 'FLAG{...}'
+
+# --- P2 — comandos ejecutados y contexto ---
 # Fecha de ejecución: 2026-10-23
 
 # 1. Confirmación de identidad, ubicación de la configuración y lectura de R2.
