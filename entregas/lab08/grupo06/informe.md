@@ -15,6 +15,12 @@
 
 Se utilizó Codex (OpenAI) para asistir en la organización de la evidencia, la redacción inicial de la fila de Loot, la respuesta P2 y el mini-research. Las credenciales y flags consignadas se verificaron mediante comandos ejecutados por el equipo dentro del entorno autorizado del Lab 08; las fuentes del research fueron leídas y contrastadas antes de incorporarlas. El grupo debe revisar este texto, completar los datos de integrantes y declarar cualquier otra herramienta utilizada.
 
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para ejecutar el reconocimiento de R1 contra el host víctima (`/opt`) y la consolidación de `comandos.txt`.
+- **Partes asistidas:** fila "R1 — Recon" en la tabla de flags, fila "Recon (R1)" y su análisis en la tabla de post-explotación y sección de comandos de R1 en `evidencia/comandos.txt`.
+- **Verificación:** los comandos se ejecutaron como `operador` y la salida se guardó cruda y sin editar en `evidencia/salidas/`. Se revisó el contenido antes de incorporarlo.
+
 ## 1. Flags capturadas
 
 | Reto      | Estado   | Evidencia                                               |
