@@ -1,0 +1,18 @@
+# Comandos ejecutados, en orden. Proveedor: mock (offline, sin API key).
+# Entorno: Lab 09 levantado con Docker; comandos corridos dentro de la consola
+# atacante (cyberlab-attacker) salvo que se indique lo contrario.
+
+# --- Linea base: corrida completa del agente de referencia (R1-R4) ---
+# Ejecutado desde el host anfitrion, entrando a la consola atacante:
+docker exec -e LLM_PROVIDER=mock cyberlab-attacker bash -lc "cd /repo/labs/lab09-agentes/src && python3 agente_pentest.py"
+# Salida completa, sin editar, en evidencia/salidas/referencia-mock.txt
+
+# --- P1 — R1: recon inicial ---
+# La flag de R1 (FLAG{agente_primer_recon}) sale en el paso 2 del transcript
+# de referencia (http_get a http://phantomcorp/), header X-Recon-Flag.
+
+# Presentacion de la flag, ejecutada desde la raiz del repositorio:
+./ctf submit 09 R1 'FLAG{...}'
+
+# --- R5 (pendiente, a cargo de otro responsable) ---
+# LLM_PROVIDER=mock python3 agente_esqueleto.py   (desde entregas/lab09/grupo06/src/)
