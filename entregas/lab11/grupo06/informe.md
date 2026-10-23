@@ -40,7 +40,7 @@ Como control, se calculó el hash de `logs/access.log` contra el contenido tal c
 
 | Tipo | Valor | Dónde apareció |
 |---|---|---|
-| IP atacante | | |
+| IP atacante | `185.220.101.42` | `logs/access.log:18-20`: origen de las tres peticiones al endpoint `/api/reporte?cmd=` (probe `id`, marcador de RCE, descarga del webshell). Es la IP que aparece en el log; no se verificó identidad real detrás de ella. |
 | IP/puerto C2 | | |
 | Archivo malicioso | | |
 | Usuario backdoor | | |
