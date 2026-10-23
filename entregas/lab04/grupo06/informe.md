@@ -5,7 +5,7 @@
 | Nombre y apellido    | Usuario de GitHub |
 | -------------------- | ----------------- |
 | Martín Beccereca     | martinbeccereca   |
-| Belén Benito         | belubenito01      |
+| Belén Benito         | belubenito603     |
 | Alejo José De Miguel | AlejoDM           |
 | Tomás Giudici        | TomasGiudici      |
 | Carolina Suppo       | carosuppo         |
