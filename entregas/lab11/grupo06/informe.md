@@ -14,7 +14,11 @@
 
 ## 0. Declaración de uso de IA
 
-*Pendiente de completar por el grupo.*
+**Herramienta:** Claude Code.
+
+- **Finalidad del uso:** apoyo para ejecutar el análisis de R1 (vector de entrada/RCE en `access.log`) y para redactar la estructura inicial del informe.
+- **Partes asistidas:** estructura del informe, nota de custodia de R1 en la sección 2, y la respuesta a P1.
+- **Verificación:** la búsqueda en `logs/access.log` se hizo con `grep` sin modificar el archivo original; la decodificación URL del parámetro `cmd` se hizo sobre el string extraído, no sobre el log. La discrepancia de `shasum -a 256 -c` en el checkout local se confirmó como un artefacto de conversión de finales de línea de Windows al comparar contra el contenido comiteado en git. Se revisó el contenido antes de incorporarlo.
 
 ## 1. Resumen del incidente
 
