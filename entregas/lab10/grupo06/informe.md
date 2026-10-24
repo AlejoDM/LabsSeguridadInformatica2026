@@ -23,7 +23,12 @@
 
 - **Finalidad del uso:** apoyo para ejecutar y documentar R2 dentro del contenedor autorizado, y para redactar la fila `scanner-ua` y la respuesta P2.
 - **Partes asistidas:** evidencia de la alerta R2, registro de la flag, tabla de firmas para `scanner-ua`, respuesta P2 y bitácora.
-- **Verificación:** la solicitud usó únicamente `curl -A sqlmap http://phantomcorp/` desde `cyberlab-attacker`; se contrastó el texto del informe contra la respuesta HTTP cruda y el verificador oficial. El equipo debe revisar este texto y conservar esta declaración si representa el uso real de IA.
+- **Verificación:** la solicitud usó únicamente `curl -A sqlmap http://phantomcorp/` desde `cyberlab-attacker`; se contrastó el texto del informe contra la respuesta HTTP cruda y el verificador oficial.
+
+**Herramienta:** Codex (OpenAI).
+
+**Finalidad y partes asistidas:** apoyo para la ejecución de R3 y revisión limitada del aporte P2.
+**Verificación realizada:** contraste con el ruleset HTTP real, aceptación de la flag por el motor oficial y comprobaciones locales de la expresión propuesta.
 
 ## 1. Flags capturadas (salida de `./ctf status 10`)
 
@@ -32,6 +37,7 @@
 | Reto | Estado | Evidencia |
 |---|---|---|
 | R1 — Vista inicial del SOC | Obtenida | [Línea base del SOC](evidencia/salidas/r1-soc-inicial.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
+| R3 — Ruleset publicado | Obtenida y aceptada en esta sesión | [Ruleset original](evidencia/salidas/r3-ruleset.txt), [envío R3](evidencia/salidas/r3-submit.txt) y [estado parcial](evidencia/salidas/status-10-p3.txt) |
 | R2 — Detección por User-Agent | Obtenida | [Respuesta y alerta `scanner-ua`](evidencia/salidas/r2-scanner-ua.txt) y [envío de R2](evidencia/salidas/r2-submit.txt) |
 
 ### Contexto de la vista `/soc` (línea base, R1)
@@ -42,8 +48,8 @@
 
 | Firma | Cómo se evade | Cómo se mejora la detección |
 |---|---|---|
-| scanner-ua | La detección observada depende de que el cliente declare literalmente `sqlmap`; por lo tanto, un atacante podría declarar una User-Agent de navegador y evitar esta firma aislada. Esto describe una limitación del control dentro del laboratorio; no se realizó esa prueba de evasión. | No usar la User-Agent como decisión única. Conservarla como señal de baja confianza y correlacionarla con método/ruta, errores, velocidad y variedad de requests, parámetros anómalos y secuencias de enumeración. Aplicar límites de tasa y detecciones de comportamiento, y corregir la vulnerabilidad de la aplicación para que una solicitud sospechosa no implique compromiso. |
-| sqli-union | | |
+| scanner-ua | La detección observada depende de que el cliente declare literalmente `sqlmap`; por lo tanto, un atacante podría declarar una User-Agent de navegador y evitar esta firma aislada. Esto describe una limitación del control dentro del laboratorio; no se realizó esa prueba de evasión. | No usar la User-Agent como decisión única. El ruleset R3 publica coincidencias con `sqlmap|nikto|nmap|dirb`; no acredita herramientas reales ni intención. Conservarla como señal de baja confianza y correlacionarla con método/ruta, errores, velocidad y variedad de requests, parámetros anómalos y secuencias de enumeración. Aplicar límites de tasa y detecciones de comportamiento, y corregir la vulnerabilidad de la aplicación para que una solicitud sospechosa no implique compromiso. |
+| sqli-union | |
 
 ## 3. Preguntas P1–P5
 
@@ -55,15 +61,19 @@ Esto no es un defecto corregible de una vez: es una limitación estructural de c
 
 **P2.** La firma `sqli-union` exigía un espacio. Reescribí la regla para que NO se evada con `/**/`. ¿Se puede hacer una firma "perfecta"?
 
-Una mejora puntual de la firma puede aceptar tanto separadores de espacio como comentarios de bloque entre las palabras, por ejemplo:
+La fuente observada es [el ruleset crudo de R3](evidencia/salidas/r3-ruleset.txt): `el query matchea /union\s+select/`. Aunque su nota dice «un ESPACIO», `\s+` normalmente expresa uno o más caracteres de espacio en blanco, no exclusivamente un espacio ASCII. No se inspeccionó la implementación: el modo de comparación, la decodificación y el motor no se deducen de esa descripción. La limitación relevante es que un comentario no coincide con `\s+`.
+
+Una propuesta conceptual, en sintaxis de expresiones regulares de Python, es:
 
 ```text
-(?i)\bunion(?:\s|/\*.*?\*/)+select\b
+(?i)\bunion(?:\s|/\*[\s\S]*?\*/)+select\b
 ```
 
-Antes de aplicarla, el WAF debería imponer límites de longitud/tiempo y normalizar la entrada: decodificar URL de forma controlada, tratar un comentario SQL de bloque como separador, plegar mayúsculas/minúsculas y compactar espacios. Después de esa canonicalización, una regla más simple como `(?i)\bunion\s+select\b` también reconoce `UNION/**/SELECT`, porque el comentario ya se representó como espacio. La normalización debe registrarse y probarse para no introducir ambigüedades ni bloquear tráfico legítimo de manera indiscriminada.
+El modificador `(?i)` ignora mayúsculas; los límites `\b` delimitan las palabras; el grupo repetido acepta espacios en blanco o comentarios de bloque completos, incluso combinados. `[\s\S]*?` incluye saltos de línea y termina en el primer cierre del comentario. Así reconoce `UNION/**/SELECT`, además de `UNION SELECT` y mezclas de ambos separadores. Es una propuesta para detección: no se instaló ni se probó una evasión HTTP de R4.
 
-No existe una firma perfecta. SQL admite variantes por dialecto, comentarios, codificaciones, operadores equivalentes y consultas legítimas que pueden parecerse a un ataque; a la vez, una regla muy amplia genera falsos positivos. La firma sirve como señal y barrera adicional, pero la defensa principal es que la aplicación use consultas parametrizadas, validación del lado servidor y privilegios mínimos de base de datos. Correlación de contexto y revisión humana complementan la regla cuando el riesgo o el impacto lo justifican.
+Antes de inspeccionar, extraer el parámetro con la misma decodificación que la aplicación, con límites de tamaño y costo de procesamiento. Una alternativa es canonicalizar comentarios ordinarios como espacios y aplicar `(?i)\bunion\s+select\b`. Esto requiere un analizador compatible con el dialecto y contexto: no eliminar comentarios dentro de cadenas ni tratar comentarios ejecutables de ciertos dialectos como si fueran espacios inocuos. Conservar tanto el original como la representación normalizada permite auditar la decisión. No decodificar repetidamente sin límite.
+
+No hay una firma perfecta: esta propuesta cubre el separador solicitado, pero no todo SQLi, variantes de dialecto o diferencias entre parsers. Texto legítimo como documentación que incluya `UNION/**/SELECT` también podría coincidir. Se deben evaluar falsos positivos con tráfico representativo, acotar la inspección por contexto y probar regresiones. La aplicación debe usar consultas parametrizadas, validación de entradas y privilegios mínimos de BD; correlación y revisión humana complementan las alertas. Una coincidencia de regex no prueba explotación ni compromiso.
 
 **P3.** Detectar por User-Agent: ¿por qué es una detección débil? ¿Qué mirarías en lugar de "quién dice ser"?
 
@@ -72,3 +82,41 @@ No existe una firma perfecta. SQL admite variantes por dialecto, comentarios, co
 **P5.** Cierre del curso: recorriste ataque (05–08), agentes (09) y defensa (10). ¿Qué cambió en cómo pensás la seguridad?
 
 ## 4. Bitácora
+
+### P3 — Consulta del ruleset y validación de R3 (2026-10-23)
+
+Los comandos HTTP se ejecutaron desde `cyberlab-attacker`, la misma consola usada por `make shell`, mediante `docker exec` en modo no interactivo. Los comandos de administración de Docker se ejecutaron desde la raíz del repositorio en el host. El registro ampliado se conserva en [evidencia/comandos.txt](evidencia/comandos.txt).
+
+1. **Consulta inicial y diagnóstico.** Se consultó el ruleset:
+
+   ```bash
+   docker exec cyberlab-attacker bash -c 'curl -sS http://phantomcorp/soc/reglas'
+   docker inspect cyberlab-phantomcorp --format '{{index .Config.Labels "com.docker.compose.project.config_files"}}'
+   docker exec cyberlab-attacker bash -c 'curl -sS -i http://phantomcorp/'
+   ```
+
+   La primera consulta devolvió `Not Found` ([salida conservada](evidencia/salidas/r3-intento-target-lab09.txt)). Las etiquetas del contenedor indicaron el compose de Lab 09 y el portal respondió con el banner `PhantomCapstone/1.0`.
+
+2. **Activación del target correcto y captura de R3.**
+
+   ```powershell
+   docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/lab10-deteccion-evasion/entorno/target.compose.yml up -d --build phantomcorp
+   docker exec cyberlab-attacker bash -c 'curl -sS http://phantomcorp/soc/reglas' > entregas/lab10/grupo06/evidencia/salidas/r3-ruleset.txt
+   ```
+
+   El [ruleset obtenido](evidencia/salidas/r3-ruleset.txt) publicó cuatro firmas y la flag de R3. El reemplazo del target inició otra sesión: sus logs no deben considerarse una continuación de la línea base anterior de R1.
+
+3. **Validación de la flag y consulta del progreso.** Por los finales de línea CRLF de Windows, el motor se ejecutó en una copia temporal normalizada a LF dentro del contenedor, sin alterar sus archivos originales. Desde la raíz de esa copia se ejecutó:
+
+   ```bash
+   bash ./ctf submit 10 R3 'FLAG{signature_ruleset}'
+   bash ./ctf status 10
+   ```
+
+   El verificador [aceptó R3](evidencia/salidas/r3-submit.txt). El [estado parcial](evidencia/salidas/status-10-p3.txt) mostró únicamente R3, 1/5: no se encontró el archivo de progreso anterior al preparar la copia. Se conservan las evidencias históricas de R1/R2 sin atribuirles validación actual. Se copió el progreso generado al host mediante:
+
+   ```powershell
+   docker cp cyberlab-attacker:/tmp/lab10-p3/.progreso/10.done .progreso/10.done
+   ```
+
+4. **Comprobación de la regla propuesta para P2.** Se envió un script por entrada estándar a `docker exec -i cyberlab-attacker python3 -`. Los [ocho casos locales](evidencia/salidas/p3-regresion-regla.txt) verificaron espacios, comentarios, límites de palabras y un posible falso positivo. No generaron solicitudes HTTP ni constituyen una ejecución de R4.

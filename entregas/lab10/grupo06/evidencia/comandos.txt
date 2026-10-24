@@ -26,3 +26,25 @@ curl -sS -i -A sqlmap http://phantomcorp/
 # --- R3 (pendiente): consulta a /soc/reglas ---
 # --- R4 (pendiente): evasion controlada de sqli-union ---
 # --- R5 (pendiente): correlacion final sobre el log completo del SOC ---
+
+# --- P3 — R3: ruleset publicado (2026-10-23) ---
+# Desde PowerShell: docker exec cyberlab-attacker bash -c '<comando>'
+# Misma consola atacante utilizada por make shell, en modo no interactivo.
+# Consulta única, salida cruda redirigida en el host:
+curl -sS http://phantomcorp/soc/reglas > evidencia/salidas/r3-ruleset.txt
+# Corrección: la primera salida fue Not Found; se conservó como r3-intento-target-lab09.txt.
+# Diagnóstico en host: docker inspect confirmó compose de Lab 09.
+# También se consultó curl -sS -i http://phantomcorp/ desde atacante: banner PhantomCapstone/1.0.
+# Se activa únicamente el target del Lab 10 (equivalente a make lab N=10):
+docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/lab10-deteccion-evasion/entorno/target.compose.yml up -d --build phantomcorp
+# Consulta R3 al target Lab 10, desde cyberlab-attacker:
+curl -sS http://phantomcorp/soc/reglas > evidencia/salidas/r3-ruleset.txt
+# Envío R3 con el verificador oficial en copia temporal LF (originales intactos).
+# Se copian ctf, bin/lib, manifest opaco y progreso a /tmp/lab10-p3; sed elimina CR.
+# Desde la raíz temporal: ./ctf submit 10 R3 'FLAG{signature_ruleset}'
+# Luego ./ctf status 10; se copia únicamente 10.done a .progreso local.
+
+# Verificación local: se envió un script Python por stdin a docker exec -i cyberlab-attacker python3 -.
+# Ocho casos de regex, sin solicitudes HTTP; salida en salidas/p3-regresion-regla.txt.
+# Casos: espacio, comentario vacío, comentario multilínea, tabulación, palabras pegadas,
+# prefijo reunion, comentario sin cierre y texto documental (posible falso positivo).
