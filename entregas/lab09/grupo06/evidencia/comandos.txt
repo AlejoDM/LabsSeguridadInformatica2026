@@ -26,3 +26,32 @@ docker exec -e LLM_PROVIDER=mock cyberlab-attacker bash -lc "cd /repo/labs/lab09
 
 # --- R5 (pendiente, a cargo de otro responsable) ---
 # LLM_PROVIDER=mock python3 agente_esqueleto.py   (desde entregas/lab09/grupo06/src/)
+
+# --- P3 — R3: API de debug expuesta ---
+# Fecha: 2026-10-23
+# Proveedor utilizado: mock (sin API key)
+
+# 1. Ejecución del agente de referencia desde Git Bash.
+# El agente se ejecutó dentro de cyberlab-attacker.
+docker exec -e LLM_PROVIDER=mock cyberlab-attacker bash -lc "cd /repo/labs/lab09-agentes/src && python3 -u agente_pentest.py" | tee .loot/lab09-r3-repeticion.txt
+
+# 2. Resultado observado en el paso 5:
+# http_get({'url': 'http://phantomcorp/api/debug'})
+# HTTP 200
+# {"debug": true, "flag": "FLAG{agente_api_expuesta}"}
+
+# 3. Los intentos anteriores de registrar R3 fueron rechazados.
+# Las salidas originales se conservaron en evidencia/salidas/.
+# Posteriormente se comprobó que el hash de la flag coincidía
+# con el esperado por el verificador local.
+
+# 4. Registro exitoso desde Git Bash, en la raíz del repositorio.
+./ctf submit 09 R3 'FLAG{agente_api_expuesta}'
+
+# Resultado:
+# [ OK ] Reto R3 resuelto: El agente detecta la API expuesta
+
+# 5. Comprobación del progreso.
+./ctf status 09 | tee entregas/lab09/grupo06/evidencia/salidas/r3-status-confirmado.txt
+
+# Resultado observado: R3 resuelto, progreso local 1/5.

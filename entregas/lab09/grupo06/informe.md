@@ -26,6 +26,12 @@
 - **Partes asistidas:** fila R2 de flags, pasos 3–4 de la auditoría, respuesta P2, `research.md` y la bitácora de comandos.
 - **Verificación:** se contrastó cada afirmación de R2 con el transcript crudo. Las fuentes del research se abrieron y leyeron antes de citarlas. El equipo debe revisar el texto y conservar esta declaración si representa el uso real de herramientas de IA.
 
+
+**Herramienta:** Codex (OpenAI), aporte P3.
+
+- **Finalidad y partes asistidas:** documentación de R3 y del paso 5, síntesis de aciertos y errores P1–P3, ayuda en redacción de respuesta P3 y revisión cruzada de P1.
+- **Verificación:** contraste con el transcript crudo existente y con `llm.py`, `herramientas.py` y el esqueleto públicos, sin leer el target ni soluciones. Se intentó presentar exclusivamente R3 al verificador oficial local y se guardó su rechazo sin alterarlo. No se probaron APIs externas ni se realizaron commits o acciones en GitHub.
+
 ## 1. Flags capturadas
 
 *(salida de `./ctf status 09`, pendiente de completar cuando se resuelvan los 5 retos)*
@@ -34,6 +40,7 @@
 |---|---|---|
 | R1 — Recon inicial | Obtenida | [Transcript de referencia](evidencia/salidas/referencia-mock.txt) (pasos 1-2) y [envío de R1](evidencia/salidas/r1-submit.txt) |
 | R2 — Pista en `robots.txt` | Observada; registro pendiente | [Transcript de referencia](evidencia/salidas/referencia-mock.txt) (pasos 3-4) y [resultado del verificador](evidencia/salidas/r2-submit-rechazado.txt). El target devolvió `FLAG{agente_ruta_oculta}`, pero el verificador oficial la rechazó; no se afirma que R2 haya quedado registrada. |
+| R3 — API de debug expuesta | Obtenida | [Transcript del agente](evidencia/salidas/referencia-mock.txt), paso 5: `HTTP 200` y `FLAG{agente_api_expuesta}`. La flag fue aceptada mediante `./ctf submit 09 R3`. Ver [estado confirmado](evidencia/salidas/r3-status-confirmado.txt). |
 
 ## 2. Tu agente
 
@@ -51,9 +58,30 @@
 | 2 | `http_get({'url': 'http://phantomcorp/'})` | `HTTP 200` con header `X-Recon-Flag: FLAG{agente_primer_recon}` y cuerpo "PhantomCorp Capstone. Auditame." (ver paso 2) | Adecuada: ante el fallo de `nmap_scan`, el agente cambió de tool en vez de insistir con la misma acción fallida, y la petición HTTP directa a la raíz del sitio es la alternativa obvia de recon cuando se sabe (de los labs anteriores) que el objetivo expone un servicio web. Encontró la flag en el primer intento con esa tool, sin pasos redundantes. |
 | 3 | `http_get({'url': 'http://phantomcorp/robots.txt'})` | `HTTP 200` con `Disallow: /vault-interno-x7` (ver paso 3 del transcript). | Adecuada: `robots.txt` es una fuente de enumeración de bajo impacto y su directiva entregó una pista concreta. El archivo no impone control de acceso; solo comunica una preferencia a rastreadores. En un servicio real, la ruta puede no existir o estar protegida, por lo que aún era necesario confirmarla. |
 | 4 | `http_get({'url': 'http://phantomcorp/vault-interno-x7'})` | `HTTP 200` y `Ruta interna. FLAG{agente_ruta_oculta}` (ver paso 4). | Adecuada y eficiente: el agente convirtió la pista observada en una única consulta de confirmación, sin ampliar el alcance ni adivinar rutas adicionales. El resultado demuestra acceso al recurso en este entorno, no que toda ruta listada en un `robots.txt` sea sensible o accesible en otros sistemas. |
+| 5 | `http_get({'url': 'http://phantomcorp/api/debug'})` | `HTTP 200`, `Content-Type: application/json` y `{"debug": true, "flag": "FLAG{agente_api_expuesta}"}` (paso 5 del transcript crudo). | Adecuada para confirmar exposición: una sola consulta obtiene una respuesta de debug con una flag, sin repetir peticiones ni salir de `phantomcorp`. No demuestra descubrimiento adaptativo: `ClienteMock.PLAN` ya contiene `/api/debug` y los resultados anteriores no muestran una pista hacia esa API. Un humano debe distinguir esta comprobación de una enumeración que hubiera descubierto la ruta. |
 
-**Límite de esta auditoría:** este análisis cubre los pasos 1–4 (R1 y R2); no evalúa R3-R5, que corresponden a otros responsables de la tabla según el reparto del grupo. Tampoco demuestra que el agente "razone" de forma general: en modo `mock` la secuencia de decisiones es fija y determinista, no generada por un LLM real; esa distinción se retoma en P2.
+### Síntesis de aciertos y errores P1–P3
 
+- **Observaciones:** los pasos 1–5 contienen un timeout de nmap y cuatro GET exitosos. `robots.txt` expone una ruta que el paso 4 confirma; el paso 5 confirma una API de debug accesible en esta corrida. No hay peticiones repetidas entre esos cinco pasos. Se conservan intactos los hechos y el transcript aportados por P1 y P2.
+- **Eficiencia y límites:** consultar la ruta publicada y comprobar debug con un GET por recurso es económico. El timeout consumió 60 segundos sin aportar servicios identificados. Su causa no está demostrada: podría requerir diagnóstico del entorno o del escaneo. La tool actual fija las opciones de nmap; cambiar puertos u opciones exigiría otro mecanismo autorizado, que no se implementó en este aporte.
+- **Inferencia acotada:** que un GET suceda después de un timeout, o que una ruta coincida con una pista anterior, no demuestra que el motor haya reaccionado a esas observaciones. `ClienteMock.paso` ignora `resultados` y recorre `PLAN`; por ello tampoco prueba que el agente hubiera seguido una ruta distinta si cambiara la respuesta del target.
+- **R3:** La respuesta HTTP 200 y el JSON obtenido en el paso 5 demuestran que la API de depuración estaba accesible y devolvió `FLAG{agente_api_expuesta}`. Aunque los primeros intentos de registrar la flag fueron rechazados por el verificador local, posteriormente `./ctf submit 09 R3` la aceptó correctamente. El archivo `evidencia/salidas/r3-status-confirmado.txt` confirma que R3 quedó registrado como resuelto. Esto no demuestra exposición de otros datos, privilegios adicionales ni razonamiento autónomo de un LLM real, ya que utilizamos el proveedor `mock`.
+
+**Límite de esta auditoría:** la integración cubre los pasos 1–5 (R1–R3). R4 y R5 quedan a sus responsables. La corrida existente usa mock determinista; no se ensayaron proveedores externos.
+
+### Revisión cruzada de P1 por P3
+
+Revisión documental de los pasos 1–2 y P1, sin reescribir el aporte original:
+
+| Afirmación revisada | Estado | Evidencia y corrección propuesta |
+|---|---|---|
+| Paso 1 con timeout y paso 2 con HTTP 200 y flag en header | Respaldada | Coincide con `evidencia/salidas/referencia-mock.txt`. |
+| El error de nmap es del entorno | Parcial | El timeout está observado, pero su causa no. Presentarlo como causa por diagnosticar. |
+| El agente cambió de tool por el fallo anterior y cada decisión depende de la observación | Requiere corrección | En `llm.py`, `ClienteMock.paso` ignora los resultados y avanza por `PLAN`. El loop entrega observaciones, pero este mock no las usa para decidir. P1 debería distinguir arquitectura del loop y comportamiento del motor ensayado. |
+| Reintentar con menos puertos o sin detección de versión | Parcial | Es una alternativa humana posible, pero `nmap_scan(host)` no permite seleccionar esas opciones. No atribuir esa capacidad al agente actual. |
+| Hay finalización y límite de pasos | Respaldada con límite | El transcript termina y el esqueleto declara `MAX_PASOS = 12`; la implementación y prueba del agente propio corresponden a P5. |
+
+Las correcciones quedan señaladas para P1; su respuesta y sus filas originales se mantienen sin cambios.
 **El guardrail (R4):** *(qué pasó y por qué importa; qué otros agregarían)*
 
 ## 4. Preguntas de análisis
@@ -72,5 +100,14 @@ Un script fijo como `recolector.py` del Lab 08 hace mejor una tarea estrecha, co
 
 En ambos casos, la salida del modelo o el contenido recibido del target no debe convertirse directamente en una acción. En este lab, `ejecutar_tool` y la validación de alcance son la barrera que evita que una decisión —razonable, errónea o manipulada— alcance otro host.
 **P3 — ventaja del diseño agnóstico.**
+
+La ventaja concreta es poder usar el mismo loop con un mock local sin credenciales o con Claude/OpenAI cambiando `LLM_PROVIDER`, sin reescribir el despacho de herramientas ni el control de alcance. Esto permite desarrollar y verificar el flujo sin costo de API y luego sustituir el motor. No implica que los proveedores produzcan decisiones idénticas ni que el mock valide su razonamiento.
+
+El agente se acopla al contrato común de `llm.py`: crea el cliente con `crear_cliente(SYSTEM, TOOLS)` y llama a `cliente.paso(resultados)`. Recibe una acción normalizada de tool (`tipo`, `nombre`, `argumentos`, `id`) o de fin (`tipo`, `texto`); devuelve los resultados como una lista de diccionarios con `id` y `output`. No necesita conocer los formatos particulares de mensajes HTTP de cada proveedor.
+
+Los adaptadores `ClienteClaude` y `ClienteOpenAI` traducen el registro `TOOLS` al esquema de su API y las respuestas al contrato común; `crear_cliente` selecciona la implementación. Por ejemplo, el resultado interno con `id` y `output` se representa como `tool_result` con `tool_use_id` en Claude y como mensaje `tool` con `tool_call_id` en OpenAI. Esa traducción queda fuera del loop. Un proveedor nuevo requeriría implementar el contrato y agregarlo a la fábrica, conservando `ejecutar_tool` y la validación de alcance.
+
+**Límite comprobado en el código:** los adaptadores actuales exponen una sola acción por llamada y no resuelven de forma general respuestas con múltiples llamadas simultáneas. El desacoplamiento es el que ofrece esta interfaz concreta, no compatibilidad universal con cualquier comportamiento de API. Solo se verificó localmente el código y la evidencia mock existente; no se probaron servicios externos.
+
 **P4 — dos riesgos y su guardrail.**
 **P5 — por qué los labs 05–08 eran requisito.**
