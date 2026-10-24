@@ -28,3 +28,35 @@ Get-Content labs/lab11-forensia/caso/memoria/bash_history.txt
 # el verificador, sus bibliotecas .sh y el manifiesto del Lab 11. Aceptada;
 # solo se persistió .progreso/11.done en el checkout.
 ./ctf submit 11 R2 'FLAG{dfir_webshell_hallado}'
+
+# --- P3: custodia previa complementaria (PowerShell, sin modificar originales) ---
+# Se verifica SHA-256 de los bytes locales; comparación LF solo diagnóstica.
+# Salida completa: salidas/p3-custodia-previa.txt
+# --- P3: R3 — fuentes, privilegios y revisión de P1 ---
+# Primero se leyó evidencia.sha256 y se ejecutó Get-FileHash -Algorithm SHA256
+# para cada ruta. Resultado completo: salidas/p3-custodia-previa.txt.
+python entregas/lab11/grupo06/src/p3_analisis.py
+rg -n '.' labs/lab11-forensia/caso/memoria/bash_history.txt labs/lab11-forensia/caso/memoria/pslist.txt labs/lab11-forensia/caso/memoria/lsof.txt labs/lab11-forensia/caso/disco/listado.txt > entregas/lab11/grupo06/evidencia/salidas/r3-fuentes-rg.txt
+# Verificador oficial mediante Git Bash en copia temporal LF (ctf, bin/lib/*.sh,
+# manifest opaco); sin modificar originales y sin leer soluciones:
+bash ./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'
+# RECHAZADA: salida original en salidas/r3-submit.txt. No se persistió progreso.
+bash ./ctf status 11
+# Salida completa: salidas/status-11-p3.txt; 0/5 en esta sesión.
+# Diagnóstico del hash (sin consultar el hash esperado del reto):
+# printf %s "FLAG{dfir_privesc_suid}" | sha256sum
+# Coincide con hashlib.sha256 de Python; shasum no está instalado en Git Bash.
+# --- P3: validación definitiva de R3 (2026-10-23) ---
+# Después del intento rechazado, se repitió la presentación desde
+# Git Bash, utilizando el verificador oficial del repositorio.
+
+./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'
+
+# Resultado:
+# [ OK ] Reto R3 resuelto: Escalada de privilegios (SUID) en memoria
+
+# Se verificó y guardó el progreso actualizado:
+./ctf status 11 | tee entregas/lab11/grupo06/evidencia/salidas/r3-status-confirmado.txt
+
+# El intento rechazado se conserva en r3-submit.txt.
+# No se modificaron los artefactos originales del caso forense.
