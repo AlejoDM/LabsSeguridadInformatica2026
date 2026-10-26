@@ -60,3 +60,51 @@ bash ./ctf status 11
 
 # El intento rechazado se conserva en r3-submit.txt.
 # No se modificaron los artefactos originales del caso forense.
+
+# --- Persona 5 — R5: cadena de custodia y evidencia alterada ---
+# Fecha: 2026-10-26
+# Entorno: Windows PowerShell y Git Bash.
+# Análisis local del caso. No se utilizó Docker ni se ejecutaron artefactos sospechosos.
+
+# 1. Inventario de fuentes.
+Get-ChildItem labs/lab11-forensia/caso -Recurse
+Get-ChildItem entregas/lab11/grupo06 -Recurse
+python --version
+
+# 2. Verificación SHA-256 con Python.
+# Se utilizó hashlib.sha256 sobre los nueve archivos enumerados
+# en labs/lab11-forensia/caso/evidencia.sha256.
+# La primera comparación de bytes mostró 9 discrepancias.
+# Se comprobaron variantes CRLF/LF solo en memoria.
+# Resultado: 8 archivos coinciden en LF; logs/auth.log no coincide.
+
+# Evidencia completa:
+# evidencia/salidas/r5-custodia.txt
+
+# 3. Inspección del archivo con integridad no verificada.
+Get-Content labs/lab11-forensia/caso/logs/auth.log -Encoding UTF8
+
+# Resultado:
+# logs/auth.log:5-7 contiene anotaciones de eliminación/alteración.
+# logs/auth.log:8 contiene FLAG{dfir_custodia_alterada}.
+
+# 4. Preservación de evidencia en la carpeta de entrega.
+Copy-Item labs/lab11-forensia/caso/logs/auth.log entregas/lab11/grupo06/evidencia/salidas/r5-auth-log.txt
+
+# 5. Validación oficial con copia temporal del verificador en Git Bash.
+# Los archivos ctf, bibliotecas y manifiesto del laboratorio
+# se copiaron a /tmp/lab11-p5 y se ajustaron a LF en esa copia.
+# No se alteraron los archivos originales del repositorio.
+bash /tmp/lab11-p5/ctf submit 11 R5 'FLAG{dfir_custodia_alterada}'
+bash /tmp/lab11-p5/ctf status 11
+
+# Resultado oficial: [ OK ] Reto R5 resuelto.
+# El estado 1/5 corresponde únicamente a la copia temporal.
+
+# 6. Revisión de IOCs en modo solo lectura.
+Get-Content labs/lab11-forensia/caso/memoria/bash_history.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/disco/etc/passwd.snippet -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/memoria/netstat.txt -Encoding UTF8
+
+# Se integraron al informe únicamente indicadores observados
+# con referencias a los archivos y líneas correspondientes.

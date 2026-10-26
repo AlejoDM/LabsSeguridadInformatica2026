@@ -7,7 +7,7 @@
 | Nombre y apellido | Usuario de GitHub |
 |---|---|
 | Martín Beccereca | martinbeccereca |
-| Belén Benito | belubenito01 |
+| Belén Benito | belubenito603 |
 | Alejo José De Miguel | AlejoDM |
 | Tomás Giudici | TomasGiudici |
 | Carolina Suppo | carosuppo |
@@ -32,13 +32,37 @@
 - **Finalidad y partes asistidas:** análisis de R3, correlación de historial/procesos/archivos abiertos/disco, IOC del binario SUID, eventos de timeline, respuesta P5, revisión del aporte P1 y bitácora.
 - **Verificación:** referencias contrastadas con los artefactos, hashes del checkout y objetos locales de Git; se guardaron salidas y el rechazo del verificador.
 
+**Herramienta:** ChatGPT (OpenAI), aporte de la Persona 5.
+
+- **Finalidad del uso:** asistencia para verificar la integridad de los archivos del caso mediante SHA-256, identificar la evidencia alterada y documentar los resultados del Reto 5.
+- **Partes asistidas:** análisis de la cadena de custodia, respuesta P2, registro de comandos y revisión de la tabla de indicadores de compromiso (IOCs).
+- **Verificación:** se calcularon los hashes mediante Python y se compararon con `evidencia.sha256`. Se comprobó que ocho archivos coincidían al considerar los finales de línea LF, mientras que `logs/auth.log` seguía presentando una discrepancia. El archivo se examinó únicamente en modo lectura y la flag `FLAG{dfir_custodia_alterada}` fue aceptada por el validador oficial. No se modificaron los artefactos originales.
+
 ## 1. Resumen del incidente
 
 *Pendiente de completar cuando estén los 5 hallazgos (R1–R5).*
 
 ## 2. Cadena de custodia
 
-*Verificación completa pendiente (R5). Nota parcial de P1, relacionada con R1:*
+### R5 — Cadena de custodia y evidencia alterada
+
+Se realizó una verificación de integridad SHA-256 de los nueve archivos del caso forense, comparando los hashes calculados con los registrados en `evidencia.sha256`.
+
+En una primera comparación, los nueve archivos presentaron diferencias. Posteriormente se comprobó que, en ocho de ellos, la discrepancia se debía a los finales de línea de Windows (`CRLF`), ya que sus hashes coincidían al realizar una conversión a `LF` únicamente en memoria, sin modificar los originales.
+
+Sin embargo, el archivo `logs/auth.log` continuó presentando una discrepancia que no pudo explicarse por esa transformación.
+
+**Hash esperado:** `0000decafbad0000f1e2d3c4b5a6978800112233445566778899aabbccddeeff`
+
+**Hash obtenido:** `9c052de3124d0364ae0172b81621c94d47bf78a2e816ba8c69be4d84468f1a6f`
+
+Al revisar el contenido del archivo, encontramos anotaciones que indican que se eliminaron líneas y que el archivo fue editado después de su captura (`logs/auth.log:5-7`). En la línea 8 aparece el marcador `FLAG{dfir_custodia_alterada}`, que fue aceptado por el validador oficial.
+
+La discrepancia demuestra que los bytes actuales de `auth.log` no coinciden con el hash registrado. Aunque los comentarios del archivo describen una alteración, **la verificación criptográfica por sí sola no permite determinar quién lo modificó, cuándo ni con qué intención**.
+
+El análisis se realizó mediante operaciones de lectura. No se editaron los archivos del caso ni se reemplazaron los hashes originales. La salida de la verificación quedó conservada en `evidencia/salidas/r5-custodia.txt` y se guardó una copia del registro en `evidencia/salidas/r5-auth-log.txt`.
+
+La integridad de `auth.log` no puede confirmarse con el manifiesto proporcionado. Por lo tanto, sus registros deben interpretarse con esa limitación y, en una investigación real, sería necesario contrastarlos con fuentes independientes.
 
 Antes de analizar `logs/access.log` se corrió `shasum -a 256 -c evidencia.sha256` desde `caso/`. En el checkout local (Windows) el comando devolvió `FAILED`/`No such file or directory` para los 9 archivos del manifiesto. Esto es un falso positivo del entorno: Git tiene `core.autocrlf=true` y convierte los finales de línea de LF a CRLF al clonar en Windows, lo que deja un `\r` colgando en cada nombre de archivo listado por `evidencia.sha256` y rompe la búsqueda por nombre; no es evidencia de alteración por sí solo. Ver [salida completa del comando](evidencia/salidas/r1-custodia-check.txt).
 
@@ -66,13 +90,13 @@ El primer [intento de registrar R3](evidencia/salidas/r3-submit.txt) fue rechaza
 
 | Tipo | Valor | Dónde apareció |
 |---|---|---|
-| IP atacante | `185.220.101.42` | `logs/access.log:18-20`: origen de las tres peticiones al endpoint `/api/reporte?cmd=` (probe `id`, marcador de RCE, descarga del webshell). Es la IP que aparece en el log; no se verificó identidad real detrás de ella. |
-| IP/puerto C2 | | |
-| Archivo malicioso | `/var/www/uploads/shell.php` | `disco/listado.txt:4` lo sitúa a las 02:19; `disco/var/www/uploads/shell.php.evidencia.txt:1-9` lo describe como webshell defanged, con parámetro `c` y comentario de descarga desde `45.13.37.7`. La descarga y posterior solicitud figuran en `logs/access.log:20-21`. |
-| Usuario backdoor | | |
-| Persistencia | | |
-| Binario SUID sospechoso | `/usr/local/bin/system-check` (copia de Bash SUID root según el listado) | `disco/listado.txt:5`; `memoria/bash_history.txt:5-6`; `memoria/lsof.txt:4`. Indicador contextual; no se dispone del binario para calcular su hash. |
-| Proceso elevado (contexto de captura) | PID 1477, PPID 1240, `system-check`, `root`, `euid=0`; padre `bash` de `www-data` | `memoria/pslist.txt:7-8`. Los PID son datos de esta captura, no indicadores estables para buscar en otros hosts. |
+| IP atacante | `185.220.101.42` | `logs/access.log:18-20`: origen de las solicitudes al endpoint `/api/reporte?cmd=`. No se verificó la identidad real del atacante. |
+| IP/puerto C2 | `45.13.37.7:4444` | `memoria/netstat.txt:4`: conexión TCP `ESTABLISHED` asociada al proceso `nc` (PID 1490). |
+| Archivo malicioso | `/var/www/uploads/shell.php` | `disco/listado.txt:4`, `disco/var/www/uploads/shell.php.evidencia.txt:1-9` y `logs/access.log:20-21`: webshell y actividad relacionada. |
+| Usuario backdoor | `phantom-svc` (UID 0, GID 0) | `disco/etc/passwd.snippet:4`: cuenta identificada como backdoor con privilegios de root. |
+| Persistencia | Cuenta `phantom-svc` y binario SUID `/usr/local/bin/system-check` | `disco/etc/passwd.snippet:4`, `disco/listado.txt:5` y `memoria/bash_history.txt:6`. Posibles mecanismos de acceso privilegiado. |
+| Binario SUID sospechoso | `/usr/local/bin/system-check` | `disco/listado.txt:5`, `memoria/bash_history.txt:5-6` y `memoria/lsof.txt:4`. No se dispone del binario para calcular su hash. |
+| Proceso elevado (contexto de captura) | PID 1477, PPID 1240, `system-check`, `root`, `euid=0` | `memoria/pslist.txt:7-8`: proceso elevado cuyo padre es una shell de `www-data`. |
 
 ## 5. Alcance del daño
 
@@ -89,6 +113,20 @@ El primer [intento de registrar R3](evidencia/salidas/r3-submit.txt) fue rechaza
 El orden de volatilidad dice que se captura primero lo que se pierde más rápido. La RAM solo existe mientras la máquina está encendida: procesos en ejecución, conexiones de red activas y, en este caso, el historial de comandos de la sesión del atacante, viven ahí. El disco persiste aunque se apague el equipo, así que puede esperar. Si se captura primero el disco, cualquier cosa que solo estuviera en memoria en ese momento se pierde para siempre apenas el proceso termina o la máquina se reinicia.
 
 En este caso puntual no tengo, desde R1, un ejemplo donde la memoria conservara algo que el disco ya no tenía (eso corresponde al R4, sobre `bash_history` en memoria, fuera de mi análisis). Lo que sí puedo señalar desde R1 es la razón estructural: `access.log` registra que el atacante ejecutó comandos arbitrarios a través del parámetro `cmd` (líneas 18-20), lo cual implica que corrió procesos y, probablemente, abrió conexiones de red (la descarga del webshell con `wget`) que en el momento de la intrusión solo existían como estado de memoria — procesos y sockets activos — y no como artefactos de disco. Si el equipo de respuesta hubiera esperado a capturar disco antes que memoria, esa actividad en curso se habría perdido apenas terminaran esos procesos.
+
+**P2 — ¿Qué implica que una evidencia digital haya sido alterada? ¿Cómo afecta a su valor probatorio?**
+
+La cadena de custodia es fundamental en una investigación forense porque permite registrar cómo se obtuvo, conservó y manipuló una evidencia digital, garantizando su trazabilidad y ayudando a comprobar su integridad.
+
+En el Laboratorio 11, al verificar los hashes SHA-256 de los archivos, encontramos que `logs/auth.log` no coincidía con el hash registrado originalmente. Primero detectamos diferencias en los nueve archivos, pero comprobamos que en ocho casos se debían a los saltos de línea de Windows (CRLF). En cambio, `auth.log` seguía presentando una diferencia incluso después de considerar esa transformación.
+
+Esto significa que no podemos asegurar que el contenido actual de ese archivo sea idéntico al registrado en el manifiesto de custodia. Sin embargo, la diferencia de hashes no demuestra por sí sola quién realizó la modificación, cuándo ocurrió ni cuál fue su intención.
+
+Esta situación afecta la confiabilidad de la evidencia y puede disminuir su valor probatorio, ya que parte de la información podría haber sido modificada o eliminada.
+
+Ante un caso así, lo correcto sería conservar el archivo tal como está, documentar la discrepancia, registrar las personas que tuvieron acceso a la evidencia y contrastar su contenido con otras fuentes. Si fuera posible, también se debería realizar una nueva adquisición forense.
+
+Como conclusión, entendimos que en informática forense no alcanza solamente con encontrar información importante. También es necesario demostrar de dónde salió y qué tan confiable es antes de utilizarla para sacar conclusiones.
 
 **P4 — El atacante corrió `history -c`. ¿Por qué igual pudiste recuperar sus comandos?**
 
