@@ -23,9 +23,9 @@
 
 **Herramienta:** ChatGPT.
 
-- **Finalidad del uso:** apoyo en la redacción y revisión de la documentación.
-- **Partes asistidas:** fila R3 del inventario, respuesta P3 y organización de la bitácora.
-- **Verificación:** los comandos y pruebas fueron ejecutados contra el contenedor `phantomcorp`; las afirmaciones se contrastaron con las salidas originales conservadas en `evidencias/`.
+- **Finalidad del uso:** apoyo en la ejecución guiada de pruebas, interpretación de resultados, resolución de problemas técnicos y redacción de la documentación.
+- **Partes asistidas:** fila R3 y R4 del inventario, respuestas P3 y P4, organización de la bitácora y validación del reto R4.
+- **Verificación:** los comandos de R4 fueron ejecutados contra el contenedor autorizado `phantomcorp`. Se comprobó la respuesta HTTP, se conservaron las evidencias originales y se verificó la aceptación de la flag mediante una copia temporal del validador compatible con Linux.
 
 **Herramienta:** Claude Code.
 
@@ -40,7 +40,7 @@
 | R1 — Enumeración de directorios      | Resuelto  | [Envío de R1](evidencias/lab06-r1-submit.txt) y [estado posterior](evidencias/lab06-status-after-r1.txt) |
 | R2 — Repositorio Git expuesto        | Resuelto  | [config filtrado](evidencias/lab06-r2-git-config.txt) y [envío de R2](evidencias/lab06-r2-submit.txt)    |
 | R3 — Métodos HTTP peligrosos         | Resuelto  | [OPTIONS](evidencias/lab06-r3-options.txt) y [Nmap HTTP](evidencias/lab06-r3-nmap-http.txt)              |
-| R4 — Enumeración de usuarios vía API | Pendiente | —                                                                                                        |
+| R4 — Enumeración de usuarios vía API | Resuelto | [Respuesta de la API](evidencias/lab06-r4-api-users.txt) y [estado del R4](evidencias/lab06-r4-status.txt) |
 | R5 — Fingerprinting de tecnología    | Pendiente | —                                                                                                        |
 
 La salida de estado posterior al R1 registra 1 de 5 retos resueltos. El archivo [progreso-06.done](evidencias/progreso-06.done) es una copia del estado local del motor y complementa, pero no reemplaza, la salida legible de `./ctf status 06`.
@@ -52,6 +52,7 @@ La salida de estado posterior al R1 registra 1 de 5 retos resueltos. El archivo 
 | Directorio de respaldos accesible sin autenticación | `/backup`                  | Enumeración de directorios con `dirb`; confirmación manual con `curl`                                                                                            | `dirb` reportó `/backup` con `200`; la respuesta HTTP lista `respaldo-db-2024.sql.gz` y `config.old`. Ver [salida de dirb](evidencias/lab06-r1-dirb.txt) y [confirmación de `/backup`](evidencias/lab06-r1-backup.txt).                                                                                                                                                                                                                                                                            | Un tercero con acceso al servicio puede consultar el índice observado. Los nombres de archivos son indicios de datos y configuraciones potencialmente sensibles; no se descargó ni verificó el contenido de esos archivos.                                                                                                                                                                                                                      | Orienta el análisis posterior hacia respaldos y configuraciones expuestos. Si alguno fuera accesible y contuviera datos o credenciales, podría habilitar nuevas hipótesis de explotación; esa condición no fue verificada en R1.                                                             |
 | Método HTTP `PUT` habilitado                        | `OPTIONS /` — método `PUT` | Enumeración de métodos HTTP con `curl`; corroboración con scripts NSE de Nmap                                                                                    | La respuesta a `OPTIONS` indicó que `PUT` está habilitado y la enumeración con Nmap corroboró el hallazgo. Ver [respuesta OPTIONS](evidencias/lab06-r3-options.txt) y [enumeración con Nmap](evidencias/lab06-r3-nmap-http.txt).                                                                                                                                                                                                                                                                   | La habilitación de `PUT` amplía la superficie de ataque porque puede permitir enviar contenido a recursos del servidor. En este lab no se comprobó que permita escritura arbitraria ni ejecución de archivos.                                                                                                                                                                                                                                   | Orienta el Lab 07 a verificar de forma controlada si `PUT` permite crear o reemplazar recursos y, solo si se cumplen las condiciones necesarias, evaluar una posible carga de archivos.                                                                                                      |
 | Repositorio Git expuesto por HTTP                   | `/.git/config`             | Petición directa con `curl -i` al archivo de configuración del repositorio; verificación de otras rutas del `.git` (`HEAD`, `logs/HEAD`, listado del directorio) | `curl -sS -i http://phantomcorp/.git/config` devolvió `200` con el contenido del archivo, que incluye la URL del remoto `origin` (`https://git.internal.phantomcorp/intranet.git`). Las mismas pruebas contra `/.git/HEAD`, `/.git/logs/HEAD` y `/.git/` devolvieron `404`. Ver [config filtrado](evidencias/lab06-r2-git-config.txt), [HEAD](evidencias/lab06-r2-git-head.txt), [logs/HEAD](evidencias/lab06-r2-git-logs-head.txt) y [listado del directorio](evidencias/lab06-r2-git-index.txt). | Un `.git/config` accesible confirma que el servidor sirve archivos internos del control de versiones y filtra la URL del repositorio origen, información útil para orientar un ataque dirigido a esa infraestructura. En este caso puntual no se pudo acceder a `HEAD`, a los logs ni al listado del directorio, por lo que no está verificado que el repositorio completo (historia, objetos) sea descargable; solo el archivo `config` lo es. | Orienta el Lab 07 a intentar, de forma controlada, reconstruir el repositorio accesible (por ejemplo con herramientas de volcado de `.git` vía HTTP) solo si se confirma que más rutas del `.git` están expuestas, y a investigar el remoto `origin` filtrado como posible vector adicional. |
+| Exposición de usuarios y roles mediante API interna | `GET /api/users` | Consulta HTTP con `curl -i` | El servidor respondió `200 OK` y devolvió tres usuarios: `admin` (`superuser`), `jperez` (`editor`) y `mgomez` (`viewer`). Ver [evidencia R4](evidencias/lab06-r4-api-users.txt). | La exposición de usuarios y roles sin autenticación facilita la identificación de cuentas privilegiadas y posibles ataques dirigidos. No se comprobó acceso a las cuentas. | Permite orientar el Lab 07 hacia la revisión de la autenticación, autorización y protección de cuentas privilegiadas. |
 
 ### Evidencia del R1
 
@@ -88,6 +89,18 @@ El servidor respondió `200` y devolvió el contenido del archivo, incluida la U
 
 No se intentó reconstruir el repositorio con herramientas de volcado (por ejemplo `git-dumper`), porque las rutas necesarias para eso no estaban disponibles; esa validación queda fuera del alcance de este hallazgo y se señala como pendiente.
 
+### Evidencia del R4
+
+Para enumerar los usuarios expuestos por la API interna de PhantomCorp realizamos una petición HTTP al endpoint `/api/users` utilizando `curl -i`.
+
+El servidor respondió con el código `200 OK` y devolvió un JSON que contiene tres usuarios con sus respectivos roles: `admin` (`superuser`), `jperez` (`editor`) y `mgomez` (`viewer`). Además, la respuesta incluye una nota que identifica al recurso como un endpoint interno de Recursos Humanos que no debería estar expuesto.
+
+La consulta se realizó sin proporcionar credenciales, lo que permitió comprobar que la información se encontraba accesible desde la consola atacante del laboratorio.
+
+La salida HTTP completa se conserva en [lab06-r4-api-users.txt](evidencias/lab06-r4-api-users.txt), mientras que la validación del reto se documenta en [lab06-r4-status.txt](evidencias/lab06-r4-status.txt).
+
+No se intentó iniciar sesión con los usuarios encontrados ni acceder a funcionalidades restringidas. Por lo tanto, el hallazgo demuestra exposición de información, pero no una vulneración de las cuentas.
+
 ## 3. Preguntas de análisis
 
 ### P1 — Enumeración vs. recon
@@ -116,7 +129,15 @@ En este laboratorio no realizamos ninguna carga mediante PUT, por lo que no pode
 
 ### P4 — Enumeración de usuarios
 
-_Pendiente de completar con la evidencia de R4._
+Durante la enumeración del servicio web de PhantomCorp consultamos el endpoint `/api/users` mediante el comando `curl -i http://phantomcorp/api/users`. El servidor respondió con un código HTTP 200 OK y devolvió información de tres usuarios: `admin`, con rol `superuser`; `jperez`, con rol `editor`; y `mgomez`, con rol `viewer`.
+
+Además, la respuesta incluía una nota que indicaba que se trataba de un endpoint interno de Recursos Humanos que no debería estar expuesto. Pudimos acceder a esta información sin proporcionar credenciales.
+
+Este hallazgo representa un riesgo porque permite conocer usuarios existentes y distinguir cuáles tienen mayores privilegios. Un atacante podría utilizar esta información para dirigir futuros intentos de acceso no autorizado, especialmente contra cuentas administrativas.
+
+Sin embargo, esto no significa que hayamos conseguido acceder a las cuentas ni vulnerar el sistema de autenticación. Lo que comprobamos fue únicamente la exposición de usuarios y roles.
+
+Para reducir este riesgo, recomendamos implementar controles de autenticación y autorización en la API, restringir el acceso a los endpoints internos y limitar la información que se devuelve a los usuarios.
 
 ### P5 — Rol defensor (3 mitigaciones)
 
@@ -142,19 +163,26 @@ curl -X OPTIONS -i http://phantomcorp/
 nmap --script http-methods,http-enum phantomcorp
 ```
 
-Desde la raíz del repositorio se registraron las flags observadas y se verificó el estado:
+	### Registro de validación del R4
 
-```bash
-# R1
-./ctf submit 06 R1 'FLAG{dir_enumeration_backup}'
+	Desde PowerShell, utilizando Docker, registramos la flag mediante una copia temporal del validador compatible con Linux:
+```powershell
+docker exec cyberlab-attacker bash /tmp/lab06-ctf/ctf submit 06 R4 'FLAG{user_enumeration_api}'
+docker exec cyberlab-attacker bash /tmp/lab06-ctf/ctf status 06
 
-# R2
-./ctf submit 06 R2 'FLAG{git_repo_exposed}'
+	Desde la raíz del repositorio se registraron las flags observadas y se verificó el estado:
 
-# R3
-./ctf submit 06 R3 'FLAG{http_methods_put_enabled}'
+	```bash
+	# R1
+	./ctf submit 06 R1 'FLAG{dir_enumeration_backup}'
 
-./ctf status 06
-```
+	# R2
+	./ctf submit 06 R2 'FLAG{git_repo_exposed}'
 
-Las salidas completas se preservan en `evidencias/`. Las operaciones se limitaron al target del Lab 06 provisto por la cátedra.
+	# R3
+	./ctf submit 06 R3 'FLAG{http_methods_put_enabled}'
+
+	./ctf status 06
+	```
+
+	Las salidas completas se preservan en `evidencias/`. Las operaciones se limitaron al target del Lab 06 provisto por la cátedra.
