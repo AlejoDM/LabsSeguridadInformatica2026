@@ -7,7 +7,7 @@
 | Nombre y apellido | Usuario de GitHub |
 |---|---|
 | Martín Beccereca | martinbeccereca |
-| Belén Benito | belubenito01 |
+| Belén Benito | belubenito603 |
 | Alejo José De Miguel | AlejoDM |
 | Tomás Giudici | TomasGiudici |
 | Carolina Suppo | carosuppo |
@@ -32,6 +32,12 @@
 - **Finalidad y partes asistidas:** documentación de R3 y del paso 5, síntesis de aciertos y errores P1–P3, ayuda en redacción de respuesta P3 y revisión cruzada de P1.
 - **Verificación:** contraste con el transcript crudo existente y con `llm.py`, `herramientas.py` y el esqueleto públicos, sin leer el target ni soluciones. Se intentó presentar exclusivamente R3 al verificador oficial local y se guardó su rechazo sin alterarlo. No se probaron APIs externas ni se realizaron commits o acciones en GitHub.
 
+**Herramienta:** ChatGPT (OpenAI), aporte P5.
+
+- **Finalidad del uso:** asistencia para comprender e implementar el ciclo de herramientas del agente, ejecutar las pruebas en modo `mock`, resolver problemas de compatibilidad entre Windows y Linux y redactar la documentación correspondiente.
+- **Partes asistidas:** implementación de `src/agente_esqueleto.py`, sección 2 del informe, respuesta P5 y comandos de ejecución de R5.
+- **Verificación:** el agente fue ejecutado dentro del contenedor `cyberlab-attacker` contra el objetivo autorizado `phantomcorp`. Se comprobó el encadenamiento de `/api/token` y `/api/vault`, la detección de la flag R5, el bloqueo por guardrail y la finalización del ciclo. La flag fue aceptada mediante una copia temporal del validador compatible con Linux.
+
 ## 1. Flags capturadas
 
 *(salida de `./ctf status 09`, pendiente de completar cuando se resuelvan los 5 retos)*
@@ -44,7 +50,19 @@
 
 ## 2. Tu agente
 
-*Pendiente del responsable de R5: adjuntar `src/agente_esqueleto.py` completado y su salida trayendo el flag R5.*
+Para el Reto 5 completamos el archivo `agente_esqueleto.py` proporcionado por la cátedra, implementando el ciclo de ejecución de herramientas (*tool-use*) del agente.
+
+El programa utiliza `cliente.paso(resultados)` para recibir la siguiente acción, ejecuta las herramientas mediante `ejecutar_tool()` y devuelve sus resultados al cliente en el formato esperado. También identifica las flags presentes en las respuestas y finaliza cuando recibe una acción de tipo `final` o alcanza el límite de 12 pasos establecido por `MAX_PASOS`.
+
+Se ejecutó utilizando **`LLM_PROVIDER=mock`**, sin claves de API. En esta modalidad, el cliente sigue una secuencia de acciones predefinida, por lo que la prueba demuestra el funcionamiento del ciclo, pero no razonamiento autónomo de un modelo de lenguaje.
+
+Durante la ejecución, el agente realizó ocho llamadas a herramientas. En el paso 6 obtuvo un token mediante `GET /api/token` y, en el paso 7, realizó un `POST /api/vault` con ese token. El servidor devolvió `HTTP 200` y la flag `FLAG{agente_esqueleto_completo}`, posteriormente aceptada por el validador del laboratorio.
+
+También comprobamos que la solicitud a `8.8.8.8` fue bloqueada por el guardrail, sin ejecutar un escaneo fuera del alcance permitido. La primera ejecución de `nmap_scan` sobre `phantomcorp` terminó por timeout a los 60 segundos, pero el agente continuó con las siguientes herramientas y completó el recorrido.
+
+**Evidencias:** [Código del agente](src/agente_esqueleto.py), [transcript de ejecución](evidencia/salidas/r5-esqueleto-mock.txt) y [estado de validación temporal](evidencia/salidas/r5-status-09.txt).
+
+**Límites:** No se modificaron las herramientas, los controles de alcance ni el servidor objetivo. Tampoco se utilizaron proveedores externos de LLM. La prueba demuestra que el agente propio ejecuta el ciclo, registra resultados, detecta flags y termina correctamente dentro del entorno autorizado.
 
 ## 3. Auditoría crítica del agente
 
@@ -111,3 +129,25 @@ Los adaptadores `ClienteClaude` y `ClienteOpenAI` traducen el registro `TOOLS` a
 
 **P4 — dos riesgos y su guardrail.**
 **P5 — por qué los labs 05–08 eran requisito.**
+
+Los laboratorios 05 al 08 fueron necesarios porque nos permitieron comprender las distintas etapas de una prueba de penetración antes de intentar automatizarlas mediante un agente.
+
+En el **Laboratorio 05** aprendimos a realizar reconocimiento, identificando hosts, servicios y superficie de exposición. En el **Laboratorio 06** profundizamos en la enumeración, buscando rutas, recursos y funcionalidades disponibles en los servicios encontrados.
+
+En el **Laboratorio 07** trabajamos sobre la explotación de vulnerabilidades, comprendiendo cómo una debilidad puede permitir acciones o accesos no autorizados. Finalmente, en el **Laboratorio 08** analizamos qué puede hacerse después de obtener acceso inicial y aprendimos a automatizar tareas repetitivas mediante un script Python.
+
+Estos conocimientos se relacionan directamente con el Laboratorio 09 porque el agente utiliza herramientas que representan varias de esas etapas. Por ejemplo, ejecuta reconocimiento con `nmap_scan`, enumera recursos mediante `http_get` y realiza una secuencia de consultas que termina accediendo al vault mediante `http_post`.
+
+La principal diferencia es que ahora esas acciones están organizadas dentro de un ciclo que puede recibir resultados y utilizarlos para solicitar nuevas herramientas. Sin embargo, en nuestra ejecución con `mock`, las acciones estaban predefinidas y no se eligieron dinámicamente según las respuestas.
+
+Por eso, consideramos que los laboratorios anteriores fueron fundamentales: para diseñar y supervisar un agente no alcanza con saber programar el ciclo, también necesitamos entender qué hace cada herramienta, interpretar sus resultados y reconocer cuándo una acción puede exceder el alcance autorizado.
+
+### Revisión cruzada de P1 y P2 — Persona 5
+
+Se revisaron las respuestas P1 y P2 y se contrastaron con el código público de `llm.py`, `herramientas.py` y la ejecución del agente propio en modo `mock`.
+
+**P1:** La explicación general del ciclo de herramientas es correcta: el cliente solicita una acción, el programa la ejecuta y devuelve el resultado para la siguiente iteración. Sin embargo, se detectó una afirmación que requiere precisión: el proveedor `mock` no decide sus acciones en función del resultado anterior, sino que sigue una secuencia fija definida en `ClienteMock.PLAN`. Por lo tanto, la ejecución demuestra que el ciclo realimenta resultados, pero no que el cliente simulado los utilice para modificar sus decisiones.
+
+**P2:** La comparación entre un LLM y un script fijo es adecuada. Se diferencia correctamente la capacidad potencial de adaptación de un LLM frente a la previsibilidad de un programa como `recolector.py` del Lab 08. También se aclara que el modo `mock` no demuestra razonamiento generativo.
+
+**Conclusión:** Las respuestas cubren los conceptos solicitados. Se recomienda ajustar la afirmación señalada en P1 para evitar atribuir al cliente simulado un comportamiento adaptativo que no fue demostrado.

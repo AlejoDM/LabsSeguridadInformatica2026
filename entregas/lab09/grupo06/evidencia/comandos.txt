@@ -24,8 +24,42 @@ docker exec -e LLM_PROVIDER=mock cyberlab-attacker bash -lc "cd /repo/labs/lab09
 # evidencia/salidas/r2-submit-rechazado.txt. No se creó progreso para R2.
 ./ctf submit 09 R2 'FLAG{agente_ruta_oculta}'
 
-# --- R5 (pendiente, a cargo de otro responsable) ---
-# LLM_PROVIDER=mock python3 agente_esqueleto.py   (desde entregas/lab09/grupo06/src/)
+# --- P5 — R5: implementación del agente ---
+# Fecha: 2026-10-26
+# Proveedor: mock (sin API key).
+# Objetivo autorizado: phantomcorp.
+
+# 1. Ejecución del agente propio.
+# Desde PowerShell, ingresar a la consola atacante:
+docker exec -it cyberlab-attacker bash
+
+# Dentro de la consola atacante:
+cd /repo/entregas/lab09/grupo06/src
+LLM_PROVIDER=mock PYTHONPATH=/repo/labs/lab09-agentes/src python3 agente_esqueleto.py
+
+# 2. Guardar el transcript completo.
+# Ejecutado desde PowerShell:
+docker exec cyberlab-attacker bash -c "cd /repo/entregas/lab09/grupo06/src && LLM_PROVIDER=mock PYTHONPATH=/repo/labs/lab09-agentes/src python3 agente_esqueleto.py > /loot/r5-esqueleto-mock.txt 2>&1"
+
+# Copiar la salida a la entrega:
+# PowerShell:
+Copy-Item .loot/r5-esqueleto-mock.txt entregas/lab09/grupo06/evidencia/salidas/r5-esqueleto-mock.txt
+
+# 3. Resultado observado.
+# Paso 6: GET /api/token -> HTTP 200.
+# Paso 7: POST /api/vault -> HTTP 200.
+# Flag encontrada: FLAG{agente_esqueleto_completo}.
+# Paso 8: el guardrail bloqueó 8.8.8.8.
+# Finalización correcta del agente.
+
+# 4. Validación desde PowerShell.
+# Se usó una copia temporal del validador para resolver
+# los problemas de saltos de línea CRLF en Windows.
+docker exec cyberlab-attacker bash /tmp/lab09-ctf/ctf submit 09 R5 'FLAG{agente_esqueleto_completo}'
+docker exec cyberlab-attacker bash /tmp/lab09-ctf/ctf status 09
+
+# Resultado: [ OK ] Reto R5 resuelto.
+# El estado temporal 1/5 no representa el progreso total del grupo.
 
 # --- P3 — R3: API de debug expuesta ---
 # Fecha: 2026-10-23
