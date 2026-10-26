@@ -21,6 +21,12 @@ Se utilizó Codex (OpenAI) para asistir en la organización de la evidencia, la 
 - **Partes asistidas:** fila "R1 — Recon" en la tabla de flags, fila "Recon (R1)" y su análisis en la tabla de post-explotación y sección de comandos de R1 en `evidencia/comandos.txt`.
 - **Verificación:** los comandos se ejecutaron como `operador` y la salida se guardó cruda y sin editar en `evidencia/salidas/`. Se revisó el contenido antes de incorporarlo.
 
+**Herramienta:** ChatGPT (OpenAI).
+
+- **Finalidad del uso:** asistencia en la implementación y prueba del script de automatización del Reto 5, interpretación de respuestas HTTP y redacción de la documentación.
+- **Partes asistidas:** función `buscar_flag()` de `src/recolector.py`, sección 3 de Automatización, respuesta P4 y registro de comandos de R5.
+- **Verificación:** el programa se ejecutó como `operador` dentro del contenedor víctima y se comprobó su funcionamiento contra `phantomcorp-db`. Se verificó el hallazgo en el legajo 187, el comportamiento con rangos sin resultados y la aceptación de la flag mediante una copia temporal del validador.
+
 ## 1. Flags capturadas
 
 | Reto      | Estado   | Evidencia                                               |
@@ -57,7 +63,21 @@ La captura final de `./ctf status 08` queda pendiente de integrar cuando el grup
 
 ## 3. Automatización
 
-Pendiente del responsable de R5: adjuntar `src/recolector.py` completado y su salida contra el host interno desde la víctima.
+Para el Reto 5 desarrollamos un script en Python que automatiza la consulta de legajos de empleados a través del endpoint `/empleado?id=N`, perteneciente al servidor interno `phantomcorp-db`.
+
+Partimos del archivo proporcionado por la cátedra, conservando la función `consultar_legajo()` y completando la función `buscar_flag()`. Esta última recorre los identificadores dentro del rango indicado, consulta cada legajo y analiza la respuesta JSON para detectar el campo especial `legajo_oculto`, que contiene la flag.
+
+El programa utiliza únicamente bibliotecas estándar de Python. Además, contempla respuestas fallidas, como los errores HTTP 404, y se detiene inmediatamente cuando encuentra el registro buscado, evitando realizar consultas innecesarias.
+
+**Ejecución:** El script se ejecutó desde el contenedor víctima `phantomcorp`, utilizando el usuario limitado `operador`, ya que el servidor `phantomcorp-db` solo es accesible desde la red interna del laboratorio.
+
+**Resultado obtenido:** Al recorrer los legajos del 1 al 250, el programa identificó el legajo **187**, correspondiente a `cuenta-servicio`, y recuperó la flag `FLAG{automation_pays_off}`. Posteriormente, la flag fue aceptada por el validador del laboratorio.
+
+También realizamos pruebas con el rango del 1 al 5 y con el identificador 251. En ambos casos, el programa finalizó correctamente informando que no encontró la flag, sin producir errores de ejecución.
+
+**Evidencias:** [Código del recolector](src/recolector.py) y [salida de la ejecución](evidencia/salidas/r5-recolector.txt).
+
+**Alcance:** Las consultas se limitaron al servicio interno del entorno autorizado. El script no modifica datos ni realiza solicitudes fuera del rango requerido para la prueba principal.
 
 ## 4. Preguntas de análisis
 
@@ -86,6 +106,16 @@ En cuanto al historial de comandos, se debe evitar introducir contraseñas o tok
 Finalmente, si una credencial queda expuesta, debe revocarse o rotarse. Estas medidas, junto con el principio de mínimo privilegio, reducen tanto la posibilidad de obtener secretos como el impacto de una eventual filtración.
 
 En PhantomCorp, el hallazgo de R2 demuestra la importancia de proteger los archivos de configuración, ya que `/var/www/.env` era legible por el usuario `operador`. Sin embargo, esa observación no demuestra que las credenciales hayan sido utilizadas para comprometer otros sistemas.
+
+### P4 — ¿Qué decisiones humanas no toma el script y debería evaluar un agente?
+
+El script desarrollado para el Reto 5 automatiza una tarea repetitiva: consultar legajos, analizar las respuestas y detenerse cuando encuentra una flag. Sin embargo, no toma decisiones sobre el contexto, la autorización ni las consecuencias de las acciones que realiza.
+
+Por ejemplo, una persona debe definir previamente qué sistema está autorizado a consultar, qué rango de identificadores corresponde utilizar y cuál es el objetivo de la búsqueda. El script solamente ejecuta esas instrucciones; no puede determinar por sí mismo si una consulta está permitida o si sus resultados deberían utilizarse para realizar otras acciones.
+
+Un agente podría incorporar decisiones adicionales, como interpretar respuestas inesperadas, adaptar el procedimiento ante errores o seleccionar entre distintas herramientas. Sin embargo, esas capacidades también requieren límites y supervisión humana, especialmente cuando podrían implicar acceder a información sensible o ampliar el alcance de una prueba.
+
+En nuestro laboratorio, el programa se limitó a recorrer los legajos del 1 al 250, identificar el registro que contenía la flag y detenerse inmediatamente. Esto demuestra cómo la automatización permite ahorrar tiempo en tareas repetitivas, pero **no reemplaza el criterio humano para definir objetivos, permisos y límites de seguridad**.
 
 ## 5. Bitácora de P2
 

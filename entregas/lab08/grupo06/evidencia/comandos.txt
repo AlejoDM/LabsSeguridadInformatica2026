@@ -54,3 +54,44 @@ sha256sum /usr/local/bin/system-check /bin/bash
 ./ctf submit 08 R3 'FLAG{privesc_suid_root}'
 
 # Resultado: [ OK ] Reto R3 resuelto: Escalada de privilegios (SUID)
+
+# --- P5 — R5: automatización de legajos ---
+# Fecha de ejecución: 2026-10-26
+# Entorno autorizado: Lab 08 de PhantomCorp.
+
+# 1. Entrar al host víctima como usuario limitado operador.
+# Ejecutado desde PowerShell.
+docker exec -it -u operador cyberlab-phantomcorp bash
+
+# 2. Confirmar identidad y consultar un legajo de referencia.
+# Ejecutado dentro de la víctima.
+whoami
+hostname
+curl -i "http://phantomcorp-db/empleado?id=1"
+
+# 3. Copiar el recolector al contenedor víctima.
+# Ejecutado desde PowerShell.
+docker cp entregas/lab08/grupo06/src/recolector.py cyberlab-phantomcorp:/tmp/recolector.py
+
+# 4. Ejecutar el programa dentro de la víctima como operador.
+# Ejecutado desde PowerShell mediante docker exec.
+docker exec -u operador cyberlab-phantomcorp python3 /tmp/recolector.py --base http://phantomcorp-db --desde 1 --hasta 250
+
+# Resultado: flag encontrada en el legajo 187.
+# FLAG{automation_pays_off}
+
+# 5. Comprobar el comportamiento sin hallazgos.
+docker exec -u operador cyberlab-phantomcorp python3 /tmp/recolector.py --base http://phantomcorp-db --desde 1 --hasta 5
+
+# 6. Comprobar el manejo de un legajo inexistente.
+docker exec -u operador cyberlab-phantomcorp python3 /tmp/recolector.py --base http://phantomcorp-db --desde 251 --hasta 251
+
+# 7. Validar la flag desde la consola atacante.
+# Se utilizó una copia temporal compatible con Linux.
+docker exec cyberlab-attacker bash /tmp/lab08-ctf/ctf submit 08 R5 'FLAG{automation_pays_off}'
+
+# 8. Consultar el estado del validador temporal.
+docker exec cyberlab-attacker bash /tmp/lab08-ctf/ctf status 08
+
+# El estado temporal mostró R5 resuelto (1/5).
+# No representa el progreso consolidado de los cinco integrantes.
