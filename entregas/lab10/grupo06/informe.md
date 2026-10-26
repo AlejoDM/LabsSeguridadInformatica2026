@@ -6,7 +6,7 @@
 | Nombre y apellido | Usuario de GitHub |
 |---|---|
 | Martín Beccereca | martinbeccereca |
-| Belén Benito | belubenito01 |
+| Belén Benito | belubenito603 |
 | Alejo José De Miguel | AlejoDM |
 | Tomás Giudici | TomasGiudici |
 | Carolina Suppo | carosuppo |
@@ -30,6 +30,12 @@
 **Finalidad y partes asistidas:** apoyo para la ejecución de R3 y revisión limitada del aporte P2.
 **Verificación realizada:** contraste con el ruleset HTTP real, aceptación de la flag por el motor oficial y comprobaciones locales de la expresión propuesta.
 
+**Herramienta:** ChatGPT (OpenAI), aporte P5.
+
+- **Finalidad del uso:** asistencia para analizar los registros del SOC, identificar y correlacionar el evento de intrusión, validar la flag y redactar la documentación del Reto 5.
+- **Partes asistidas:** evidencia y análisis de R5, respuestas P4 y P5, registro de comandos y revisión de integración.
+- **Verificación:** se analizó la línea base del SOC conservada por el grupo, se identificó el evento `ALERT[path-traversal]` y se comprobó que no correspondía a las pruebas propias. La flag fue aceptada mediante una copia temporal del validador compatible con Linux.
+
 ## 1. Flags capturadas (salida de `./ctf status 10`)
 
 *Pendiente de completar cuando se resuelvan los 5 retos.*
@@ -39,6 +45,7 @@
 | R1 — Vista inicial del SOC | Obtenida | [Línea base del SOC](evidencia/salidas/r1-soc-inicial.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
 | R3 — Ruleset publicado | Obtenida y aceptada en esta sesión | [Ruleset original](evidencia/salidas/r3-ruleset.txt), [envío R3](evidencia/salidas/r3-submit.txt) y [estado parcial](evidencia/salidas/status-10-p3.txt) |
 | R2 — Detección por User-Agent | Obtenida | [Respuesta y alerta `scanner-ua`](evidencia/salidas/r2-scanner-ua.txt) y [envío de R2](evidencia/salidas/r2-submit.txt) |
+| R5 — Intrusión en el ruido | Obtenida y validada | [Línea base completa](evidencia/salidas/r5-soc-completo.txt), [evento identificado](evidencia/salidas/r5-correlacion-log.txt) y [validación temporal](evidencia/salidas/r5-status-10.txt). Flag `FLAG{intrusion_in_the_noise}`. |
 
 ### Contexto de la vista `/soc` (línea base, R1)
 
@@ -79,7 +86,33 @@ No hay una firma perfecta: esta propuesta cubre el separador solicitado, pero no
 
 **P4.** El R5: la intrusión estaba en el log. ¿Qué habría hecho que se detecte automáticamente y no dependiera de que alguien la mire?
 
+La intrusión del Reto 5 podría haberse detectado automáticamente mediante una regla de correlación en el SOC o en un SIEM que analice los registros HTTP.
+
+En nuestro caso, encontramos una solicitud desde la IP `185.220.101.42` hacia `/admin/../../etc/passwd`, con respuesta HTTP 200 y una alerta `path-traversal`. Este evento se diferenciaba del tráfico habitual, que consistía principalmente en consultas al catálogo, y ya estaba presente antes de que nuestro grupo realizara sus pruebas.
+
+Propondríamos una regla que detecte solicitudes con secuencias de recorrido de directorios, como `../`, especialmente cuando intentan acceder a archivos sensibles. La alerta debería registrar el origen, la ruta, el método HTTP, la respuesta del servidor y el momento del evento.
+
+Como mejora, también se podría correlacionar esa señal con varias solicitudes sospechosas provenientes del mismo origen dentro de una ventana de cinco minutos, aumentando la prioridad si se observan rutas sensibles o respuestas exitosas. Sin embargo, una única solicitud claramente sospechosa también debería generar una alerta, aunque no supere un umbral de frecuencia.
+
+Esta detección permitiría que el equipo de seguridad reciba una notificación y revise el evento sin depender exclusivamente de una inspección manual de los logs.
+
+De todas formas, la alerta no demuestra por sí sola que se haya comprometido el sistema. Un código HTTP 200 no garantiza que el archivo solicitado se haya leído. Sería necesario revisar la respuesta y otros registros disponibles para confirmar el impacto.
+
+También podrían existir falsos positivos o variantes que no coincidan con la regla. Por eso, la correlación debe complementarse con validación de rutas en el servidor, controles de acceso y revisión humana.
+
 **P5.** Cierre del curso: recorriste ataque (05–08), agentes (09) y defensa (10). ¿Qué cambió en cómo pensás la seguridad?
+
+A lo largo de los laboratorios fuimos cambiando nuestra manera de entender la seguridad informática. Al principio nos enfocábamos principalmente en descubrir vulnerabilidades y comprobar si podían explotarse, pero después comprendimos que también es importante analizar qué consecuencias tienen y cómo podemos prevenirlas o detectarlas.
+
+En los laboratorios 05 y 06 aprendimos a reconocer y enumerar servicios. En el 07 trabajamos con vulnerabilidades que permitían realizar acciones no autorizadas, y en el 08 analizamos las posibilidades y los riesgos que aparecen después de obtener acceso a un sistema.
+
+En el Laboratorio 09 incorporamos la automatización mediante agentes, entendiendo que pueden facilitar determinadas tareas, pero que necesitan límites claros y supervisión humana.
+
+Finalmente, el Laboratorio 10 nos permitió observar las mismas actividades desde el punto de vista del defensor. Aprendimos que no alcanza con detectar una cadena sospechosa: también necesitamos interpretar registros, relacionar eventos y distinguir entre tráfico normal, pruebas autorizadas e intentos de intrusión.
+
+Como conclusión, entendimos que Red Team y Blue Team se complementan. Conocer cómo se realiza un ataque nos ayuda a diseñar mejores defensas, y comprender cómo funciona la detección nos permite evaluar con mayor criterio los riesgos de seguridad.
+
+Nos llevamos una visión más completa: la seguridad no consiste solamente en encontrar fallas, sino también en prevenirlas, detectarlas y responder de manera fundamentada.
 
 ## 4. Bitácora
 
