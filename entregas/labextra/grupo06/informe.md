@@ -15,14 +15,24 @@
 
 **Herramienta:** Codex (OpenAI).
 
-**Finalidad y partes asistidas:** apoyo para la ejecución de R3.
+**Finalidad y partes asistidas:** apoyo para la ejecución de R1 y R3, el ordenamiento de evidencias y la redacción técnica inicial.
 **Verificación realizada:** Se ejecutaron los comandos en el entorno autorizado del laboratorio y se analizaron las respuestas obtenidas para comprobar que el acceso al recurso interno se realizó mediante la vulnerabilidad SSRF. Se verificó la presencia de la información expuesta y se validó la flag mediante el sistema oficial de retos.
 
 ## 1. Cadena de explotación
 
 ### R1 — Panel interno en localhost
 
-Pendiente del responsable P1. No se sondearon puertos para este aporte.
+La home pública de `http://phantomcorp/` expuso una herramienta con formulario GET hacia `/preview` e input `url`; el texto de la propia página aclara que la previsualización la genera el servidor. Esto justificó comprobar que el destino indicado se consulta desde PhantomCorp y no desde la consola atacante. La home y el formulario constan en la [salida original](evidencia/salidas/01-home.txt).
+
+Se probaron por `/preview` destinos `127.0.0.1` limitados a una lista breve de puertos HTTP y de administración habituales. El contraste inicial contra el puerto 1 devolvió `HTTP/1.0 502 Bad Gateway` y `Connection refused`, por lo que la aplicación reveló que intentó abrir una conexión local pero no obtuvo listener. La [salida original](evidencia/salidas/08-r1-oraculo-puertos.txt) conserva ese caso. Los puertos 8080, 8000, 3000, 5000, 8888, 8008, 8081 y 9090 presentaron el mismo resultado; el registro de comandos detalla la secuencia completa.
+
+El puerto 9000 produjo una respuesta diferente: el portal devolvió `HTTP/1.0 200 OK` y envolvió el contenido de «PhantomCorp — Panel interno (solo localhost)», que incluía la flag. La consulta reproducible fue:
+
+```bash
+curl -sS -i --max-time 10 --get --data-urlencode 'url=http://127.0.0.1:9000/' http://phantomcorp/preview
+```
+
+La respuesta completa está en la [evidencia del panel local](evidencia/salidas/09-r1-panel-local.txt). Desde la raíz del repositorio se presentó `FLAG{ssrf_localhost_panel_interno}` mediante `./ctf submit extra R1 'FLAG{ssrf_localhost_panel_interno}'`; el verificador la aceptó, como acredita la [salida de presentación](evidencia/salidas/10-r1-submit.txt).
 
 ### R2 — Intranet en la red interna
 
@@ -63,9 +73,18 @@ La [salida íntegra de ./ctf status extra](evidencia/salidas/07-status.txt) cons
 
 ## 3. Preguntas de análisis
 
-### P1 — Modelo de confianza por red
+### Acceso indirecto y modelo de confianza por red
 
-Pendiente de P1.
+La topología del laboratorio separa la consola atacante y la intranet: el atacante solo pertenece a `labnet`, mientras que `phantomcorp-intra` solo pertenece a `internalnet`. El portal `phantomcorp` está conectado a ambas redes. Por eso, una petición directa desde la consola hacia la intranet no dispone de una ruta o resolución utilizable, pero la misma petición introducida en `/preview` puede ser emitida por el portal, que sí tiene conectividad hacia la red interna.
+
+```text
+Consola atacante --labnet--> phantomcorp (/preview) --internalnet--> phantomcorp-intra
+        |                         |
+        |                         +-- localhost:9000 (panel interno)
+        +---- sin acceso directo a la intranet ----X
+```
+
+El componente que vuelve alcanzable indirectamente a la intranet es el servidor web `phantomcorp`, en particular su función `/preview`: acepta una URL elegida por quien consulta, realiza el request con la identidad y conectividad del servidor, y devuelve el contenido. R1 también demuestra la misma pérdida de la confianza basada solo en ubicación: `127.0.0.1` significa el propio portal para la solicitud generada por el servidor, no la consola atacante. La segmentación limita el acceso directo, pero no protege por sí sola cuando un host conectado a ambas redes puede ser inducido a solicitar destinos arbitrarios.
 
 ### P2 — Oráculo de escaneo
 
