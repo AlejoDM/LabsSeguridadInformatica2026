@@ -115,4 +115,16 @@ Get-Content labs/lab11-forensia/caso/memoria/bash_history.txt -Encoding UTF8
 Get-Content labs/lab11-forensia/caso/memoria/netstat.txt -Encoding UTF8
 Get-Content labs/lab11-forensia/caso/memoria/lsof.txt -Encoding UTF8
 Get-Content labs/lab11-forensia/caso/memoria/pslist.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/logs/access.log -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/disco/listado.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/disco/var/www/uploads/shell.php.evidencia.txt -Encoding UTF8
 # Extractos relevantes conservados en salidas/r4-c2-exfiltracion.txt.
+
+# --- Validacion final de las cinco flags (Git Bash local; no usa Docker) ---
+./ctf submit 11 R1 'FLAG{dfir_vector_sqli}'
+./ctf submit 11 R2 'FLAG{dfir_webshell_hallado}'
+./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'
+./ctf submit 11 R4 'FLAG{dfir_c2_exfil}'
+./ctf submit 11 R5 'FLAG{dfir_custodia_alterada}'
+./ctf status 11
+# Salidas completas: salidas/r1-r5-validacion.txt y salidas/status-11-final.txt.
