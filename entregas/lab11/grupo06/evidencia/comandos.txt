@@ -108,3 +108,11 @@ Get-Content labs/lab11-forensia/caso/memoria/netstat.txt -Encoding UTF8
 
 # Se integraron al informe únicamente indicadores observados
 # con referencias a los archivos y líneas correspondientes.
+
+# --- P4: R4 — C2, exfiltración y correlación (2026-10-28) ---
+# Lecturas directas de artefactos provistos; sin ejecutar comandos del historial.
+Get-Content labs/lab11-forensia/caso/memoria/bash_history.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/memoria/netstat.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/memoria/lsof.txt -Encoding UTF8
+Get-Content labs/lab11-forensia/caso/memoria/pslist.txt -Encoding UTF8
+# Extractos relevantes conservados en salidas/r4-c2-exfiltracion.txt.

