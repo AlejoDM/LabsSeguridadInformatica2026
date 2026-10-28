@@ -23,6 +23,12 @@
 - **Finalidad y partes asistidas:** apoyo para explicar la respuesta P2 sobre referencias y objetos de Git.
 - **Verificación:** Se contrastó la explicación con la consigna y se reprodujeron los comandos `reflog`, `fsck` y `show` sobre el repositorio local del caso. Se revisaron las salidas crudas adjuntas y la aceptación del verificador; no se probó la credencial contra ningún servicio.
 
+**Herramienta:** ChatGPT (OpenAI), aporte de Persona 5.
+
+- **Finalidad:** asistencia para comprender y redactar los mecanismos preventivos de filtración de secretos en Git.
+- **Parte asistida:** pregunta P5, sobre controles locales pre-commit y protección durante el push.
+- **Verificación:** se revisó la coherencia de la respuesta con el enunciado y el alcance del laboratorio. La explicación es conceptual; no se instalaron ni ejecutaron herramientas de detección de secretos en el repositorio del caso.
+
 ## 1. Línea de tiempo de la filtración
 
 Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y committer coinciden, con zona -03:00. No son fechas de publicación ni de descubrimiento: el caso se generó e investigó el 28/10/2026.
@@ -97,6 +103,28 @@ Pendiente del responsable P4. **Revisión cruzada de P3:** todavía no existe su
 ## 5. Preguntas P1–P5
 
 P1: pendiente de su responsable.
+
+### P5 — Mecanismos preventivos para evitar filtraciones en Git
+
+Para prevenir la exposición de credenciales en un repositorio Git, proponemos implementar dos mecanismos complementarios, uno en la computadora del desarrollador antes de registrar los cambios y otro en la plataforma donde se aloja el repositorio.
+
+**1. Control local antes del commit: hooks pre-commit con detección de secretos.**
+
+Se puede configurar un hook `pre-commit` que ejecute una herramienta de detección de secretos, como Gitleaks, para analizar los archivos que el desarrollador está por incorporar al historial. Si identifica una contraseña, token o clave de API, puede impedir el commit y solicitar que se retire el secreto.
+
+Este control permite detectar el problema antes de que la información quede registrada en el historial de Git. Es especialmente útil porque borrar posteriormente una credencial del código no elimina automáticamente las versiones anteriores que la contienen.
+
+Su principal limitación es que los hooks locales pueden desactivarse o no estar instalados en todas las computadoras. Además, los detectores pueden producir falsos positivos o no identificar ciertos formatos de credenciales.
+
+**2. Control del lado del servidor: escaneo de secretos y protección durante el push.**
+
+Como segunda medida, se puede utilizar una funcionalidad como GitHub Push Protection, que examina los cambios que se intentan subir al repositorio y puede bloquear el push cuando detecta determinados secretos compatibles con sus patrones de identificación.
+
+Esto incorpora una barrera adicional, incluso si un desarrollador no configuró correctamente los controles locales. La plataforma puede alertar sobre credenciales expuestas y permitir aplicar políticas de seguridad centralizadas.
+
+Sin embargo, este mecanismo tampoco garantiza detectar todos los secretos: su cobertura depende de los tipos de credenciales reconocidos, la configuración disponible y las posibles excepciones autorizadas. Además, no reemplaza la revocación o rotación de las credenciales que ya fueron expuestas.
+
+**Conclusión:** ambos controles deben utilizarse conjuntamente. El mecanismo local busca evitar que el secreto ingrese al historial, mientras que el control del servidor reduce el riesgo de que llegue al repositorio compartido. En caso de una filtración, la prioridad sigue siendo revocar o rotar la credencial afectada, porque eliminarla del código o reescribir el historial no garantiza que desaparezca de las copias existentes.
 
 ### P2 — Por qué `reset --hard` no necesariamente destruye objetos
 
