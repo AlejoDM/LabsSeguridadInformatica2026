@@ -18,11 +18,33 @@
 - **Finalidad y partes asistidas:** asistencia para generar la implementación de `aplicar_reglas` y sus pruebas, ejecutar comprobaciones sobre el caso, consultar la documentación de NIST y redactar el análisis y las evidencias del informe.
 - **Verificación:** Revisión del código y reproducción manual de las pruebas.
 
+**Herramienta:** ChatGPT (OpenAI), aporte de Persona 2.
+
+- **Finalidad:** asistencia para implementar las funciones `cargar_sombra()` y `crackear()`, preparar las pruebas aisladas y redactar la respuesta P2 sobre el salt.
+- **Partes asistidas:** implementación de las dos funciones, script `evidencia/probar-p2.py`, documentación de P2 y registro de pruebas.
+- **Verificación:** se comprobó que el archivo de hashes contiene cuatro registros, que `cracker.py` compila correctamente y que el ataque de diccionario encuentra una contraseña ficticia en una prueba aislada. La ejecución integrada de R2 sigue pendiente de la implementación de `hash_de()` por Persona 1.
+
 ## 1. Tabla de resultados
 
 | Usuario | Algoritmo | ¿Cayó? | Técnica | Contraseña del caso | Tiempo |
 |---|---|---|---|---|---|
 | admin | sha256 | Sí, en prueba aislada de reglas; falta CLI integrada | palabra + año | `phantom2026` | 0,000337 s, 95 intentos en esta ejecución aislada |
+
+### Implementación de P2
+
+Se completaron las funciones `cargar_sombra()` y `crackear()` en `cracker.py`.
+
+La función `cargar_sombra()` lee el archivo de hashes, ignora las líneas vacías y los comentarios, y devuelve una lista de tuplas con usuario, algoritmo, salt y hash. Se verificó que el archivo proporcionado por la cátedra contiene cuatro registros: operador, analista, admin y root.
+
+La función `crackear()` recorre las palabras de un diccionario y compara sus hashes con los registros pendientes. Cuando se habilita `con_reglas`, utiliza las variantes generadas por `aplicar_reglas()`. Devuelve un diccionario con las contraseñas encontradas. En la ejecución general se omite PBKDF2 para evitar pruebas masivas de alto costo; su medición se realiza por separado.
+
+Se comprobó la compilación con `py -3 -m py_compile` y se ejecutó una prueba aislada con un usuario ficticio, un hash SHA-256 con salt y un diccionario temporal. La prueba encontró correctamente la contraseña esperada.
+
+**Resultado:** `PRUEBA P2 SUPERADA`.
+
+**Evidencia:** `evidencia/probar-p2.py` y `evidencia/salidas/p2-prueba-aislada.txt`.
+
+La prueba aislada utiliza una implementación temporal de hash dentro del script de prueba, sin alterar `hash_de()` de Persona 1. Queda pendiente ejecutar el cracker completo y documentar R2 cuando se integre esa función.
 
 ### Implementación de P3
 
@@ -57,6 +79,18 @@ Demuestra acceso al texto cifrado del ejercicio con la contraseña recuperada. E
 R3 se presentó después de obtenerla del loot. El primer envío fue rechazado por el formato CRLF del manifiesto. `evidencia/validar-r3-crlf.sh` reutiliza las funciones oficiales con una copia temporal normalizada, sin editar motor ni manifiesto ni escribir el progreso a mano. La salida de aceptación y el estado oficial muestran **R3 resuelto, 1/3**. La flag aceptada no elimina la necesidad de repetir R3 con el CLI integrado.
 
 ## 5. Preguntas P1–P5
+
+### P2 — ¿Para qué sirve el salt y por qué no impide ataques de diccionario?
+
+El *salt* es un valor aleatorio que se incorpora al proceso de generación del hash de una contraseña. Su finalidad es evitar que dos usuarios con la misma contraseña tengan necesariamente el mismo hash y dificultar el uso de tablas precalculadas, como las *rainbow tables*.
+
+Al utilizar un salt diferente para cada usuario, es necesario calcular los candidatos para cada registro, en lugar de reutilizar directamente los mismos hashes.
+
+Sin embargo, el salt no impide un ataque de diccionario. Si una contraseña es común o predecible y aparece entre los candidatos, se puede calcular su hash utilizando el salt correspondiente y compararlo con el hash almacenado.
+
+En este laboratorio trabajamos con hashes MD5 y SHA-256 que incorporan salt. Esto permite comprobar que el salt no reemplaza la necesidad de utilizar contraseñas difíciles de adivinar ni algoritmos de derivación costosos, como PBKDF2.
+
+**En conclusión**, el salt dificulta los ataques basados en tablas precalculadas y evita que hashes iguales revelen directamente contraseñas compartidas, pero no impide probar contraseñas mediante un diccionario.
 
 ### P3 — Complejidad predecible y NIST
 

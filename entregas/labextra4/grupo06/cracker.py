@@ -45,11 +45,29 @@ def hash_de(algo: str, salt_hex: str, password: str) -> str:
     raise NotImplementedError("Completá hash_de()")
 
 
+
 def cargar_sombra(ruta: str) -> list:
-    """Devuelve una lista de tuplas (usuario, algo, salt_hex, hash_hex)
-    parseando sombra.txt (ignorá líneas de comentario que empiezan con #)."""
-    # TODO
-    raise NotImplementedError("Completá cargar_sombra()")
+    """Lee el volcado y devuelve (usuario, algoritmo, salt, hash)."""
+    registros = []
+
+    with open(ruta, "r", encoding="utf-8-sig") as archivo:
+        for numero, linea in enumerate(archivo, start=1):
+            linea = linea.strip()
+
+            if not linea or linea.startswith("#"):
+                continue
+
+            partes = linea.split(":")
+            if len(partes) != 4:
+                raise ValueError(
+                    f"Formato invalido en linea {numero}: se esperan 4 campos"
+                )
+
+            usuario, algo, salt_hex, hash_hex = partes
+            registros.append((usuario, algo, salt_hex, hash_hex))
+
+    return registros
+
 
 
 def aplicar_reglas(palabra: str) -> list:
@@ -71,15 +89,50 @@ def aplicar_reglas(palabra: str) -> list:
     return variantes
 
 
-def crackear(sombra: list, diccionario: str, con_reglas: bool = False) -> dict:
-    """Para cada usuario, probá cada candidato del diccionario (y sus variantes
-    si con_reglas=True) hasta que hash_de() coincida con el hash looteado.
-    Devolvé {usuario: password} de los que cayeron. Imprimí el progreso.
 
-    OJO con pbkdf2: 200.000 iteraciones por intento. ¿Conviene probarlo con el
-    diccionario entero? ¿Qué te dice eso del algoritmo? (Pista: es la P4.)"""
-    # TODO
-    raise NotImplementedError("Completá crackear()")
+def crackear(sombra: list, diccionario: str, con_reglas: bool = False) -> dict:
+    """Prueba candidatos del diccionario contra el volcado ficticio."""
+    halladas = {}
+    pendientes = []
+
+    for usuario, algo, salt_hex, hash_hex in sombra:
+        if algo.lower().startswith("pbkdf2"):
+            print(f"[INFO] {usuario}: PBKDF2 omitido en corrida general")
+            continue
+
+        pendientes.append((usuario, algo, salt_hex, hash_hex))
+
+    with open(diccionario, "r", encoding="utf-8-sig") as archivo:
+        for linea in archivo:
+            palabra = linea.strip()
+
+            if not palabra or palabra.startswith("#"):
+                continue
+
+            candidatos = (
+                aplicar_reglas(palabra) if con_reglas else [palabra]
+            )
+
+            for candidato in candidatos:
+                for usuario, algo, salt_hex, hash_hex in pendientes[:]:
+                    calculado = hash_de(algo, salt_hex, candidato)
+
+                    if calculado.lower() == hash_hex.lower():
+                        halladas[usuario] = candidato
+                        pendientes.remove(
+                            (usuario, algo, salt_hex, hash_hex)
+                        )
+                        print(f"[OK] {usuario}: coincidencia encontrada")
+
+                if not pendientes:
+                    break
+
+            if not pendientes:
+                break
+
+    print(f"[INFO] Recuperadas: {len(halladas)} de {len(sombra)}")
+    return halladas
+
 
 
 def main() -> int:

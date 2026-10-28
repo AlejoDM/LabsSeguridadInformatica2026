@@ -27,3 +27,31 @@ Capturas reales mediante Tee-Object, UTF-8; no editadas.
 19. git -C $repo status --short --branch: solo carpeta nueva entregas/labextra4/grupo06/.
 
 La prueba aislada no es la ejecución integrada de crackear. Los tiempos de las repeticiones varían y no se mezclan en un benchmark. No se ejecutaron commit, add, fetch, push ni cambios remotos.
+
+P2 / Lab Extra 04 — 28/10/2026 — PowerShell.
+
+1. git switch --track origin/labextra4-grupo06
+   Cambio a la rama compartida del grupo.
+
+2. Get-Content entregas/labextra4/grupo06/cracker.py -Encoding UTF8
+   Lectura del código existente antes de modificarlo.
+
+3. py -3 -m py_compile entregas/labextra4/grupo06/cracker.py
+   Comprobación de sintaxis: sin errores.
+
+4. Prueba aislada de cargar_sombra() mediante importlib.util.
+   Resultado: cuatro registros cargados correctamente:
+   operador (md5), analista (sha256), admin (sha256), root (pbkdf2).
+
+5. Prueba aislada de crackear() con hash SHA-256 y diccionario ficticio.
+   Resultado: usuario_prueba recuperado correctamente.
+
+6. py -3 entregas/labextra4/grupo06/evidencia/probar-p2.py
+   Resultado: PRUEBA P2 SUPERADA.
+   Evidencia: evidencia/salidas/p2-prueba-aislada.txt.
+
+7. git diff --check
+   Sin errores de formato.
+
+Pendiente: integración con hash_de() de P1, ejecución real de R2
+y revisión cruzada de aplicar_reglas() de P3.
