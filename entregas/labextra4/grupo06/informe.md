@@ -58,6 +58,17 @@ Como `hash_de`, `cargar_sombra` y `crackear` aún no están implementadas por P1
 
 Sobre las 49 palabras del diccionario puro no hubo coincidencia. Con las reglas se encontró `phantom2026`, derivada de `phantom`, en el intento 95. La contraseña no se obtuvo del generador ni de soluciones. Se confirmó el loot con el subcomando oficial `descifrar` de la copia. La ejecución `crackear ... --reglas` todavía falla en `cargar_sombra`, y su error se conserva en `cli-pendiente-integracion.txt`. **No se presenta la prueba aislada como ejecución exitosa del cracker integrado.**
 
+### Revisión cruzada de P3 — realizada por Persona 2
+
+Se revisó la implementación de `aplicar_reglas()` y se ejecutó el script `evidencia/probar-p3.py` sobre el código del grupo.
+
+Las pruebas confirmaron que la función genera variantes con capitalización y sufijos, conserva un orden estable, evita candidatos duplicados y funciona con distintas entradas.
+
+En la prueba aislada sobre `admin`, el diccionario sin reglas no encontró coincidencias en 49 intentos. Con reglas se recuperó la contraseña del caso en 95 intentos y se comprobó el descifrado del loot.
+
+**Resultado de la revisión:** aprobada para los casos evaluados. No se modificó la implementación de Persona 3.
+
+**Evidencia:** `evidencia/salidas/p2-revision-p3.txt`.
 ## 2. Medición de velocidad (P1)
 
 

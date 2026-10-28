@@ -55,3 +55,17 @@ P2 / Lab Extra 04 — 28/10/2026 — PowerShell.
 
 Pendiente: integración con hash_de() de P1, ejecución real de R2
 y revisión cruzada de aplicar_reglas() de P3.
+
+P2 / Revisión cruzada de P3 — 28/10/2026.
+
+8. Lectura de evidencia/probar-p3.py.
+   Se revisaron las comprobaciones del contrato de aplicar_reglas().
+
+9. Ejecución de probar-p3.py con cracker.py, caso y usuario admin.
+   Resultado: contrato, orden, deduplicación y variantes correctos.
+   Diccionario puro: 49 intentos, sin coincidencia.
+   Con reglas: 95 intentos, contraseña recuperada y loot descifrado.
+
+10. Repetición de la prueba con Tee-Object.
+    Evidencia: evidencia/salidas/p2-revision-p3.txt.
+    Se observaron caracteres mal representados por la codificación de PowerShell.
