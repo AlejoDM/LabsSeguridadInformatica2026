@@ -18,6 +18,11 @@
 **Finalidad y partes asistidas:** apoyo para la ejecución de R3.
 **Verificación realizada:** Se ejecutaron los comandos en el entorno autorizado del laboratorio y se analizaron las respuestas obtenidas para comprobar que el acceso al recurso interno se realizó mediante la vulnerabilidad SSRF. Se verificó la presencia de la información expuesta y se validó la flag mediante el sistema oficial de retos.
 
+**Herramienta:** Opencode.
+
+**Finalidad y partes asistidas:** apoyo para documentar R2 y redactar la respuesta P2 sobre el oráculo de escaneo.
+**Verificación realizada:** Se contrastaron las solicitudes con las salidas crudas del contenedor del Lab Extra. La cadena mostrada por la intranet se presentó al verificador y fue rechazada; la comparación literal de los errores de R1 queda pendiente de las salidas de P1.
+
 ## 1. Cadena de explotación
 
 ### R1 — Panel interno en localhost
@@ -26,7 +31,13 @@ Pendiente del responsable P1. No se sondearon puertos para este aporte.
 
 ### R2 — Intranet en la red interna
 
-Pendiente del responsable P2. Para obtener el punto de partida de R3 se consultó la home de la intranet mediante preview y se conservó el contraste de acceso directo. No se presentó la flag R2 ni se reemplaza el análisis asignado a P2.
+Desde `cyberlab-attacker`, la solicitud directa a `http://phantomcorp-intra/` devolvió `curl: (6) Could not resolve host: phantomcorp-intra`; esto confirma que el nombre no se resolvió desde la consola, no que se haya observado un timeout o una conexión bloqueada por IP. En la topología del Compose del laboratorio, la consola atacante está en `labnet` y la intranet solo en `internalnet`, por lo que no hay acceso directo desde la consola. [Salida original](evidencia/salidas/08-p2-directo.txt).
+
+Luego se envió `http://phantomcorp-intra/` como destino de `/preview` en `phantomcorp`. La respuesta HTTP 200 incluyó la página «Intranet PhantomCorp» y el contenido `FLAG{ssrf_intranet_descubierta}`, prueba de acceso indirecto a través del servidor web conectado a ambas redes. [Salida original](evidencia/salidas/09-p2-intranet-preview.txt).
+
+La cadena observada se presentó al verificador con `./ctf submit extra R2 'FLAG{ssrf_intranet_descubierta}'`, pero respondió `[FAIL] Flag incorrecta para el reto R2`. Por lo tanto, queda comprobado el acceso indirecto y documentado el contenido recibido, pero R2 no se declara resuelto ni se afirma que esa cadena sea la flag válida. El estado consultado en esta sesión mostró 0/3; la captura 07 corresponde al estado documentado durante la ejecución anterior de P3. Se conservan el intento fallido y el estado observado después del intento. [Presentación](evidencia/salidas/11-p2-submit.txt) · [Estado](evidencia/salidas/12-p2-status.txt).
+
+Para buscar más pistas sin adivinar rutas, se siguieron los dos enlaces publicados en la home. `/salud` devolvió únicamente el estado del servicio; `backups/clientes.json` devolvió la flag de R3 ya documentada, no otra flag para R2. [Home](evidencia/salidas/13-p2-intranet-home-recheck.txt) · [Salud](evidencia/salidas/14-p2-salud-recheck.txt) · [Backup enlazado](evidencia/salidas/15-p2-backup-link.txt). No se observó otra cadena de R2 en los recursos publicados ni se presentó una respuesta de R3 como si correspondiera a R2; la aceptación de R2 sigue pendiente.
 
 ### R3 — Exfiltración del backup
 
@@ -69,7 +80,9 @@ Pendiente de P1.
 
 ### P2 — Oráculo de escaneo
 
-Pendiente de P2.
+El transcript de los sondeos de localhost de R1 todavía no está en la entrega, así que no se atribuyen mensajes literales a puertos concretos. En la evidencia de P2 sí se observa el contraste de R2: desde la consola atacante, `curl` informa que no puede resolver `phantomcorp-intra`; al pedirle ese mismo destino a `/preview`, el servidor responde HTTP 200 con la página interna. Es un ejemplo de cómo el punto de observación del servidor permite conocer recursos que no están disponibles directamente desde el atacante.
+
+Para R1, la comparación literal solicitada debe completarse con las salidas de P1. En general, un rechazo de conexión indica que no hay un servicio aceptando TCP en ese puerto, mientras que una respuesta HTTP demuestra que algo aceptó la conexión y habló HTTP. La aplicación SSRF puede revelar esa diferencia aunque el atacante no tenga conectividad directa, convirtiéndose en un oráculo de escaneo. La señal no es concluyente por sí sola: filtros, timeouts, protocolos distintos y errores de la aplicación pueden producir respuestas ambiguas.
 
 ### P3 — Hallazgo profesional
 
