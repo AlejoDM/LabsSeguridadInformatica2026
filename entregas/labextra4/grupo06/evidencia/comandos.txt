@@ -1,0 +1,29 @@
+P3, Extra 04, 28/10/2026. PowerShell; Git Bash para ctf.
+$repo='C:/Users/Muhammed/Desktop/Facultad/Seguridad Laboratorios/LabsSeguridadInformatica2026'
+$dest="$repo/entregas/labextra4/grupo06"
+$py='C:/Users/Muhammed/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+$env:PYTHONIOENCODING='utf-8'; $env:PYTHONDONTWRITEBYTECODE='1'
+Trabajo temporal: C:/Users/Muhammed/Documents/Codex/2026-10-28/accede-a-c-users-muhammed-desktop-6/work/extra4
+Capturas reales mediante Tee-Object, UTF-8; no editadas.
+
+1. git -c safe.directory="$repo" -C $repo status --short --branch: labextra4-grupo06, limpio.
+2. Lectura plan adjunto; búsqueda recursiva AGENTS.md (ninguno); inventario rg --files --hidden -g '!.git/**'. Lectura README, esqueleto, entregable, rúbrica, CONTRIBUTING y PROTOCOLO-EVIDENCIA.
+3. git -c safe.directory="$repo" -C $repo diff -- CONTRIBUTING.md README.md docs/PROTOCOLO-EVIDENCIA.md: sin diferencias locales.
+4. Consulta web NIST https://pages.nist.gov/800-63-4/sp800-63b.html, sección Password Verifiers. Sin acceso al remoto Git del proyecto.
+5. Lectura sombra.txt y diccionario.txt del caso. No se leyó generar_caso.py ni soluciones ni manifiesto para obtener candidatos/flags.
+6. Copia temporal del esqueleto e implementación exclusiva de aplicar_reglas. Creación de probar-p3.py para comprobar el contrato y SHA-256 del usuario solicitado, sin implementar los TODO de P1/P2.
+7. & $py work/extra4/probar-p3.py work/extra4/cracker.py "$repo/labs/labextra4-cracking/caso" admin -> p3-pruebas-aisladas.txt, código 0.
+8. Creación de entrega y copia de cracker.py y evidencia/probar-p3.py; no existían archivos anteriores.
+9. & $py "$dest/cracker.py" crackear "$repo/labs/labextra4-cracking/caso/sombra.txt" "$repo/labs/labextra4-cracking/caso/diccionario.txt" --reglas -> cli-pendiente-integracion.txt, NotImplementedError en cargar_sombra.
+10. & $py "$dest/cracker.py" descifrar "$repo/labs/labextra4-cracking/caso/loot/admin.enc" --password phantom2026 -> loot-admin.txt, código 0.
+11. & 'C:/Program Files/Git/bin/bash.exe' "$repo/ctf" submit extra4 R3 'FLAG{crack_reglas_mangling}' -> r3-submit.txt, rechazo CRLF.
+12. & 'C:/Program Files/Git/bin/bash.exe' work/extra4/validar-r3-crlf.sh -> r3-submit-compatibilidad.txt, R3 aceptada con funciones oficiales y manifiesto temporal normalizado.
+13. & 'C:/Program Files/Git/bin/bash.exe' "$repo/ctf" status extra4 -> status-extra4.txt, 1/3, R3. Código 1 debido a condición final de lab incompleto.
+14. git diff --no-index -- "$repo/labs/labextra4-cracking/src/cracker.py" "$dest/cracker.py" -> p3-parche.diff; código 1 esperado por diferencias.
+15. & $py "$dest/evidencia/probar-p3.py" "$dest/cracker.py" "$repo/labs/labextra4-cracking/caso" admin -> p3-verificacion-copia.txt, prueba repetida sobre archivo instalado.
+16. Guardado de informe, bitácora y capturas.
+17. git -C $repo diff --exit-code -- labs bin ctf .github README.md CONTRIBUTING.md: originales sin cambios.
+18. git -C $repo diff --cached --exit-code: índice sin cambios.
+19. git -C $repo status --short --branch: solo carpeta nueva entregas/labextra4/grupo06/.
+
+La prueba aislada no es la ejecución integrada de crackear. Los tiempos de las repeticiones varían y no se mezclan en un benchmark. No se ejecutaron commit, add, fetch, push ni cambios remotos.
