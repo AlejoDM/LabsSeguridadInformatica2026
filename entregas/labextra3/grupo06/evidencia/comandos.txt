@@ -1,0 +1,29 @@
+P3 / Lab Extra 03 — 28/10/2026 — PowerShell y Git Bash.
+$repo='C:/Users/Muhammed/Desktop/Facultad/Seguridad Laboratorios/LabsSeguridadInformatica2026'
+$py='C:/Users/Muhammed/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe'
+$dest="$repo/entregas/labextra3/grupo06"
+$env:PYTHONIOENCODING='utf-8'
+Directorio de trabajo de capturas: C:/Users/Muhammed/Documents/Codex/2026-10-28/accede-a-c-users-muhammed-desktop-6/work/extra3
+Las capturas se hicieron con 2>&1 | Tee-Object; se preserva el texto crudo, incluidos errores y estados no exitosos. A continuación se usan nombres abreviados de los archivos locales adjuntos.
+
+1. git -c safe.directory="$repo" -C $repo status --short --branch -> labextra3-grupo06, limpio.
+2. Lectura del plan adjunto, CONTRIBUTING, README del lab, entregable, rúbrica, PROTOCOLO-EVIDENCIA, server.py, start.sh y reglas CI. Inventario rg --files --hidden -g '!.git/**'; búsqueda recursiva AGENTS.md: ninguno en el repo. Se consultó el verificador para comprender su lanzamiento y compatibilidad, no para obtener flags por lectura.
+3. & $py --version -> Python 3.12.14. No se instalaron dependencias.
+4. Test-Path C:/tmp y C:/tmp/phantom_hardening.db -> False. Creación de C:/tmp requerido por el original; creación de carpeta de entrega y Copy-Item del objetivo oficial (no existía copia previa).
+5. & $py "$repo/labs/labextra3-hardening/verificar-defensa.py" -> verificador-inicial.txt, 1/5 (D5 falso positivo Windows), código 1.
+6. & $py probar-d4.py "$repo/labs/labextra3-hardening/objetivo/server.py" antes -> d4-antes-intento1.txt. Pruebas HTTP realizadas; error de limpieza por conexión SQLite del propio script sin cerrar.
+7. Se agregó db.close() al script de pruebas después de crear sus datos temporales.
+8. & $py probar-d4.py "$repo/labs/labextra3-hardening/objetivo/server.py" antes -> d4-antes.txt, código 0.
+9. Cambio únicamente de comentario D4 y consulta en objetivo/server.py del grupo: SQL fijo con dos ? y tupla (user, pwd). Ningún cambio al código original.
+10. & $py probar-d4.py "$dest/objetivo/server.py" despues -> d4-despues.txt, código 0.
+11. git diff --no-index -- "$repo/labs/labextra3-hardening/objetivo/server.py" "$dest/objetivo/server.py" -> d4-parche.diff. Código 1 significa diferencias; aviso de conversión LF/CRLF de Git.
+12. & $py "$repo/labs/labextra3-hardening/verificar-defensa.py" --dir "$dest/objetivo" -> verificador-despues-p3.txt, 2/5 (D4 real y D5 falso positivo), código 1.
+13. & 'C:/Program Files/Git/bin/bash.exe' "$repo/ctf" submit extra3 D4 'FLAG{def_sqli_parametrizado}' -> d4-submit.txt, rechazo por CRLF.
+14. & 'C:/Program Files/Git/bin/bash.exe' validar-d4-crlf.sh -> d4-submit-compatibilidad.txt, D4 aceptada por funciones oficiales; manifiesto temporal normalizado, original intacto.
+15. & 'C:/Program Files/Git/bin/bash.exe' "$repo/ctf" status extra3 -> status-extra3.txt, 1/5 (solo D4). Código 1 porque aún no se completaron todas las defensas.
+16. Copia de informe, script de pruebas, script de compatibilidad y salidas a la entrega. No se copia el plan interno.
+17. git -C $repo diff --exit-code -- labs bin ctf .github README.md CONTRIBUTING.md -> sin cambios.
+18. git -C $repo diff --cached --exit-code -> sin archivos preparados.
+19. git -C $repo status --short --branch -> solo nueva carpeta entregas/labextra3/grupo06/ en labextra3-grupo06.
+
+Para reproducir pruebas: ejecutar con el Python indicado evidencia/probar-d4.py <ruta/server.py> antes|despues. El modo antes exige bypass en el original; despues exige bloqueo en la copia. D5 es observación y se imprime independientemente. Los temporales se eliminan al terminar; ningún servidor de pruebas queda ejecutándose.
