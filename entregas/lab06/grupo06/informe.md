@@ -33,26 +33,33 @@
 - **Partes asistidas:** sección "Evidencia del R2" y comandos de R2 en la bitácora.
 - **Verificación:** las peticiones HTTP se ejecutaron contra el contenedor `phantomcorp` desde la consola atacante; las salidas crudas se conservaron sin editar en `evidencias/`. Se revisó el contenido antes de incorporarlo.
 
+**Herramienta:** opencode (asistente de IA de la línea Claude) — sesión final.
+
+- **Finalidad del uso:** apoyo para re-verificar, previo al PR, la enumeración dirigida del R5 contra `phantomcorp` (archivos default, `gobuster` con `big.txt` y `./ctf status 06`), conservar las salidas crudas correspondientes y revisar la redacción de la sección "Evidencia del R5", la fila R5 del inventario y el formato de este informe.
+- **Partes asistidas:** sección "Evidencia del R5", fila R5 del inventario, registro de la re-ejecución en la bitácora y corrección de formato de este informe.
+- **Verificación:** las verificaciones del R5 se ejecutaron contra el contenedor autorizado `phantomcorp` desde la consola atacante; las salidas crudas se conservaron sin editar en `evidencias/` y el estado 5/5 quedó reconfirmado. Respecto de dónde exponía la instancia la flag del R5 queda registrado en el informe como aspecto no verificado.d
+
 ## 1. Flags capturadas
 
-| Reto                                 | Estado    | Evidencia                                                                                                |
-| ------------------------------------ | --------- | -------------------------------------------------------------------------------------------------------- |
-| R1 — Enumeración de directorios      | Resuelto  | [Envío de R1](evidencias/lab06-r1-submit.txt) y [estado posterior](evidencias/lab06-status-after-r1.txt) |
-| R2 — Repositorio Git expuesto        | Resuelto  | [config filtrado](evidencias/lab06-r2-git-config.txt) y [envío de R2](evidencias/lab06-r2-submit.txt)    |
-| R3 — Métodos HTTP peligrosos         | Resuelto  | [OPTIONS](evidencias/lab06-r3-options.txt) y [Nmap HTTP](evidencias/lab06-r3-nmap-http.txt)              |
+| Reto                                 | Estado   | Evidencia                                                                                                  |
+| ------------------------------------ | -------- | ---------------------------------------------------------------------------------------------------------- |
+| R1 — Enumeración de directorios      | Resuelto | [Envío de R1](evidencias/lab06-r1-submit.txt) y [estado posterior](evidencias/lab06-status-after-r1.txt)   |
+| R2 — Repositorio Git expuesto        | Resuelto | [config filtrado](evidencias/lab06-r2-git-config.txt) y [envío de R2](evidencias/lab06-r2-submit.txt)      |
+| R3 — Métodos HTTP peligrosos         | Resuelto | [OPTIONS](evidencias/lab06-r3-options.txt) y [Nmap HTTP](evidencias/lab06-r3-nmap-http.txt)                |
 | R4 — Enumeración de usuarios vía API | Resuelto | [Respuesta de la API](evidencias/lab06-r4-api-users.txt) y [estado del R4](evidencias/lab06-r4-status.txt) |
-| R5 — Fingerprinting de tecnología    | Pendiente | —                                                                                                        |
+| R5 — Fingerprinting de tecnología    | Resuelto | [whatweb](evidencias/lab06-r5-whatweb.txt) y [envío de R5](evidencias/lab06-r5-submit.txt)                 |
 
-La salida de estado posterior al R1 registra 1 de 5 retos resueltos. El archivo [progreso-06.done](evidencias/progreso-06.done) es una copia del estado local del motor y complementa, pero no reemplaza, la salida legible de `./ctf status 06`.
+La salida de estado posterior al R1 registra 1 de 5 retos resueltos, y la salida final del motor ([estado 5/5](evidencias/lab06-status-final.txt)) registra los cinco retos completados. El archivo [progreso-06.done](evidencias/progreso-06.done) es una copia del estado local del motor y complementa, pero no reemplaza, la salida legible de `./ctf status 06`.
 
 ## 2. Inventario de enumeración
 
-| Hallazgo                                            | Ruta/Método                | Técnica                                                                                                                                                          | Evidencia                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          | Riesgo                                                                                                                                                                                                                                                                                                                                                                                                                                          | ¿Qué habilita para el Lab 07?                                                                                                                                                                                                                                                                |
-| --------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Directorio de respaldos accesible sin autenticación | `/backup`                  | Enumeración de directorios con `dirb`; confirmación manual con `curl`                                                                                            | `dirb` reportó `/backup` con `200`; la respuesta HTTP lista `respaldo-db-2024.sql.gz` y `config.old`. Ver [salida de dirb](evidencias/lab06-r1-dirb.txt) y [confirmación de `/backup`](evidencias/lab06-r1-backup.txt).                                                                                                                                                                                                                                                                            | Un tercero con acceso al servicio puede consultar el índice observado. Los nombres de archivos son indicios de datos y configuraciones potencialmente sensibles; no se descargó ni verificó el contenido de esos archivos.                                                                                                                                                                                                                      | Orienta el análisis posterior hacia respaldos y configuraciones expuestos. Si alguno fuera accesible y contuviera datos o credenciales, podría habilitar nuevas hipótesis de explotación; esa condición no fue verificada en R1.                                                             |
-| Método HTTP `PUT` habilitado                        | `OPTIONS /` — método `PUT` | Enumeración de métodos HTTP con `curl`; corroboración con scripts NSE de Nmap                                                                                    | La respuesta a `OPTIONS` indicó que `PUT` está habilitado y la enumeración con Nmap corroboró el hallazgo. Ver [respuesta OPTIONS](evidencias/lab06-r3-options.txt) y [enumeración con Nmap](evidencias/lab06-r3-nmap-http.txt).                                                                                                                                                                                                                                                                   | La habilitación de `PUT` amplía la superficie de ataque porque puede permitir enviar contenido a recursos del servidor. En este lab no se comprobó que permita escritura arbitraria ni ejecución de archivos.                                                                                                                                                                                                                                   | Orienta el Lab 07 a verificar de forma controlada si `PUT` permite crear o reemplazar recursos y, solo si se cumplen las condiciones necesarias, evaluar una posible carga de archivos.                                                                                                      |
-| Repositorio Git expuesto por HTTP                   | `/.git/config`             | Petición directa con `curl -i` al archivo de configuración del repositorio; verificación de otras rutas del `.git` (`HEAD`, `logs/HEAD`, listado del directorio) | `curl -sS -i http://phantomcorp/.git/config` devolvió `200` con el contenido del archivo, que incluye la URL del remoto `origin` (`https://git.internal.phantomcorp/intranet.git`). Las mismas pruebas contra `/.git/HEAD`, `/.git/logs/HEAD` y `/.git/` devolvieron `404`. Ver [config filtrado](evidencias/lab06-r2-git-config.txt), [HEAD](evidencias/lab06-r2-git-head.txt), [logs/HEAD](evidencias/lab06-r2-git-logs-head.txt) y [listado del directorio](evidencias/lab06-r2-git-index.txt). | Un `.git/config` accesible confirma que el servidor sirve archivos internos del control de versiones y filtra la URL del repositorio origen, información útil para orientar un ataque dirigido a esa infraestructura. En este caso puntual no se pudo acceder a `HEAD`, a los logs ni al listado del directorio, por lo que no está verificado que el repositorio completo (historia, objetos) sea descargable; solo el archivo `config` lo es. | Orienta el Lab 07 a intentar, de forma controlada, reconstruir el repositorio accesible (por ejemplo con herramientas de volcado de `.git` vía HTTP) solo si se confirma que más rutas del `.git` están expuestas, y a investigar el remoto `origin` filtrado como posible vector adicional. |
-| Exposición de usuarios y roles mediante API interna | `GET /api/users` | Consulta HTTP con `curl -i` | El servidor respondió `200 OK` y devolvió tres usuarios: `admin` (`superuser`), `jperez` (`editor`) y `mgomez` (`viewer`). Ver [evidencia R4](evidencias/lab06-r4-api-users.txt). | La exposición de usuarios y roles sin autenticación facilita la identificación de cuentas privilegiadas y posibles ataques dirigidos. No se comprobó acceso a las cuentas. | Permite orientar el Lab 07 hacia la revisión de la autenticación, autorización y protección de cuentas privilegiadas. |
+| Hallazgo                                            | Ruta/Método                | Técnica                                                                                                                                                          | Evidencia                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        | Riesgo                                                                                                                                                                                                                                                                                                                                                                                                                                          | ¿Qué habilita para el Lab 07?                                                                                                                                                                                                                                                                |
+| --------------------------------------------------- | -------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Directorio de respaldos accesible sin autenticación | `/backup`                  | Enumeración de directorios con `dirb`; confirmación manual con `curl`                                                                                            | `dirb` reportó `/backup` con `200`; la respuesta HTTP lista `respaldo-db-2024.sql.gz` y `config.old`. Ver [salida de dirb](evidencias/lab06-r1-dirb.txt) y [confirmación de `/backup`](evidencias/lab06-r1-backup.txt).                                                                                                                                                                                                                                                                                                                                                                                                          | Un tercero con acceso al servicio puede consultar el índice observado. Los nombres de archivos son indicios de datos y configuraciones potencialmente sensibles; no se descargó ni verificó el contenido de esos archivos.                                                                                                                                                                                                                      | Orienta el análisis posterior hacia respaldos y configuraciones expuestos. Si alguno fuera accesible y contuviera datos o credenciales, podría habilitar nuevas hipótesis de explotación; esa condición no fue verificada en R1.                                                             |
+| Método HTTP `PUT` habilitado                        | `OPTIONS /` — método `PUT` | Enumeración de métodos HTTP con `curl`; corroboración con scripts NSE de Nmap                                                                                    | La respuesta a `OPTIONS` indicó que `PUT` está habilitado y la enumeración con Nmap corroboró el hallazgo. Ver [respuesta OPTIONS](evidencias/lab06-r3-options.txt) y [enumeración con Nmap](evidencias/lab06-r3-nmap-http.txt).                                                                                                                                                                                                                                                                                                                                                                                                 | La habilitación de `PUT` amplía la superficie de ataque porque puede permitir enviar contenido a recursos del servidor. En este lab no se comprobó que permita escritura arbitraria ni ejecución de archivos.                                                                                                                                                                                                                                   | Orienta el Lab 07 a verificar de forma controlada si `PUT` permite crear o reemplazar recursos y, solo si se cumplen las condiciones necesarias, evaluar una posible carga de archivos.                                                                                                      |
+| Repositorio Git expuesto por HTTP                   | `/.git/config`             | Petición directa con `curl -i` al archivo de configuración del repositorio; verificación de otras rutas del `.git` (`HEAD`, `logs/HEAD`, listado del directorio) | `curl -sS -i http://phantomcorp/.git/config` devolvió `200` con el contenido del archivo, que incluye la URL del remoto `origin` (`https://git.internal.phantomcorp/intranet.git`). Las mismas pruebas contra `/.git/HEAD`, `/.git/logs/HEAD` y `/.git/` devolvieron `404`. Ver [config filtrado](evidencias/lab06-r2-git-config.txt), [HEAD](evidencias/lab06-r2-git-head.txt), [logs/HEAD](evidencias/lab06-r2-git-logs-head.txt) y [listado del directorio](evidencias/lab06-r2-git-index.txt).                                                                                                                               | Un `.git/config` accesible confirma que el servidor sirve archivos internos del control de versiones y filtra la URL del repositorio origen, información útil para orientar un ataque dirigido a esa infraestructura. En este caso puntual no se pudo acceder a `HEAD`, a los logs ni al listado del directorio, por lo que no está verificado que el repositorio completo (historia, objetos) sea descargable; solo el archivo `config` lo es. | Orienta el Lab 07 a intentar, de forma controlada, reconstruir el repositorio accesible (por ejemplo con herramientas de volcado de `.git` vía HTTP) solo si se confirma que más rutas del `.git` están expuestas, y a investigar el remoto `origin` filtrado como posible vector adicional. |
+| Exposición de usuarios y roles mediante API interna | `GET /api/users`           | Consulta HTTP con `curl -i`                                                                                                                                      | El servidor respondió `200 OK` y devolvió tres usuarios: `admin` (`superuser`), `jperez` (`editor`) y `mgomez` (`viewer`). Ver [evidencia R4](evidencias/lab06-r4-api-users.txt).                                                                                                                                                                                                                                                                                                                                                                                                                                                | La exposición de usuarios y roles sin autenticación facilita la identificación de cuentas privilegiadas y posibles ataques dirigidos. No se comprobó acceso a las cuentas.                                                                                                                                                                                                                                                                      | Permite orientar el Lab 07 hacia la revisión de la autenticación, autorización y protección de cuentas privilegiadas.                                                                                                                                                                        |
+| Fingerprinting del servidor web                     | `http://phantomcorp/`      | `whatweb http://phantomcorp` y `whatweb -a 3` / enumeración dirigida posterior                                                                                   | `whatweb` identificó `PhantomServer/3.7` y `PhantomCMS/3.7` (header `X-Powered-By` y metatag `generator`). Ver [salida de whatweb](evidencias/lab06-r5-whatweb.txt) y [envío de R5](evidencias/lab06-r5-submit.txt). La enumeración dirigida posterior (`nmap http-enum`, `gobuster` con `big.txt`, consultas de archivos default tipo `/robots.txt` y `/changelog` — que devolvieron `404` en la instancia levantada —, cabeceras y UAs) no detectó rutas adicionales a las ya inventariadas. Ver [gobuster big.txt](evidencias/lab06-r5-gobuster-big.txt) y [archivos default (404)](evidencias/lab06-r5-probes-defaults.txt). | El banner y la versión anunciados permiten guiar la enumeración dirigida y la búsqueda de parches/secretos conocidos para ese producto, pero no confirman vulnerabilidades por sí solos; esa comparación requiere contraste posterior.                                                                                                                                                                                                          | Permite acotar wordlists/paths y priorizar pruebas para el Lab 07 en función de la pila `PhantomServer/PhantomCMS 3.7`, evitando enumeración indiscriminada.                                                                                                                                 |
 
 ### Evidencia del R1
 
@@ -101,6 +108,19 @@ La salida HTTP completa se conserva en [lab06-r4-api-users.txt](evidencias/lab06
 
 No se intentó iniciar sesión con los usuarios encontrados ni acceder a funcionalidades restringidas. Por lo tanto, el hallazgo demuestra exposición de información, pero no una vulneración de las cuentas.
 
+### Evidencia del R5
+
+El fingerprinting se realizó sobre la raíz del servicio web con `whatweb` (niveles normal y agresivo):
+
+```text
+http://phantomcorp [200 OK] HTML5, HTTPServer[PhantomServer/3.7],
+MetaGenerator[PhantomCMS 3.7], X-Powered-By[PhantomCMS/3.7]
+```
+
+La observación directa es que el servicio anuncia su servidor y su CMS con la versión 3.7 en la cabecera `Server`/`X-Powered-By` y el metatag `generator`. Con esa versión identificado se lanzó una enumeración dirigida: `nmap --script http-enum` ([salida cruda](evidencias/lab06-r5-nmap-httpenum.txt)), `gobuster` con la lista `big.txt` (20470 rutas; solo respondieron `/admin` con `403` y `/backup` con `200`, ya ambas inventariadas; [salida cruda](evidencias/lab06-r5-gobuster-big.txt)), y consultas manuales con `curl` a archivos default típicos de un CMS (`/robots.txt`, `/changelog`, `/readme.txt`, `/sitemap.xml`, `/docs`, `/version`, `/info.php`), a variantes de cabeceras (`X-CMS-Version`) y User-Agent ([salidas combinadas](evidencias/lab06-r5-probes-dirigidas.txt)). Esas consultas no detectaron rutas ni archivos adicionales a los ya inventariados (`/admin`, `/backup`, `/.git/config`, `/api/users`); los archivos default del CMS que la consigna anticipa devolvieron `404 Not Found` en la instancia levantada ([salida cruda](evidencias/lab06-r5-probes-defaults.txt)).
+
+El envío de la flag R5 al validador del curso y su aceptación se documentan en [lab06-r5-submit.txt](evidencias/lab06-r5-submit.txt), y el estado final agregado del lab en [lab06-status-final.txt](evidencias/lab06-status-final.txt). Previo al PR se re-ejecutaron las verificaciones descritas en esta sección: los archivos default volvieron a responder `404`, `gobuster` con `big.txt` arrojó nuevamente solo las rutas ya inventariadas, y `./ctf status 06` mantuvo el estado 5/5. No se incluye en el inventario ningún vector de obtención de esta flag distinto del fingerprinting citado: respecto de dónde exponía la flag la instancia levantada, queda como aspecto no verificado.
+
 ## 3. Preguntas de análisis
 
 ### P1 — Enumeración vs. recon
@@ -141,7 +161,9 @@ Para reducir este riesgo, recomendamos implementar controles de autenticación y
 
 ### P5 — Rol defensor (3 mitigaciones)
 
-_Pendiente de completar una vez documentados al menos tres hallazgos._
+1. **Ocultar/denegar acceso a repositorios expuestos** (`/.git/`): configurar el servidor web para bloquear el acceso a directorios ocultos (`.git/`), deshabilitando el listado y el servicio de archivos internos. Esto evita el volcado de historial/repo.
+2. **Restringir métodos HTTP innecesarios** (`PUT`, `DELETE`, `TRACE`): limitar los métodos permitidos por ruta mediante configuración del servidor (allowlist). Si `PUT` no es estrictamente necesario, debe deshabilitarse; en caso excepcional, requerir autenticación/validación estricta.
+3. **Proteger endpoints internos/APIs y minimizar exposición**: aplicar autenticación/autorización a `GET /api/users` y a otros endpoints internos, evitar filtrar usuarios/roles, deshabilitar/filtrar listados de directorios (`/backup/`) y remover o proteger archivos sensibles (`.sql.gz`, `.old`, `.bak`) accesibles desde la web.
 
 ## 4. Bitácora de comandos
 
@@ -161,28 +183,52 @@ curl -sS -i http://phantomcorp/.git/
 # R3 — Enumeración de métodos HTTP
 curl -X OPTIONS -i http://phantomcorp/
 nmap --script http-methods,http-enum phantomcorp
+
+# R4 — Enumeración de usuarios vía API
+curl -i http://phantomcorp/api/users
+./ctf status 06
+
+# R5 — Fingerprinting y enumeración dirigida
+whatweb http://phantomcorp
+whatweb -a 3 http://phantomcorp
+nmap -Pn --script http-enum phantomcorp -p80
+gobuster dir -u http://phantomcorp -w /usr/share/dirb/wordlists/big.txt
 ```
 
-	### Registro de validación del R4
+La bitácora completa, en orden de ejecución, se conserva en [`evidencias/comandos.txt`](evidencias/comandos.txt).
 
-	Desde PowerShell, utilizando Docker, registramos la flag mediante una copia temporal del validador compatible con Linux:
+### Registro de validación de flags
+
+Desde la raíz del repositorio se registraron las flags observadas y se verificó el estado con el validador del curso:
+
+```bash
+# R1
+./ctf submit 06 R1 'FLAG{dir_enumeration_backup}'
+
+# R2
+./ctf submit 06 R2 'FLAG{git_repo_exposed}'
+
+# R3
+./ctf submit 06 R3 'FLAG{http_methods_put_enabled}'
+
+# R4
+./ctf submit 06 R4 'FLAG{user_enumeration_api}'
+
+# R5
+./ctf submit 06 R5 'FLAG{tech_fingerprint_phantomcms}'
+
+./ctf status 06
+```
+
+Para ejecutar el validador desde Windows se utilizó una copia temporal compatible con Linux:
+
 ```powershell
-docker exec cyberlab-attacker bash /tmp/lab06-ctf/ctf submit 06 R4 'FLAG{user_enumeration_api}'
+# Copia temporal del validador sin finales de línea de Windows (CRLF)
+docker exec cyberlab-attacker bash -c "cp -r /repo/bin /repo/labs /tmp/lab06-ctf/"
+docker cp .\ctf cyberlab-attacker:/tmp/lab06-ctf/ctf
+docker exec cyberlab-attacker bash -c "find /tmp/lab06-ctf -type f -exec sed -i 's/\r$//' {} +"
+docker exec cyberlab-attacker bash /tmp/lab06-ctf/ctf submit 06 R5 'FLAG{tech_fingerprint_phantomcms}'
 docker exec cyberlab-attacker bash /tmp/lab06-ctf/ctf status 06
+```
 
-	Desde la raíz del repositorio se registraron las flags observadas y se verificó el estado:
-
-	```bash
-	# R1
-	./ctf submit 06 R1 'FLAG{dir_enumeration_backup}'
-
-	# R2
-	./ctf submit 06 R2 'FLAG{git_repo_exposed}'
-
-	# R3
-	./ctf submit 06 R3 'FLAG{http_methods_put_enabled}'
-
-	./ctf status 06
-	```
-
-	Las salidas completas se preservan en `evidencias/`. Las operaciones se limitaron al target del Lab 06 provisto por la cátedra.
+La salida final completa de `./ctf status 06` (5/5) se conserva en [`evidencias/lab06-status-final.txt`](evidencias/lab06-status-final.txt) y el envío del R5 en [`evidencias/lab06-r5-submit.txt`](evidencias/lab06-r5-submit.txt). Las operaciones se limitaron al target del Lab 06 provisto por la cátedra.
