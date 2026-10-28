@@ -36,15 +36,22 @@
 - **Partes asistidas:** evidencia y análisis de R5, respuestas P4 y P5, registro de comandos y revisión de integración.
 - **Verificación:** se analizó la línea base del SOC conservada por el grupo, se identificó el evento `ALERT[path-traversal]` y se comprobó que no correspondía a las pruebas propias. La flag fue aceptada mediante una copia temporal del validador compatible con Linux.
 
+**Herramienta:** Opencode.
+
+- **Finalidad del uso:** apoyo para ejecutar y documentar la evasión controlada del reto R4 y componer la fila `sqli-union` de la tabla de firmas, junto con su registro en la bitácora.
+- **Partes asistidas:** conservación de la evidencia cruda de R4 (respuesta del request, resultado en el log del SOC y aceptación de la flag), fila `sqli-union` en la tabla de firmas y aporte P4 en la bitácora.
+- **Verificación:** el request único se ejecutó con `curl` contra `http://phantomcorp/api`, desde `cyberlab-attacker` dentro de Docker, usando únicamente la condición publicada por el ruleset de R3 (`union\s+select`, que exige un espacio). El informe contrasta la respuesta cruda, la ausencia de alertas en el log del SOC y la aceptación por el verificador oficial (5/5 consolidado).
+
 ## 1. Flags capturadas (salida de `./ctf status 10`)
 
-*Pendiente de completar cuando se resuelvan los 5 retos.*
+*Completo y verificado: las 5 flags fueron obtenidas y validadas por el verificador oficial. El estado consolidado de la sesión final está en [status-10.txt](evidencia/salidas/status-10.txt) y la evidencia de cada reto se enlaza en la tabla.*
 
 | Reto | Estado | Evidencia |
 |---|---|---|
 | R1 — Vista inicial del SOC | Obtenida | [Línea base del SOC](evidencia/salidas/r1-soc-inicial.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
 | R3 — Ruleset publicado | Obtenida y aceptada en esta sesión | [Ruleset original](evidencia/salidas/r3-ruleset.txt), [envío R3](evidencia/salidas/r3-submit.txt) y [estado parcial](evidencia/salidas/status-10-p3.txt) |
 | R2 — Detección por User-Agent | Obtenida | [Respuesta y alerta `scanner-ua`](evidencia/salidas/r2-scanner-ua.txt) y [envío de R2](evidencia/salidas/r2-submit.txt) |
+| R4 — Evasión controlada de `sqli-union` | Obtenida y validada en esta sesión | [Respuesta cruda del request](evidencia/salidas/r4-evasion-controlada.txt), [SOC tras la prueba](evidencia/salidas/r4-soc-despues.txt), [envío R4](evidencia/salidas/r4-submit.txt) y [estado consolidado](evidencia/salidas/status-10.txt). Flag `FLAG{signature_evaded}`. |
 | R5 — Intrusión en el ruido | Obtenida y validada | [Línea base completa](evidencia/salidas/r5-soc-completo.txt), [evento identificado](evidencia/salidas/r5-correlacion-log.txt) y [validación temporal](evidencia/salidas/r5-status-10.txt). Flag `FLAG{intrusion_in_the_noise}`. |
 
 ### Contexto de la vista `/soc` (línea base, R1)
@@ -56,7 +63,7 @@
 | Firma | Cómo se evade | Cómo se mejora la detección |
 |---|---|---|
 | scanner-ua | La detección observada depende de que el cliente declare literalmente `sqlmap`; por lo tanto, un atacante podría declarar una User-Agent de navegador y evitar esta firma aislada. Esto describe una limitación del control dentro del laboratorio; no se realizó esa prueba de evasión. | No usar la User-Agent como decisión única. El ruleset R3 publica coincidencias con `sqlmap|nikto|nmap|dirb`; no acredita herramientas reales ni intención. Conservarla como señal de baja confianza y correlacionarla con método/ruta, errores, velocidad y variedad de requests, parámetros anómalos y secuencias de enumeración. Aplicar límites de tasa y detecciones de comportamiento, y corregir la vulnerabilidad de la aplicación para que una solicitud sospechosa no implique compromiso. |
-| sqli-union | |
+| sqli-union | Demostrado en R4: la regla matchea `/union\s+select/`, que exige uno o más caracteres de espacio en blanco. Se envió un único request contra el endpoint indicado por el README del lab (`GET /api?q=1%20UNION/**/SELECT%20null,null--`): el comentario SQL `/**/` funciona como separador para el intérprete, pero no coincide con `\s`, por lo que el SOC lo procesó como benigno (`NINGUNA firma la detectó`) y el log del `/soc` no registró alerta ni evento nuevo. La respuesta cruda está en [r4-evasion-controlada.txt](evidencia/salidas/r4-evasion-controlada.txt). La prueba demuestra solo la fragilidad de esta regla literal; no prueba haber evadido análisis sintáctico, validación de parámetros u otras capas. | Normalización/canonicalización antes de inspección: extraer el parámetro con la misma decodificación de la aplicación y tratar los comentarios de bloque como separadores, en dialectos con contexto, conservando el original y su forma normalizada para auditar la decisión. La regla propuesta para P2 (`(?i)\bunion(?:\s|/\*[\s\S]*?\*/)+select\b`) cubre esta evasión concreta, pero ninguna firma es perfecta: variantes de dialecto, contexto de cadenas y texto legítimo que contenga el patrón exigen pruebas de regresión y evaluación de falsos positivos con tráfico representativo. La corrección de causa raíz sigue siendo parametrizar las consultas en la aplicación. |
 
 ## 3. Preguntas P1–P5
 
@@ -153,3 +160,19 @@ Los comandos HTTP se ejecutaron desde `cyberlab-attacker`, la misma consola usad
    ```
 
 4. **Comprobación de la regla propuesta para P2.** Se envió un script por entrada estándar a `docker exec -i cyberlab-attacker python3 -`. Los [ocho casos locales](evidencia/salidas/p3-regresion-regla.txt) verificaron espacios, comentarios, límites de palabras y un posible falso positivo. No generaron solicitudes HTTP ni constituyen una ejecución de R4.
+
+### P4 — Evasión controlada de `sqli-union` (2026-10-28)
+
+Al iniciar la sesión, los contenedores del laboratorio estaban detenidos desde la anterior; se levantó el target del Lab 10 con el mismo comando documentado por P3 en `evidencia/comandos.txt`, lo que reconstruyó los contenedores e inició una sesión de logs nueva. Antes de generar tráfico de prueba se verificó el objetivo: `curl -sS http://phantomcorp/soc/reglas` devolvió el ruleset del Lab 10 y confirmó la condición exacta de la firma — `sqli-union` matchea `/union\s+select/`, que exige un espacio. La prueba se basó únicamente en esa fuente publicada; no se leyó `server.py` ni `retos.manifest` para obtener rutas, reglas o flags.
+
+El registro cronológico completo queda en [evidencia/comandos.txt](evidencia/comandos.txt).
+
+1. **Supuestos anotados antes del request.** El endpoint `/api` con parámetro `q` es el indicado por el README del lab (`curl -s "http://phantomcorp/api?q=..."`); el separador `/**/` sustituye al espacio que la propia nota del ruleset menciona. Un solo request, sin automatización de variantes ni extracción de datos.
+
+2. **Prueba mínima.** Se ejecutó `curl -sS -i "http://phantomcorp/api?q=1%20UNION/**/SELECT%20null,null--"` desde `cyberlab-attacker`. La [respuesta cruda](evidencia/salidas/r4-evasion-controlada.txt) es `200 OK (procesado como benigno)` y el texto `Tu request ERA maliciosa pero NINGUNA firma la detectó`, con `FLAG{signature_evaded}`. La primera captura llegó al host en UTF-16 por la redirección de PowerShell; el archivo se reescribió con el mismo contenido de texto y no se repitió ningún request HTTP para ello.
+
+3. **Comprobación en el SOC.** Después de la prueba, `curl -sS http://phantomcorp/soc` ([snapshot en `r4-soc-despues.txt`](evidencia/salidas/r4-soc-despues.txt)) reproduce la vista íntegra: sin alertas de `sqli-union`, sin eventos nuevos y sin rastro del request propio; sus últimas 125 líneas coinciden línea a línea con la línea base de R1. La evasión no dejó traza en el log: la firma literal no disparó nada.
+
+4. **Envío de la flag y estado.** El verificador oficial se ejecutó en copia temporal (`/tmp/lab10-p4`) con `ctf`, `bin/lib/*.sh` y `retos.manifest` normalizados a LF para eliminar el CRLF de Windows. En `.progreso/10.done` se sembraron los retos ya validados por el grupo en sesiones previas (R1, R2, R3 y R5, respaldados por sus respectivas evidencias) para reflejar el progreso consolidado; en esta sesión solo se envió R4, [aceptado](evidencia/salidas/r4-submit.txt), y `./ctf status 10` mostró los cinco retos completos ([conservado en `status-10.txt`](evidencia/salidas/status-10.txt)). El progreso consolidado se copió al host con `docker cp`.
+
+5. **Revisión del aporte P1 (revisión cruzada del plan).** Se releyó la respuesta a P1 con la evidencia de esta sesión: sus límites (la firma detecta una forma superficial, no la intención) quedaron corroborados por la evasión ejecutada, que conserva el efecto del request sin coincidir con el patrón. No se modificó su texto, que queda a cargo de su autor.
