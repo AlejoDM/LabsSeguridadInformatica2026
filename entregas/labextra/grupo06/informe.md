@@ -60,16 +60,16 @@ El recorrido observado fue: home pública → formulario `/preview?url=...` → 
 
 ## 2. Evidencia de progreso
 
-Estado real posterior al aporte P3 (no es el estado final grupal):
+Estado real posterior a la presentación de R1 y R3 (no es el estado final grupal):
 
 ```text
-·  R1     El server fetchea por vos: panel interno en localhost
+✓  R1     El server fetchea por vos: panel interno en localhost
 ·  R2     Descubrir la intranet en la red interna
 ✓  R3     Exfiltrar datos sensibles a traves del SSRF
-1/3 (33%)
+2/3 (66%)
 ```
 
-La [salida íntegra de ./ctf status extra](evidencia/salidas/07-status.txt) conserva el formato original. P5 deberá integrar el estado final cuando P1 y P2 presenten sus retos.
+La [salida íntegra de ./ctf status extra](evidencia/salidas/13-status-r1-r3.txt) conserva el formato original. Al integrar la entrega se debe volver a ejecutar el verificador y reemplazar este bloque por el estado final con los tres retos aceptados.
 
 ## 3. Preguntas de análisis
 
