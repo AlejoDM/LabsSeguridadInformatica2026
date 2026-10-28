@@ -1,0 +1,38 @@
+P3 — 28/10/2026. Terminal PowerShell; Git Bash para el motor.
+Raíz externa: C:/Users/Muhammed/Desktop/Facultad/Seguridad Laboratorios/LabsSeguridadInformatica2026
+Caso: <raíz>/labs/labextra2-git-forense/caso/repo-delata
+Capturas: Tee-Object de PowerShell, texto UTF-8. Se conserva contenido y orden; los finales de línea son los de la captura Windows.
+
+Comandos Git ejecutados en orden (las variables se definen aquí para reproducirlos):
+$repo='C:/Users/Muhammed/Desktop/Facultad/Seguridad Laboratorios/LabsSeguridadInformatica2026'
+$case="$repo/labs/labextra2-git-forense/caso/repo-delata"
+1. git -C $repo status --short --branch (falló: propiedad del directorio; ruta original con barras invertidas).
+2. git -C $repo status --short --branch (mismo rechazo).
+3. git -c safe.directory="$repo" -C $repo status --short --branch (rechazo: safe.directory todavía tenía barras invertidas).
+4. git -c safe.directory="$repo" -C $repo status --short --branch (ruta con /; éxito: labextra2-grupo06, limpio).
+No se modificó la configuración global: la excepción es por invocación y ruta exacta.
+Preparación: & 'C:\Program Files\Git\bin\bash.exe' ./ctf lab extra2, desde la raíz externa. Caso ausente antes de ejecutarlo. Creó la historia ficticia; emitió avisos LF→CRLF. No se leyó el generador como solución.
+5. git -c safe.directory="$case" -C $case status --short --branch -> r3-estado-inicial.txt
+6. git -c safe.directory="$case" -C $case branch -a -> r3-ramas.txt
+7. git -c safe.directory="$case" -C $case log --all --oneline --decorate -> r3-inventario.txt
+8. git -c safe.directory="$case" -C $case log feature/pasarela-pagos --format=fuller --name-status -> r3-historial.txt
+9. git -c safe.directory="$case" -C $case show feature/pasarela-pagos:.env.pasarela -> r3-rama-abandonada.txt
+10. git -c safe.directory="$case" -C $case diff main feature/pasarela-pagos -- .env.pasarela pasarela.py -> r3-comparacion-main.txt
+11. git -c safe.directory="$case" -C $case log --all --reverse --format=fuller -> r3-fechas.txt
+12. git -c safe.directory="$case" -C $case ls-tree -r --name-only main -> r3-arbol-main.txt
+13. git -c safe.directory="$case" -C $case show -s --format=raw feature/pasarela-pagos -> r3-parentesco.txt
+14. git -c safe.directory="$case" -C $case show --format=fuller feature/pasarela-pagos -- .env.pasarela pasarela.py -> r3-diff-introduccion.txt
+Desde raíz externa, mediante Git Bash:
+./ctf submit extra2 R3 'FLAG{git_rama_abandonada}' -> r3-submit.txt (rechazada)
+./ctf status extra2 -> status-extra2.txt (0/3; salida 1 por condición final del motor)
+Diagnóstico posterior: lectura binaria del manifiesto y SHA-256 de la flag ya encontrada con .NET; longitud hash=65, último carácter=13, coincidencia al quitar CR/LF=True. -> r3-diagnostico-verificador.txt
+15. git -c safe.directory="$repo" -C $repo status --short --branch (limpio).
+Git Bash ejecutó validar-r3-crlf.sh adjunto, inicialmente guardado en el directorio temporal de trabajo. -> r3-submit-compatibilidad.txt (aceptado; progreso 1/3). Reutiliza funciones oficiales y manifiesto temporal normalizado; no escribe el progreso a mano.
+16. git -c safe.directory="$case" -C $case status --short --branch -> r3-estado-final.txt
+Git Bash: ./ctf status extra2 -> status-extra2-final.txt (R3 resuelto, 1/3; salida 1 porque faltan otros retos).
+
+Los comandos de lectura de documentación/inventario no buscaron flags en soluciones ni generador. No se ejecutaron checkout, reset, fsck --lost-found, gc ni prune durante la investigación.
+Verificación final desde PowerShell, ejecutada con la cuenta propietaria tras copiar los entregables:
+17. git -C $repo status --short --branch -> labextra2-grupo06; solo ?? entregas/labextra2/grupo06/
+18. git -C $repo diff --exit-code -> sin cambios en archivos rastreados, código 0.
+19. git -C $repo diff --cached --exit-code -> sin cambios preparados, código 0.
