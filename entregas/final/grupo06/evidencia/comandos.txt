@@ -1,0 +1,21 @@
+P1 — 28/10/2026 — PowerShell, desde el espacio de trabajo Codex salvo indicación.
+Repo: C:/Users/Muhammed/Desktop/Facultad/Seguridad Laboratorios/LabsSeguridadInformatica2026
+Capturas HTTP con Tee-Object, UTF-8, sin edición del contenido.
+1. git -c safe.directory=<repo> -C <repo> status --short --branch -> labfinal-grupo06, limpio.
+2. Lectura plan y referencia adjuntos, README, plantilla, rúbrica, start.sh, Compose y Makefile. Búsqueda AGENTS.md: ninguno. Se aplican CONTRIBUTING y PROTOCOLO-EVIDENCIA revisados en esta sesión. No se leyó server.py del objetivo ni soluciones.
+3. docker ps --format '{{.Names}} {{.Image}} {{.Status}}' -> acceso denegado a configuración Docker bajo cuenta restringida.
+4. docker ps -a --format '{{.Names}} {{.Image}} {{.Status}}' con cuenta propietaria -> solo dos contenedores ajenos detenidos; no se tocaron.
+5. Desde raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labfinal-practico-integrador/entorno/target.compose.yml up -d --build -> construido e iniciado entorno oficial. Descarga de imagen base Docker; ninguna operación sobre remotos Git.
+6. docker exec cyberlab-attacker curl -sS -i --max-time 10 http://phantomcorp/ -> p1-inicio.txt
+7. docker exec cyberlab-attacker curl -sS -i --max-time 10 http://phantomcorp/robots.txt -> p1-robots.txt
+8. docker exec cyberlab-attacker curl -sS -i --max-time 10 http://phantomcorp/portal-rrhh -> p1-r1-portal.txt
+9. docker exec cyberlab-attacker curl -sS -i --max-time 10 http://phantomcorp/p1-control-inexistente -> p1-control.txt
+10. Git Bash: bash <repo>/ctf submit final R1 'FLAG{final_recon_portal}' -> p1-submit.txt, rechazo CRLF.
+11. Git Bash: bash validar-r1-crlf.sh -> p1-submit-compatibilidad.txt. Funciones oficiales con manifiesto temporal sin CR; aceptación R1.
+12. Git Bash: bash <repo>/ctf status final -> status-final.txt, 1/4. Exit 1 por lab incompleto.
+13. Creación de informe y traspaso P1; copia a entregas/final/grupo06.
+14. git -C <repo> diff --exit-code -- labs bin ctf .github README.md CONTRIBUTING.md
+15. git -C <repo> diff --cached --exit-code
+16. git -C <repo> status --short --branch
+17. docker ps --filter name=cyberlab --format '{{.Names}} {{.Status}}' -> entorno-final.txt
+No se ejecutó add, commit, fetch, push, explotación R2 ni lectura del código objetivo. Los contenedores se dejan activos para continuidad P2.
