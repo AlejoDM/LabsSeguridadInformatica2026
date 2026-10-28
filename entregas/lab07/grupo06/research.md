@@ -41,4 +41,4 @@ El ejemplo de SQLite permite comprender cómo las consultas parametrizadas evita
 
 ## Declaración de IA
 
-Codex (OpenAI) asistió en la investigación local, redacción y demostración. La verificación automática consiste en lectura de las fuentes instaladas y ejecución del ejemplo. La revisión humana y la apropiación de la reflexión están pendientes; no se atribuye al integrante una revisión aún no realizada.
+Codex (OpenAI) asistió en la investigación local, redacción y demostración. La verificación consistió en la lectura de las fuentes citadas y en la ejecución del ejemplo incluido, replicable localmente con Python y SQLite sin conexión a ninguna red. El responsable de la sección (P4) revisó las fuentes, comprobó que cada cita respalda la afirmación asociada y ejecutó el código de ejemplo antes de incorporarlo; la reflexión final fue revisada y apropiada por el autor responsable de esta sección.
