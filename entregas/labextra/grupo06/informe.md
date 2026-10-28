@@ -18,6 +18,12 @@
 **Finalidad y partes asistidas:** apoyo para la ejecución de R1 y R3, el ordenamiento de evidencias y la redacción técnica inicial.
 **Verificación realizada:** Se ejecutaron los comandos en el entorno autorizado del laboratorio y se analizaron las respuestas obtenidas para comprobar que el acceso al recurso interno se realizó mediante la vulnerabilidad SSRF. Se verificó la presencia de la información expuesta y se validó la flag mediante el sistema oficial de retos.
 
+**Herramienta:** ChatGPT (OpenAI), aporte de la Persona 5.
+
+- **Finalidad del uso:** asistencia para comprender los riesgos de SSRF en entornos cloud, redactar la pregunta P5 y revisar la integración de la entrega grupal.
+- **Partes asistidas:** respuesta P5 sobre servicios de metadatos y revisión preliminar del informe.
+- **Verificación:** se contrastó la respuesta con el alcance del laboratorio, diferenciando los accesos internos efectivamente observados de los riesgos teóricos de SSRF en servicios cloud. No se realizaron consultas contra servicios de metadatos reales.
+
 ## 1. Cadena de explotación
 
 ### R1 — Panel interno en localhost
@@ -114,7 +120,19 @@ Respuesta completa pendiente de P4. **Revisión de P3 de la propuesta del plan:*
 
 ### P5 — Metadata service
 
-Pendiente de P5.
+El servicio de metadatos (*metadata service*) es un mecanismo que utilizan las plataformas de computación en la nube para proporcionar información a las máquinas virtuales sobre su entorno de ejecución. En algunas plataformas, estos servicios también permiten obtener credenciales temporales asociadas a los permisos de la instancia.
+
+Una dirección conocida es `169.254.169.254`, utilizada por servicios de metadatos como el de Amazon EC2. Se trata de una dirección especial accesible desde determinados entornos de nube, no de un servidor público convencional.
+
+El problema aparece cuando una aplicación tiene una vulnerabilidad SSRF, como la que analizamos en PhantomCorp. Si el servidor acepta una URL proporcionada por un usuario y realiza la consulta sin validar correctamente el destino, un atacante podría intentar utilizar esa funcionalidad para acceder al servicio de metadatos desde el propio servidor.
+
+En un entorno cloud mal protegido, esto podría exponer información de configuración o credenciales temporales. Si esas credenciales tienen permisos importantes, el impacto puede extenderse a otros recursos de la nube, según los permisos asignados. Por eso, las consecuencias pueden ser mayores que la simple lectura de una página interna.
+
+Para reducir este riesgo es necesario restringir los destinos que puede consultar la aplicación, bloquear accesos innecesarios a direcciones internas y servicios de metadatos, aplicar permisos mínimos y utilizar mecanismos de protección específicos de cada plataforma, como IMDSv2 en AWS.
+
+En nuestro laboratorio comprobamos que `/preview` permitía consultar recursos internos mediante SSRF, incluyendo un panel local y un backup de clientes. Sin embargo, no intentamos acceder a un servicio de metadatos real ni obtuvimos credenciales cloud.
+
+Como conclusión, entendimos que una vulnerabilidad SSRF puede ser especialmente peligrosa en la nube porque el servidor podría tener acceso a recursos y permisos que el usuario externo no posee. El impacto depende de la configuración, las protecciones implementadas y los privilegios disponibles.
 
 ## 4. Conclusión
 
