@@ -18,6 +18,11 @@
 - **Finalidad y partes asistidas:** apoyo en la validación de R3 y redacción de respuestas.
 - **Verificación:** Se contrastaron las indicaciones de la IA con los resultados obtenidos mediante comandos Git sobre el repositorio del caso. Para R3, se verificó la existencia de la rama abandonada, se inspeccionó su historial y se comprobó que contenía la información sensible identificada. Además, se revisaron las respuestas redactadas, contrastándolas con la evidencia recopilada y los conceptos explicados en la consigna del laboratorio.
 
+**Herramienta:** Opencode.
+
+- **Finalidad y partes asistidas:** apoyo para explicar la respuesta P2 sobre referencias y objetos de Git.
+- **Verificación:** Se contrastó la explicación con la consigna y se reprodujeron los comandos `reflog`, `fsck` y `show` sobre el repositorio local del caso. Se revisaron las salidas crudas adjuntas y la aceptación del verificador; no se probó la credencial contra ningún servicio.
+
 ## 1. Línea de tiempo de la filtración
 
 Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y committer coinciden, con zona -03:00. No son fechas de publicación ni de descubrimiento: el caso se generó e investigó el 28/10/2026.
@@ -28,9 +33,10 @@ Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y commit
 | 2026-08-10 09:12 -03:00 | dev-jperez | de33a75843139302dfbe034cab11e8175881540e | Inicio de deploy-tool | Contexto legítimo según historial; `r3-historial.txt`. |
 | 2026-08-10 18:47 -03:00 | dev-jperez | 9333f2b4a09f7a320cb66d621c3bd53b4f694941 | Configuración temporal del hotfix; padre del commit de pagos | R1 debe corroborar contenido y exposición del token; `r3-parentesco.txt`. |
 | 2026-08-11 10:05 -03:00 | dev-jperez | eafb81c3ec5790ce4741629458e11ab5c1a690b8 | Mensaje de limpieza de credenciales | R1 debe documentar su diff; `r3-fechas.txt`. |
+| 2026-08-12 14:22 -03:00 | dev-jperez | bc9d0dbe6aca41d639a515395cc983e139979102 | Commit de notas de investigación; luego `reset --hard` movió `main` a `eafb81c` | Incluyó una clave ficticia de staging en `notas_investigacion.txt`; quedó sin referencia de rama y fue recuperable localmente. `r2-reflog.txt`, `r2-reflog-fechas.txt`, `r2-fsck.txt`, `r2-objeto-recuperado.txt`. La fecha del reflog es local y no acredita publicación. |
 | 2026-08-20 11:00 -03:00 | dev-jperez | fa714bda2ac9d31bf92774e901400be4a296c1e5 | Actualización documental, punta de `main` | Contexto; el secreto de pagos sigue en otra rama. |
 
-**Inconsistencia temporal:** `git show -s --format=raw feature/pasarela-pagos` muestra que el padre de `0abdf95` es `9333f2b`, aunque la fecha del hijo es anterior. El orden topológico es inicial → hotfix → pagos, independientemente de esas fechas. No se corrige el caso ni se inventa una duración de exposición. La tabla ordena fechas declaradas, no demuestra el orden real de publicación. P1/P2 deben incorporar sus evidencias, incluido el objeto no alcanzable, para completar la cronología general.
+**Inconsistencia temporal:** `git show -s --format=raw feature/pasarela-pagos` muestra que el padre de `0abdf95` es `9333f2b`, aunque la fecha del hijo es anterior. El orden topológico es inicial → hotfix → pagos, independientemente de esas fechas. No se corrige el caso ni se inventa una duración de exposición. La tabla ordena fechas declaradas, no demuestra el orden real de publicación. P2 aporta el evento del objeto no alcanzable; P1 aún debe integrar sus evidencias para completar la cronología del token.
 
 ## 2. Hallazgos
 
@@ -38,7 +44,19 @@ Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y commit
 Pendiente del aporte de P1; no resuelto en esta contribución.
 
 ### R2 — Commit «perdido»
-Pendiente del aporte de P2; no resuelto en esta contribución.
+
+El reflog mostró el commit `bc9d0dbe6aca41d639a515395cc983e139979102` y el movimiento posterior `reset: moving to HEAD~1`, que dejó `main` en `eafb81c3ec5790ce4741629458e11ab5c1a690b8`. La búsqueda independiente con `git fsck --no-reflogs --unreachable --no-progress` identificó el mismo commit como `unreachable`. La captura con fechas registra ambos eventos del reflog a `2026-08-12 14:22:00 -0300`; esa hora es metadato local del reflog y no demuestra el instante real de publicación ni una exposición remota. Se inspeccionó el commit sin mover referencias:
+
+```bash
+git reflog show --all --format="%H %gd %gs"
+git show bc9d0dbe6aca41d639a515395cc983e139979102
+```
+
+El commit, de autor y committer `dev-jperez <jperez@phantomcorp.example>` con fecha 12/08/2026 14:22:00 -03:00 y mensaje `wip: notas del cluster nuevo (no mergear todavia)`, añadió `notas_investigacion.txt`. El archivo contiene `staging_key: FLAG{git_reflog_rescata}` y la describe como llave del cluster de staging. Esto no demuestra que la clave fuera válida, qué permisos tenía ni que alguien la usara. Evidencias crudas: `evidencia/salidas/r2-reflog.txt`, `r2-fsck.txt` y `r2-objeto-recuperado.txt`.
+
+La flag R2 fue aceptada. El intento inicial con `./ctf submit extra2 R2 ...` fue rechazado porque el manifiesto tiene finales CRLF y el hash esperado conserva el CR final. Para no modificar el manifiesto ni el verificador, `validar-r2-crlf.sh` reutiliza las funciones oficiales con una copia temporal del manifiesto normalizada; el verificador marcó R2 como resuelto. Se guardan ambos resultados en `r2-submit.txt` y `r2-submit-compatibilidad.txt`.
+
+`reset --hard` actualiza `HEAD` y las referencias afectadas y ajusta el árbol de trabajo; no equivale a borrar inmediatamente los objetos almacenados. Un commit referencia un árbol, los árboles referencian blobs y otros árboles, y retirar una referencia no destruye de inmediato esa cadena de objetos. El reflog y los objetos no alcanzables son locales y temporales: su retención depende de la configuración y una recolección de basura puede eliminarlos. Hallarlos en una copia local no demuestra que hayan sido publicados ni distribuidos a otros clones.
 
 ### R3 — Rama abandonada
 
@@ -78,7 +96,20 @@ Pendiente del responsable P4. **Revisión cruzada de P3:** todavía no existe su
 
 ## 5. Preguntas P1–P5
 
-P1 y P2: pendientes de sus responsables.
+P1: pendiente de su responsable.
+
+### P2 — Por qué `reset --hard` no necesariamente destruye objetos
+
+`reset --hard` movió `main` de `bc9d0dbe6aca41d639a515395cc983e139979102` a `eafb81c3ec5790ce4741629458e11ab5c1a690b8`, y actualizó índice y árbol de trabajo. No borró inmediatamente el commit ni los objetos que forman su contenido: el commit apunta a un árbol, que a su vez referencia blobs. El reflog conservó el movimiento y el commit previo; `fsck` lo encontró como no alcanzable cuando se excluyeron los reflogs. `git show` permitió examinarlo sin recrear la rama ni alterar el repositorio. La salida recuperada contiene la flag `FLAG{git_reflog_rescata}` en `notas_investigacion.txt`.
+
+La demostración consta de dos pasos: localizar el rastro en el reflog e inspeccionar el commit identificado, sin cambiar de rama ni mover referencias:
+
+```bash
+git reflog show --all --format="%H %gd %gs"
+git show bc9d0dbe6aca41d639a515395cc983e139979102
+```
+
+Como corroboración independiente, `git fsck --no-reflogs --unreachable --no-progress` informó el commit como `unreachable`. El reflog y `fsck` son mecanismos de diagnóstico local, no prueba de que el objeto se haya publicado o distribuido a terceros. La retención del reflog y de objetos no alcanzables depende de la configuración y del momento de recolección de basura; no se debe afirmar que Git los conserva indefinidamente. Las salidas y el camino de descubrimiento están en `evidencia/salidas/r2-reflog.txt`, `r2-reflog-fechas.txt`, `r2-fsck.txt` y `r2-objeto-recuperado.txt`.
 
 ### P3 — Riesgo público frente a privado con 30 colaboradores
 
@@ -92,10 +123,11 @@ P4 y P5: pendientes de sus responsables.
 
 ## 6. Evidencia de progreso y preservación
 
-- `evidencia/comandos.txt`: secuencia de investigación y comprobaciones, incluidos intentos fallidos de acceso por propiedad del directorio.
-- `evidencia/salidas/`: ramas, historial, contenido, comparación, parentesco, fechas y verificación.
+- `evidencia/comandos.txt`: secuencia de P3 y P2, con contexto de terminal y ruta del caso.
+- `evidencia/salidas/`: salidas de ramas, historial, comparación, reflog (incluidas las fechas registradas), fsck, commit recuperado, presentaciones de flags y estados.
 - `evidencia/validar-r3-crlf.sh`: adaptación reproducible del verificador sin editar archivos oficiales.
-- `evidencia/salidas/status-extra2-final.txt`: estado oficial **1/3**. R1 y R2 pendientes, coherente con el alcance P3.
+- `evidencia/validar-r2-crlf.sh`: presentación de R2 reutilizando el verificador oficial con una copia temporal normalizada del manifiesto.
+- `evidencia/salidas/status-extra2-final.txt`: captura anterior de P3, **1/3 con R3** marcado en esa ejecución. `status-extra2-p2.txt`: estado del checkout actual tras la presentación de P2, **1/3 con R2** marcado; no se modificó el aporte ni el estado de R3.
 - Se generó el caso una sola vez con el comando oficial. Los avisos LF/CRLF de esa preparación corresponden al entorno Windows, no a una alteración maliciosa. Después se mantuvieron `HEAD`, referencias y árbol de trabajo del caso sin cambios.
 - La rama externa ya era `labextra2-grupo06` y estaba limpia al inicio. No se cambió de rama, no se prepararon archivos para commit ni se hicieron commits, fetch, push o cambios remotos. El generador creó únicamente los commits ficticios internos del caso.
 
