@@ -17,13 +17,19 @@
 
 - **Finalidad del uso:** apoyo para la redacción del informe.
 
+**Herramienta:** ChatGPT (OpenAI), aporte de Persona 2.
+
+- **Finalidad:** asistencia para comprender y corregir la exposición de `/backup`, preparar pruebas locales y redactar la respuesta P2.
+- **Partes asistidas:** parche D3, script `evidencia/probar-d3.py` y respuesta P2.
+- **Verificación:** se ejecutaron pruebas HTTP sobre la copia del grupo utilizando una base de datos temporal. Se confirmó que `/backup` devuelve 404, que `robots.txt` no lo anuncia y que la página principal y la descarga legítima del manual siguen respondiendo 200. La validación oficial de D3 sigue pendiente por los errores de ejecución observados en Windows.
+
 ## 1. Tabla de defensas (antes → después)
 
 | Defensa | Ataque que funcionaba | Fix aplicado | Verificación |
 |---|---|---|---|
 | D1 | Banner identifica producto y versión | Pendiente P1 | Verificador sigue marcándola vulnerable |
 | D2 | `/api/status` entrega debug, ruta y PID | Pendiente P1 | Sigue vulnerable |
-| D3 | Backup abierto y anunciado en robots | Pendiente P2 | Sigue vulnerable |
+| D3 |aprobada por el verificador oficial; flag aceptada mediante normalización temporal de CRLF. Evidencias: d3-verificador.txt y d3-submit-compatibilidad.txt.
 | D4 | `admin'--` en usuario y `' OR 1=1 --` en contraseña permiten entrar sin credenciales válidas | Consulta fija con `?` y tupla `(user, pwd)`; `evidencia/salidas/d4-parche.diff` | Ambos ataques bloqueados por el verificador; tres variantes devuelven HTTP 401 en pruebas propias |
 | D5 | Lectura fuera del directorio mediante `../centinela-p3.txt` | Pendiente P4 | HTTP 200 con contenido del centinela: sigue vulnerable, pese al verde del verificador Windows |
 
@@ -69,7 +75,21 @@ La ejecución oficial requiere `/tmp` para su base y descargas. En Windows se pr
 
 ## 4. Preguntas P1–P5
 
-Preguntas P1, P2, P3 y P5: pendientes de sus responsables según el plan.
+Preguntas P1, P3 y P5: pendientes de sus responsables según el plan.
+
+### P2 — ¿Por qué eliminar `/backup` de `robots.txt` no equivale a protegerlo?
+
+El archivo `robots.txt` sirve para indicarles a los rastreadores web qué rutas deberían evitar, pero no es un mecanismo de autenticación ni de autorización. Su contenido es público y sus indicaciones no impiden que un usuario solicite directamente una dirección.
+
+En la versión vulnerable de PhantomCorp, `robots.txt` anunciaba la ruta `/backup`, que además respondía con HTTP 200 y devolvía información interna sin solicitar credenciales.
+
+Eliminar únicamente esa referencia habría reducido la visibilidad del recurso, pero no solucionaría la vulnerabilidad, porque cualquier persona que conociera la ruta podría seguir accediendo a ella.
+
+Por eso, en la defensa D3 realizamos dos modificaciones: eliminamos la referencia de `/backup` en `robots.txt` y deshabilitamos el endpoint público, que ahora devuelve HTTP 404 sin exponer el contenido del backup.
+
+La prueba posterior confirmó que `/robots.txt` ya no publica la ubicación sensible y que `/backup` no entrega información. También verificamos que la página principal y la descarga legítima del manual continúan funcionando.
+
+La conclusión es que ocultar una ruta no equivale a protegerla. La seguridad debe aplicarse sobre el recurso mediante autorización efectiva o eliminando su exposición pública cuando no es necesario que esté disponible.
 
 ### P4 — Por qué `user.replace("'", "")` no sustituye parametrizar
 
