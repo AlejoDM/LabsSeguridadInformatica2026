@@ -91,6 +91,10 @@ No hay una firma perfecta: esta propuesta cubre el separador solicitado, pero no
 
 **P3.** Detectar por User-Agent: ¿por qué es una detección débil? ¿Qué mirarías en lugar de "quién dice ser"?
 
+Porque el User-Agent es un campo de cabecera del cliente y no una prueba de autenticidad ni de intención. Cualquier cliente puede enviarlo arbitrariamente; un atacante puede declarar `Mozilla/5.0`, un navegador o incluso un valor genérico, y la regla deja de distinguir entre una herramienta de escaneo y un usuario normal. En el laboratorio, la firma `scanner-ua` observada depende de que el cliente diga literalmente `sqlmap`; eso la vuelve frágil, fácil de evadir y poco confiable como indicador de riesgo. Además, un User-Agent sospechoso no prueba que una petición sea maliciosa: existen herramientas legítimas, navegadores con extensiones, proxies, bots de validación y clientes internos que pueden reutilizar cabeceras de navegador o modificarlas por conveniencia.
+
+En lugar de mirar "quién dice ser", conviene analizar el comportamiento. La señal más útil es la combinación de método HTTP, ruta, parámetros, frecuencia, secuencia de requests, volumen, tiempo de respuesta, errores, y la relación entre varios eventos desde la misma IP. Un atacante que está enumerando endpoints o probando payloads suele generar patrones muy distintos a los de un usuario normal, aunque su User-Agent sea indistinguible. Por eso una detección robusta correlaciona el valor del User-Agent con rutas sospechosas, parámetros anómalos, respuestas con errores, ráfagas de escaneo y cambios de comportamiento en ventanas cortas de tiempo. El User-Agent puede conservarse como una señal de baja confianza, pero no como criterio único ni como prueba de explotación.
+
 **P4.** El R5: la intrusión estaba en el log. ¿Qué habría hecho que se detecte automáticamente y no dependiera de que alguien la mire?
 
 La intrusión del Reto 5 podría haberse detectado automáticamente mediante una regla de correlación en el SOC o en un SIEM que analice los registros HTTP.
