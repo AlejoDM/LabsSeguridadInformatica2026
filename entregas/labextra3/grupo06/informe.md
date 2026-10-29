@@ -13,9 +13,11 @@
 
 ## 0. Declaración de uso de IA
 
-**Herramienta:** Codex (OpenAI).
+**Herramientas:** Codex (OpenAI) y OpenCode.
 
-- **Finalidad del uso:** apoyo para la redacción del informe.
+- **Codex (OpenAI) — finalidad del uso:** apoyo para la redacción del informe.
+- **OpenCode — finalidad del uso:** apoyo para revisar la consigna, analizar las evidencias disponibles y redactar las respuestas P1 y P5, la conclusión y esta declaración.
+- **Verificación:** se contrastó el contenido con el código, el diff y las salidas de pruebas guardadas. No se ejecutó el contenedor.
 
 ## 1. Tabla de defensas (antes → después)
 
@@ -69,7 +71,15 @@ La ejecución oficial requiere `/tmp` para su base y descargas. En Windows se pr
 
 ## 4. Preguntas P1–P5
 
-Preguntas P1, P2, P3 y P5: pendientes de sus responsables según el plan.
+P2 y P3: pendientes de sus responsables según el plan.
+
+### P1 — Ataque, parche y comprobación de D4
+
+Se eligió D4 para la demostración. Antes del cambio, las pruebas contra el código de referencia muestran que `GET /login?user=admin%27--&pass=x` respondía HTTP 200, y que tanto `' OR 1=1 --` como usuario o contraseña también permitían el acceso (HTTP 200). La salida completa está en `evidencia/salidas/d4-antes.txt`.
+
+El diff `evidencia/salidas/d4-parche.diff` reemplaza la construcción de SQL por concatenación por una consulta fija con marcadores `?` y pasa `(user, pwd)` como parámetros. No se filtran caracteres ni se reconocen cadenas específicas. Después del cambio, esas mismas tres variantes responden HTTP 401, mientras las credenciales legítimas de `admin` responden HTTP 200; los resultados están en `evidencia/salidas/d4-despues.txt`. El verificador guardado en `evidencia/salidas/verificador-despues-p3.txt` confirma que D4 bloquea el bypass. En esta ejecución el resultado global fue 2/5, no 5/5; D1–D3 seguían vulnerables y el resultado de D5 no coincide con la prueba del centinela, como se detalla en la sección 3.
+
+La evidencia es reproducible con `evidencia/probar-d4.py` contra el archivo de referencia en modo `antes` y contra `objetivo/server.py` en modo `despues`; la secuencia y el entorno originales constan en `evidencia/comandos.txt`.
 
 ### P4 — Por qué `user.replace("'", "")` no sustituye parametrizar
 
@@ -85,4 +95,18 @@ El alcance del cambio es la inyección de valores en esta consulta. No equivale 
 
 Se revisó el estado disponible: la ruta sigue concatenando `DESCARGAS + "/" + nombre`. Se creó exclusivamente un archivo centinela de prueba en el padre del directorio temporal de descargas y se solicitó `../centinela-p3.txt`. Tanto antes como después de D4 respondió 200 con `CENTINELA_FUERA_DE_DESCARGAS`. La descarga legítima del manual también funciona.
 
+### P5 — Ranking de impacto de D1–D5
+
+Este orden prioriza impacto potencial sobre confidencialidad e integridad, facilidad de explotación y exposición demostrada en el entorno; no sustituye una evaluación de riesgo del despliegue real:
+
+1. **D4 — Inyección SQL en el login.** En la prueba previa al parche, entradas en usuario o contraseña eludían la autenticación y devolvían HTTP 200. El acceso no autorizado puede exponer las funciones o datos disponibles tras el login. La evidencia confirma el bypass de autenticación; no demuestra por sí sola qué operaciones adicionales tendría una aplicación de producción.
+2. **D5 — Path traversal en descargas.** La prueba controlada leyó con HTTP 200 un archivo centinela ubicado fuera del directorio de descargas. Esto demuestra lectura arbitraria fuera de la raíz prevista en ese entorno. El alcance depende de los permisos del proceso y de los archivos accesibles.
+3. **D3 — Backup sin autorización.** El endpoint entrega directamente un volcado descrito como datos de usuarios y se anuncia en `robots.txt`. La exposición puede divulgar información sensible; quitar la pista no protegería el recurso. El resultado guardado muestra que aún debe corregirse y probarse el acceso directo.
+4. **D2 — Filtración de estado y datos internos.** `/api/status` revela modo debug, rutas internas y PID, información que facilita reconocimiento y puede ayudar a encadenar otros fallos, pero la evidencia disponible no demuestra que por sí sola permita autenticación o lectura de datos.
+5. **D1 — Banner con producto y versión.** Facilita identificar la tecnología y orientar el fingerprinting, pero no constituye por sí solo una vía de acceso. Ocultarlo reduce exposición de metadatos y no corrige vulnerabilidades explotables.
+
+Para gerencia, el hallazgo prioritario es **D4**: el bypass de autenticación se demostró con entradas HTTP y habilita acceso sin credenciales válidas, por lo que compromete directamente el control de acceso. D5 también tiene impacto importante sobre confidencialidad, pero su alcance observado se limita a la lectura del centinela en el entorno de prueba. Este ranking es provisional: D1–D3 no cuentan todavía con pruebas posteriores a sus parches y la verificación global no está completa.
+
 ## 5. Conclusión
+
+En esta etapa no corresponde afirmar que el grupo completó la corrección integral: las pruebas disponibles muestran que el cambio de D4 bloquea las inyecciones ensayadas y mantiene el login legítimo, pero quedan defensas por integrar y verificar. La parte más exigente de corregir es mantener separados los datos de las instrucciones SQL sin alterar credenciales legítimas, y comprobar tanto el bloqueo como la continuidad del servicio. La experiencia ofensiva ayuda a reproducir los ataques; la corrección exige además verificar los flujos válidos y reconocer qué no demuestra cada prueba. El verificador registrado no acredita todavía el conjunto ni permite concluir que los riesgos no ensayados estén resueltos.
