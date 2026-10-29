@@ -98,7 +98,18 @@ La publicación efectiva de cada referencia es decisiva. Si un bot recorre todas
 
 ## 4. Plan de remediación (P4)
 
-Pendiente del responsable P4. **Revisión cruzada de P3:** todavía no existe su aporte ni `research.md`, por lo que no es posible aprobar su coherencia. Al integrarlo, comprobar que inventaría el token API (R1), el secreto del objeto recuperado (R2, tipo por confirmar con su evidencia) y la clave de pagos (R3); que prioriza revocación/rotación antes de limpiar historia; que contempla ramas, forks y clones; y que distingue exposición potencial de uso probado. Esta lista no sustituye la respuesta de P4 ni afirma una revisión realizada.
+PhantomCorp ya publicó `deploy-tool` en GitHub y existen forks conocidos. El plan ordena las acciones por lo único que realmente contiene el riesgo primero, no por lo que resulta más cómodo de ejecutar en Git:
+
+1. **Inventariar los tres secretos y su alcance real, sin reexponerlos.** El token de API identificado en la rama de hallazgos de R1 (commits de configuración del hotfix y de limpieza de credenciales ya ubicados en la línea de tiempo; evidencia detallada pendiente del responsable de R1), la clave de staging recuperada en R2 (`notas_investigacion.txt`, commit `bc9d0dbe6aca41d639a515395cc983e139979102`) y la credencial de la pasarela de pagos de R3 (`.env.pasarela`, rama `feature/pasarela-pagos`). Para cada una, determinar a qué sistema pertenece y qué permisos otorgaría si fuera válida, sin repetir su valor en tickets o mensajes amplios.
+2. **Revocar o rotar de inmediato cada credencial confirmada, antes de tocar el historial de Git.** Es el único paso que cierra el riesgo independientemente de cuántas copias del repositorio existan. Priorizar la credencial de pagos, por el sistema al que declara dar acceso (`https://pagos.phantomcorp.example`), y el token de API, por ser de uso más genérico; la clave de staging, aun si su alcance es menor, se rota igual porque ya está confirmada como real dentro del caso.
+3. **Investigar uso no autorizado antes de asumir que no pasó nada.** Revisar logs de autenticación y auditoría de los tres sistemas asociados en la ventana de exposición conocida. La investigación de R1–R3 solo demuestra que los secretos son recuperables desde esta copia local del repositorio; no demuestra ni descarta que alguien los haya usado.
+4. **Comunicar el incidente a colaboradores, forks y clones conocidos.** Dado que el repositorio ya fue publicado y hay forks, cualquiera de ellos pudo haber obtenido una copia de los tres commits/ramas comprometidos antes de cualquier limpieza. Avisar permite que esos terceros también roten accesos que pudieran depender de las mismas credenciales y evita asumir que una limpieza posterior del repositorio "oficial" los alcanza.
+5. **Sanear la historia recién después de rotar, de forma coordinada.** Reescribir con una herramienta como `git filter-repo` (ver `research.md`) exige que todos los colaboradores vuelvan a clonar, invalida los forks/PRs existentes contra los commits antiguos y requiere respaldo previo. Hacerlo antes de rotar da una falsa sensación de cierre: los objetos ya pudieron copiarse a cualquier clon o fork previo a la operación, y un force-push no los alcanza.
+6. **Prevenir la recurrencia** con los controles pre-commit y server-side descriptos en la respuesta P5, para que un secreto nuevo no vuelva a ingresar al historial.
+
+**Por qué reescribir la historia es la parte menos urgente:** un `force-push` o una limpieza con `filter-repo`/BFG actualiza las referencias del repositorio remoto propio, pero no revoca el secreto en el sistema que lo emitió ni elimina las copias que ya existen en clones y forks hechos antes de la operación —exactamente el mismo principio que R2 demostró a escala de un solo repositorio local: mover una referencia no destruye el objeto al que apuntaba—. Mientras la credencial original siga siendo válida, sigue siendo explotable sin importar que el historial "visible" ya no la muestre; rotarla es lo único que la invalida en origen, independientemente de cuántas copias del repositorio circulen.
+
+**Revisión cruzada de P3 sobre el plan:** su evaluación de exposición (sección 3) ya establece que la visibilidad de cada secreto depende de si su referencia llegó a publicarse y de cuántas copias existen, no solo de si está en `main`; este plan retoma ese criterio al tratar como comprometidos los tres secretos —incluido el de una rama nunca mergeada— y al no asumir alcance ni uso que la evidencia de R1–R3 no demuestra.
 
 ## 5. Preguntas P1–P5
 
@@ -147,7 +158,11 @@ Como corroboración independiente, `git fsck --no-reflogs --unreachable --no-pro
 
 La visibilidad privada reduce la audiencia inicial, pero el impacto depende de permisos, vigencia y alcance de la clave. En ambos escenarios corresponde tratar el secreto expuesto como comprometido a efectos de contención, revocarlo/rotarlo y revisar registros de uso antes de afirmar abuso. La investigación solo prueba accesibilidad en esta copia local; no prueba publicación, lectura de terceros ni operaciones de pago. Para establecerlas harían falta registros de la plataforma, de distribución y del proveedor.
 
-P4 y P5: pendientes de sus responsables.
+### P4 — Plan de respuesta ante repositorio ya publicado con forks
+
+El orden desarrollado en la sección 4 es: inventariar los tres secretos y su alcance → revocar/rotar cada credencial confirmada → investigar uso no autorizado en los sistemas asociados → comunicar a colaboradores, forks y clones conocidos → recién entonces sanear la historia de forma coordinada → prevenir la recurrencia.
+
+Reescribir la historia queda en el último lugar porque, una vez que el repositorio fue publicado y existen forks, un force-push o una limpieza con `git filter-repo`/BFG solo cambia las referencias del repositorio remoto propio: no revoca el secreto en el sistema que lo emitió ni alcanza los objetos que un fork o un clon ya hechos conservan de manera independiente. El riesgo real —que la credencial siga siendo válida en otro lado— se cierra exclusivamente rotándola; la reescritura solo reduce la exposición de **nuevas** copias hacia adelante, no las que ya circulan.
 
 ## 6. Evidencia de progreso y preservación
 
