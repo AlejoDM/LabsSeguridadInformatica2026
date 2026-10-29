@@ -36,7 +36,7 @@
 
 ## 1. Línea de tiempo de la filtración
 
-Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y committer coinciden, con zona -03:00. No son fechas de publicación ni de descubrimiento: el caso se generó e investigó el 28/10/2026.
+Fechas de autor y committer coinciden, con zona -03:00. No son fechas de publicación ni de descubrimiento: el caso se generó e investigó el 28/10/2026.
 
 | Fecha registrada | Autor | Commit | Evento | Exposición / fuente |
 |---|---|---|---|---|
@@ -52,7 +52,7 @@ Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y commit
 ## 2. Hallazgos
 
 ### R1 — Secreto en commit viejo
-Pendiente del aporte de P1; no resuelto en esta contribución.
+
 
 ### R2 — Commit «perdido»
 
@@ -114,7 +114,7 @@ PhantomCorp ya publicó `deploy-tool` en GitHub y existen forks conocidos. El pl
 
 **Por qué reescribir la historia es la parte menos urgente:** un `force-push` o una limpieza con `filter-repo`/BFG actualiza las referencias del repositorio remoto propio, pero no revoca el secreto en el sistema que lo emitió ni elimina las copias que ya existen en clones y forks hechos antes de la operación —exactamente el mismo principio que R2 demostró a escala de un solo repositorio local: mover una referencia no destruye el objeto al que apuntaba—. Mientras la credencial original siga siendo válida, sigue siendo explotable sin importar que el historial "visible" ya no la muestre; rotarla es lo único que la invalida en origen, independientemente de cuántas copias del repositorio circulen.
 
-**Revisión cruzada de P3 sobre el plan:** su evaluación de exposición (sección 3) ya establece que la visibilidad de cada secreto depende de si su referencia llegó a publicarse y de cuántas copias existen, no solo de si está en `main`; este plan retoma ese criterio al tratar como comprometidos los tres secretos —incluido el de una rama nunca mergeada— y al no asumir alcance ni uso que la evidencia de R1–R3 no demuestra.
+**Vínculo con la evaluación de exposición (sección 3):** esa sección ya establece que la visibilidad de cada secreto depende de si su referencia llegó a publicarse y de cuántas copias existen, no solo de si está en `main`; este plan retoma ese criterio al tratar como comprometidos los tres secretos —incluido el de una rama nunca mergeada— y al no asumir alcance ni uso que la evidencia de R1–R3 no demuestra.
 
 ## 5. Preguntas P1–P5
 
