@@ -6,6 +6,7 @@ mediciones calculan candidatos sintéticos con hash_de(), sin buscar secretos.
 """
 import importlib.util
 import platform
+import statistics
 import time
 from pathlib import Path
 
@@ -14,7 +15,20 @@ ROOT = Path(__file__).resolve().parents[4]
 CRACKER = ROOT / "entregas/labextra4/grupo06/cracker.py"
 SOMBRA = ROOT / "labs/labextra4-cracking/caso/sombra.txt"
 DICCIONARIO = ROOT / "labs/labextra4-cracking/caso/diccionario.txt"
-MUESTRAS = {"md5": 100, "sha256": 100, "pbkdf2": 20}
+# Cada serie respeta la muestra acotada indicada por la consigna. La mediana de
+# varias series reduce la influencia del reloj y de la planificación del SO.
+MUESTRAS = {
+    "md5": (100, 25),
+    "sha256": (100, 25),
+    "pbkdf2": (20, 3),
+}
+VECTORES = {
+    "md5": "2d339ff09afe6e9ebaa6fe6cfca43c3d",
+    "sha256": "3a1514e7852c75e159ee1823adbc73d5810421845b2532ec320cb3661633546e",
+    "pbkdf2": "183272f5e383f7d4a2020854968d47759c1e4d6a5e2765661a09f18e1eb632ad",
+}
+SALT_VECTOR = "00112233"
+PASSWORD_VECTOR = "Clave-ß"
 
 
 def cargar_modulo():
@@ -55,16 +69,27 @@ def main():
         if algoritmo != "pbkdf2":
             assert obtenido != esperado, "El candidato de control no debe coincidir"
 
-    for algoritmo, cantidad in MUESTRAS.items():
+    for algoritmo, esperado in VECTORES.items():
+        obtenido = cracker.hash_de(algoritmo, SALT_VECTOR, PASSWORD_VECTOR)
+        assert obtenido == esperado, f"Vector {algoritmo} incorrecto"
+        print(f"Vector {algoritmo}: OK")
+
+    for algoritmo, (cantidad, series) in MUESTRAS.items():
         _usuario, salt, _esperado = registros[algoritmo]
-        inicio = time.perf_counter()
-        for indice in range(cantidad):
-            cracker.hash_de(algoritmo, salt, f"p1-medicion-{indice:03d}")
-        segundos = time.perf_counter() - inicio
-        tasa = cantidad / segundos
+        tasas = []
+        for serie in range(series):
+            inicio = time.perf_counter()
+            for indice in range(cantidad):
+                cracker.hash_de(
+                    algoritmo, salt, f"p1-medicion-{serie:02d}-{indice:03d}"
+                )
+            segundos = time.perf_counter() - inicio
+            tasas.append(cantidad / segundos)
+        tasa = statistics.median(tasas)
         print(
-            f"Medicion {algoritmo}: {cantidad} intentos, {segundos:.6f} s, "
-            f"{tasa:.2f} intentos/s, estimacion 49 candidatos: {49 / tasa:.6f} s"
+            f"Medicion {algoritmo}: {series} series de {cantidad} intentos, "
+            f"mediana {tasa:.2f} intentos/s, "
+            f"estimacion 49 candidatos: {49 / tasa:.6f} s"
         )
 
     try:

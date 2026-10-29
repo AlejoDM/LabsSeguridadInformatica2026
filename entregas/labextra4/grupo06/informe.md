@@ -1,7 +1,7 @@
 # Informe — Laboratorio Extra 4: Cracking de contraseñas
 
 **Grupo:** 06
-**Fecha:** 2026-10-28
+**Fecha:** 2026-10-29
 
 | Nombre y apellido | Usuario de GitHub |
 |---|---|
@@ -33,6 +33,7 @@
 
 | Usuario | Algoritmo | ¿Cayó? | Técnica | Contraseña del caso | Tiempo |
 |---|---|---|---|---|---|
+| operador | md5 | Sí, mediante CLI integrado | diccionario | `riverplate` | No medido en la corrida de recuperación |
 | admin | sha256 | Sí, en prueba aislada de reglas; falta CLI integrada | palabra + año | `phantom2026` | 0,000337 s, 95 intentos en esta ejecución aislada |
 
 ### Implementación de P2
@@ -76,21 +77,21 @@ En la prueba aislada sobre `admin`, el diccionario sin reglas no encontró coinc
 **Evidencia:** `evidencia/salidas/p2-revision-p3.txt`.
 ## 2. Medición de velocidad (P1)
 
-Se ejecutó `evidencia/medir-p1.py` con Python 3.12.13 en Windows 11, en el procesador indicado en la salida cruda. El script importa la copia entregable de `cracker.py`, llama a `hash_de()` para candidatos sintéticos y usa los salts del caso; no intenta recuperar secretos durante la medición. Se emplearon 100 intentos para MD5/SHA-256 y 20 para PBKDF2, con `time.perf_counter()`.
+Se ejecutó `evidencia/medir-p1.py` con Python 3.12.13 en Windows 11, en el procesador indicado en la salida cruda. El script importa la copia entregable de `cracker.py`, llama a `hash_de()` para candidatos sintéticos y usa los salts del caso; no intenta recuperar secretos durante la medición. Para reducir el ruido de mediciones muy cortas, se toma la mediana de 25 series de 100 intentos para MD5/SHA-256 y de 3 series de 20 intentos para PBKDF2, con `time.perf_counter()`.
 
 | Algoritmo | Intentos/segundo (máquina local) | Muestra | Estimación para 49 candidatos |
 |---|---:|---:|---:|
-| MD5 con salt | 220653,13 | 100 | 0,000222 s |
-| SHA-256 con salt | 184877,06 | 100 | 0,000265 s |
-| PBKDF2-HMAC-SHA256 (200.000 iteraciones) | 13,12 | 20 | 3,733875 s |
+| MD5 con salt | 454545,45 | Mediana de 25 × 100 | 0,000108 s |
+| SHA-256 con salt | 493096,65 | Mediana de 25 × 100 | 0,000099 s |
+| PBKDF2-HMAC-SHA256 (200.000 iteraciones) | 13,73 | Mediana de 3 × 20 | 3,567582 s |
 
 La evidencia completa —versión de Python, sistema, procesador, tamaños de salida y manejo del algoritmo no soportado— está en `evidencia/salidas/p1-benchmark.txt`; el procedimiento reproducible es `evidencia/medir-p1.py`. Los tiempos de diccionario son estimaciones de `49 / tasa`, no ejecuciones adicionales.
 
 ### P1 — Tasas medidas y significado para un atacante
 
-En esta medición MD5 fue aproximadamente 1,19 veces más rápido que SHA-256. PBKDF2-200k fue aproximadamente 16.818 veces más lento que MD5 (4,23 órdenes de magnitud) y 14.091 veces más lento que SHA-256 (4,15 órdenes). La diferencia proviene de que MD5 y SHA-256 hacen un hash rápido por candidato, mientras que PBKDF2 aplica 200.000 iteraciones de HMAC-SHA256.
+MD5 y SHA-256 quedaron en el mismo orden de magnitud: SHA-256 resultó 1,08 veces más rápido en esta corrida, una diferencia demasiado pequeña para generalizarla como propiedad del algoritmo o del hardware. PBKDF2-200k fue aproximadamente 33.106 veces más lento que MD5 (4,52 órdenes de magnitud) y 35.914 veces más lento que SHA-256 (4,56 órdenes). La diferencia relevante proviene de que MD5 y SHA-256 hacen un hash rápido por candidato, mientras que PBKDF2 aplica 200.000 iteraciones de HMAC-SHA256.
 
-La consigna propone como escenario pedagógico una GPU capaz de realizar `10^9` intentos/s contra MD5. Esa tasa hipotética es unas 4.532 veces la tasa MD5 local medida (3,66 órdenes de magnitud); sobre 49 candidatos, el cálculo idealizado sería `49 / 10^9 = 4,9 × 10⁻⁸ s`. No es una medición de esta GPU ni una tasa aplicable a SHA-256 o PBKDF2: para esos algoritmos depende de la implementación, la memoria y las iteraciones. En particular, trasladar `10^9` intentos/s a PBKDF2-200k sería incorrecto; su propósito es elevar el trabajo de cada candidato incluso en hardware paralelo.
+La consigna propone como escenario pedagógico una GPU capaz de realizar `10^9` intentos/s contra MD5. Esa tasa hipotética es unas 2.200 veces la tasa MD5 local medida (3,34 órdenes de magnitud); sobre 49 candidatos, el cálculo idealizado sería `49 / 10^9 = 4,9 × 10⁻⁸ s`. No es una medición de esta GPU ni una tasa aplicable a SHA-256 o PBKDF2: para esos algoritmos depende de la implementación, la memoria y las iteraciones. En particular, trasladar `10^9` intentos/s a PBKDF2-200k sería incorrecto; su propósito es elevar el trabajo de cada candidato incluso en hardware paralelo.
 
 
 ## 3. El loot

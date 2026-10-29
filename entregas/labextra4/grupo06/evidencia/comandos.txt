@@ -82,3 +82,8 @@ P1 / Lab Extra 04 — 29/10/2026 — PowerShell.
 
 14. Con `PYTHONIOENCODING=utf-8`: `.../python.exe entregas/labextra4/grupo06/cracker.py crackear labs/labextra4-cracking/caso/sombra.txt labs/labextra4-cracking/caso/diccionario.txt`
     Resultado: `operador` y `analista` recuperados mediante el diccionario; `admin` no cae sin reglas y `root` se omite deliberadamente por PBKDF2. Salida cruda: `evidencia/salidas/r1-r2-diccionario.txt`. La corrida previa sin esa variable llegó a las coincidencias, pero no pudo imprimir los símbolos ✓/✗ por la consola CP1252.
+
+15. Mejora de P1: incorporación de vectores deterministas independientes para MD5, SHA-256 y PBKDF2-200k, y medición por series con mediana para reducir el ruido de las corridas cortas.
+
+16. `.../python.exe -m py_compile entregas/labextra4/grupo06/cracker.py entregas/labextra4/grupo06/evidencia/medir-p1.py`; seguido de `.../python.exe entregas/labextra4/grupo06/evidencia/medir-p1.py | Tee-Object entregas/labextra4/grupo06/evidencia/salidas/p1-benchmark.txt`.
+    Resultado: los tres vectores devolvieron `OK`; mediana de 25 series de 100 intentos para MD5/SHA-256 y de 3 series de 20 para PBKDF2. La salida cruda reemplaza el benchmark inicial de una sola serie.
