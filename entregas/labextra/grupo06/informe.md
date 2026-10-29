@@ -24,6 +24,10 @@
 - **Partes asistidas:** respuesta P5 sobre servicios de metadatos y revisión preliminar del informe.
 - **Verificación:** se contrastó la respuesta con el alcance del laboratorio, diferenciando los accesos internos efectivamente observados de los riesgos teóricos de SSRF en servicios cloud. No se realizaron consultas contra servicios de metadatos reales.
 
+- **Herramienta:** Claude (Anthropic), vía Claude Code.
+- **Finalidad y partes asistidas:** redacción de la respuesta a la pregunta P4 y del research.md.
+- **Verificación:** Las afirmaciones del caso Capital One se contrastaron contra el aviso judicial del caso (justice.gov), la nota técnica de Krebs on Security/TechTarget y la documentación oficial de AWS sobre IMDSv2 antes de incluirlas.
+
 ## 1. Cadena de explotación
 
 ### R1 — Panel interno en localhost
