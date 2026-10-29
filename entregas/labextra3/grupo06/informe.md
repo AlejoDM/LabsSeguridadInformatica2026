@@ -28,6 +28,11 @@
 - **Finalidad del uso:** apoyo para revisar la consigna, analizar las evidencias disponibles y redactar las respuestas P1 y P5, la conclusión y esta declaración.
 - **Verificación:** se contrastó el contenido con el código, el diff y las salidas de pruebas guardadas. No se ejecutó el contenedor.
 
+**Herramienta:** Claude (Anthropic), vía Claude Code.
+
+**Finalidad y partes asistidas:** implementación del parche D5 en objetivo/server.py, redacción de la sección D5 en informe.md y de research.md.
+**Verificación:** el parche se probó directamente con curl contra una instancia real del servidor parcheado y con tres corridas del verificador oficial, descartando antes una corrida con errores de conexión que daba un falso positivo. La flag D5 se obtuvo del verificador oficial, sin inventar resultados. Las afirmaciones del research se contrastaron contra las páginas oficiales de OWASP citadas antes de incluirlas.
+
 ## 1. Tabla de defensas (antes → después)
 
 | Defensa | Ataque que funcionaba | Fix aplicado | Verificación |
