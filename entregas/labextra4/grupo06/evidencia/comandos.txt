@@ -69,3 +69,16 @@ P2 / Revisión cruzada de P3 — 28/10/2026.
 10. Repetición de la prueba con Tee-Object.
     Evidencia: evidencia/salidas/p2-revision-p3.txt.
     Se observaron caracteres mal representados por la codificación de PowerShell.
+
+P1 / Lab Extra 04 — 29/10/2026 — PowerShell.
+
+11. Implementación de `hash_de()` en la copia de entrega: `bytes.fromhex()` para el salt, MD5/SHA-256 de `salt + password` y `hashlib.pbkdf2_hmac("sha256", password, salt, 200000)` para PBKDF2. Los algoritmos no admitidos generan `ValueError`.
+
+12. `C:/Users/marti/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe -m py_compile entregas/labextra4/grupo06/cracker.py`
+    Resultado: sin errores de sintaxis.
+
+13. `C:/Users/marti/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe entregas/labextra4/grupo06/evidencia/medir-p1.py | Tee-Object entregas/labextra4/grupo06/evidencia/salidas/p1-benchmark.txt`
+    Resultado: tasas medidas para MD5, SHA-256 y PBKDF2-200k; validación de longitudes hexadecimales y de algoritmo inválido.
+
+14. Con `PYTHONIOENCODING=utf-8`: `.../python.exe entregas/labextra4/grupo06/cracker.py crackear labs/labextra4-cracking/caso/sombra.txt labs/labextra4-cracking/caso/diccionario.txt`
+    Resultado: `operador` y `analista` recuperados mediante el diccionario; `admin` no cae sin reglas y `root` se omite deliberadamente por PBKDF2. Salida cruda: `evidencia/salidas/r1-r2-diccionario.txt`. La corrida previa sin esa variable llegó a las coincidencias, pero no pudo imprimir los símbolos ✓/✗ por la consola CP1252.

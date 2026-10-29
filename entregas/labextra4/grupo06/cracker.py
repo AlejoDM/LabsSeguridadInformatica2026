@@ -41,8 +41,19 @@ def hash_de(algo: str, salt_hex: str, password: str) -> str:
     """Calcula el hash de un candidato EXACTAMENTE como lo hizo el servidor.
     Pista: md5/sha256 son hash(salt_bytes + password); pbkdf2 usa
     hashlib.pbkdf2_hmac('sha256', password, salt, ITER_PBKDF2)."""
-    # TODO
-    raise NotImplementedError("Completá hash_de()")
+    salt = bytes.fromhex(salt_hex)
+    password_bytes = password.encode("utf-8")
+    algoritmo = algo.lower()
+
+    if algoritmo == "md5":
+        return hashlib.md5(salt + password_bytes).hexdigest()
+    if algoritmo == "sha256":
+        return hashlib.sha256(salt + password_bytes).hexdigest()
+    if algoritmo == "pbkdf2":
+        return hashlib.pbkdf2_hmac(
+            "sha256", password_bytes, salt, ITER_PBKDF2
+        ).hex()
+    raise ValueError(f"Algoritmo no soportado: {algo}")
 
 
 

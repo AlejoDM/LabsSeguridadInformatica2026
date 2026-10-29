@@ -15,8 +15,8 @@
 
 **Herramienta:** Codex (OpenAI).
 
-- **Finalidad y partes asistidas:** asistencia para generar la implementación de `aplicar_reglas` y sus pruebas, ejecutar comprobaciones sobre el caso, consultar la documentación de NIST y redactar el análisis y las evidencias del informe.
-- **Verificación:** Revisión del código y reproducción manual de las pruebas.
+- **Finalidad y partes asistidas:** asistencia para generar la implementación de `aplicar_reglas` y sus pruebas, implementar `hash_de()` para P1, ejecutar comprobaciones sobre el caso, medir tasas locales, consultar la documentación de NIST y redactar el análisis y las evidencias del informe.
+- **Verificación:** Revisión del código, reproducción manual de las pruebas y ejecución de `evidencia/medir-p1.py` sobre la copia entregable.
 
 **Herramienta:** ChatGPT (OpenAI), aporte de Persona 2.
 
@@ -75,6 +75,22 @@ En la prueba aislada sobre `admin`, el diccionario sin reglas no encontró coinc
 
 **Evidencia:** `evidencia/salidas/p2-revision-p3.txt`.
 ## 2. Medición de velocidad (P1)
+
+Se ejecutó `evidencia/medir-p1.py` con Python 3.12.13 en Windows 11, en el procesador indicado en la salida cruda. El script importa la copia entregable de `cracker.py`, llama a `hash_de()` para candidatos sintéticos y usa los salts del caso; no intenta recuperar secretos durante la medición. Se emplearon 100 intentos para MD5/SHA-256 y 20 para PBKDF2, con `time.perf_counter()`.
+
+| Algoritmo | Intentos/segundo (máquina local) | Muestra | Estimación para 49 candidatos |
+|---|---:|---:|---:|
+| MD5 con salt | 220653,13 | 100 | 0,000222 s |
+| SHA-256 con salt | 184877,06 | 100 | 0,000265 s |
+| PBKDF2-HMAC-SHA256 (200.000 iteraciones) | 13,12 | 20 | 3,733875 s |
+
+La evidencia completa —versión de Python, sistema, procesador, tamaños de salida y manejo del algoritmo no soportado— está en `evidencia/salidas/p1-benchmark.txt`; el procedimiento reproducible es `evidencia/medir-p1.py`. Los tiempos de diccionario son estimaciones de `49 / tasa`, no ejecuciones adicionales.
+
+### P1 — Tasas medidas y significado para un atacante
+
+En esta medición MD5 fue aproximadamente 1,19 veces más rápido que SHA-256. PBKDF2-200k fue aproximadamente 16.818 veces más lento que MD5 (4,23 órdenes de magnitud) y 14.091 veces más lento que SHA-256 (4,15 órdenes). La diferencia proviene de que MD5 y SHA-256 hacen un hash rápido por candidato, mientras que PBKDF2 aplica 200.000 iteraciones de HMAC-SHA256.
+
+La consigna propone como escenario pedagógico una GPU capaz de realizar `10^9` intentos/s contra MD5. Esa tasa hipotética es unas 4.532 veces la tasa MD5 local medida (3,66 órdenes de magnitud); sobre 49 candidatos, el cálculo idealizado sería `49 / 10^9 = 4,9 × 10⁻⁸ s`. No es una medición de esta GPU ni una tasa aplicable a SHA-256 o PBKDF2: para esos algoritmos depende de la implementación, la memoria y las iteraciones. En particular, trasladar `10^9` intentos/s a PBKDF2-200k sería incorrecto; su propósito es elevar el trabajo de cada candidato incluso en hardware paralelo.
 
 
 ## 3. El loot
