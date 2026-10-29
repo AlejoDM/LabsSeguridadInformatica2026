@@ -27,3 +27,41 @@ Las capturas se hicieron con 2>&1 | Tee-Object; se preserva el texto crudo, incl
 19. git -C $repo status --short --branch -> solo nueva carpeta entregas/labextra3/grupo06/ en labextra3-grupo06.
 
 Para reproducir pruebas: ejecutar con el Python indicado evidencia/probar-d4.py <ruta/server.py> antes|despues. El modo antes exige bypass en el original; despues exige bloqueo en la copia. D5 es observación y se imprime independientemente. Los temporales se eliminan al terminar; ningún servidor de pruebas queda ejecutándose.
+
+
+P2 / Lab Extra 03 — 28/10/2026 — PowerShell.
+
+1. Get-Content entregas/labextra3/grupo06/objetivo/server.py -Encoding UTF8
+   Lectura del código existente antes del parche.
+
+2. py -3 labs/labextra3-hardening/verificar-defensa.py --dir entregas/labextra3/grupo06/objetivo
+   Verificador posterior al primer parche D3: 4/5, con errores de conexión. La salida se observó en consola.
+
+3. py -3 -m py_compile entregas/labextra3/grupo06/objetivo/server.py
+   Comprobación de sintaxis: sin errores.
+
+4. Prueba HTTP inicial mediante Python en PowerShell.
+   Falló durante init_db() porque /tmp no estaba disponible para esa ejecución.
+
+5. Prueba HTTP con importlib.util, ThreadingHTTPServer y directorios temporales.
+   Resultados: / HTTP 200; /robots.txt HTTP 200 sin /backup; /backup HTTP 404; manual.txt HTTP 200.
+
+6. Creación de evidencia/probar-d3.py mediante Set-Content -Encoding UTF8.
+   Script reproducible de la prueba anterior.
+
+7. py -3 entregas/labextra3/grupo06/evidencia/probar-d3.py | Tee-Object -FilePath entregas/labextra3/grupo06/evidencia/salidas/d3-despues.txt
+   Se guardó la salida real de la prueba local.
+
+8. git diff --check
+   Sin errores de formato.
+
+9. Verificador oficial sobre la copia del grupo, con PYTHONIOENCODING=utf-8: D3 aprobada, GET /backup HTTP 404, robots sin referencia a /backup. Salida: evidencia/salidas/d3-verificador.txt.
+
+10. Se ejecutó validar-d3-crlf.sh desde Git Bash.
+    Se utilizó una copia temporal del manifiesto con saltos de línea normalizados, sin modificar archivos oficiales.
+    Resultado: D3 aceptada, FLAG{def_rutas_blindadas}.
+    Evidencia: evidencia/salidas/d3-submit-compatibilidad.txt.
+
+11. Se ejecutó ./ctf status extra3 desde Git Bash.
+    Estado local: D3 resuelta, 1/5.
+    Evidencia: evidencia/salidas/d3-status.txt.
