@@ -55,3 +55,21 @@ La notación <caso> en los comandos siguientes representa exactamente esa ruta a
 13. & 'C:\Program Files\Git\bin\bash.exe' ./ctf status extra2 -> status-extra2-p2.txt (1/3 en este checkout).
 14. git -c safe.directory="<caso>" -C "labs/labextra2-git-forense/caso/repo-delata" reflog show --all --date=iso --format="%H %gD %gs" -> r2-reflog-fechas.txt; captura fechas registradas del reflog como evidencia temporal local, no como fecha de publicación.
 Durante la investigación no se ejecutaron reset, checkout, gc, prune, fsck --lost-found ni comandos de limpieza sobre el caso. El reset/checkout que forma la historia es parte de la generación oficial recién ejecutada.
+
+P1 — 29/10/2026. Terminal PowerShell; Git Bash para el motor. Raíz externa: C:/Users/marti/OneDrive/Escritorio/LabsSeguridadInformatica2026. Caso: <raíz>/labs/labextra2-git-forense/caso/repo-delata.
+1. & 'C:\Program Files\Git\bin\bash.exe' ./ctf lab extra2 -> el caso no existía en este checkout; el generador oficial lo creó una vez. No se leyó el generador ni el manifiesto para descubrir la flag.
+2. git -C $case status --short --branch -> ## main.
+3. git -C $case log --all --oneline --decorate -> r1-inventario.txt.
+4. git -C $case log --all --reverse --format=fuller -> inventario exploratorio de autores, fechas y mensajes.
+5. git -C $case log main -p -- config.py -> descubre los diffs de introducción y limpieza.
+6. & 'C:\Program Files\Git\bin\bash.exe' ./ctf submit extra2 R1 'FLAG{git_log_no_olvida}' -> r1-submit.txt; rechazo por CR final del hash del manifiesto.
+7. & 'C:\Program Files\Git\bin\bash.exe' entregas/labextra2/grupo06/evidencia/validar-r1-crlf.sh -> r1-submit-compatibilidad.txt; el script usa una copia temporal del manifiesto sin CR, llama las funciones oficiales y acepta R1.
+8. git -C $case show --format=fuller 9333f2b4a09f7a320cb66d621c3bd53b4f694941 -- config.py -> parte de r1-introduccion-limpieza.txt.
+9. git -C $case show --format=fuller eafb81c3ec5790ce4741629458e11ab5c1a690b8 -- config.py -> parte de r1-introduccion-limpieza.txt.
+10. git -C $case log main --reverse --format=fuller -> r1-fechas.txt.
+11. git -C $case status --short --branch -> ## main; se verificó que no hubo cambios ni movimientos de referencias en el caso.
+12. & 'C:\Program Files\Git\bin\bash.exe' ./ctf status extra2 -> status-extra2-r1.txt; R1 resuelto, 1/3 en este checkout.
+
+Durante P1 no se ejecutaron checkout, reset, gc, prune, fsck --lost-found ni comandos de limpieza sobre el caso.
+
+Integración final — 29/10/2026. Git Bash: `entregas/labextra2/grupo06/evidencia/validar-status-final-crlf.sh`. El script presenta R1, R2 y R3 ya descubiertas con las funciones oficiales y un manifiesto temporal sin CR; no modifica el manifiesto de la cátedra. Resultado completo: `salidas/status-extra2-final-3de3.txt` (3/3, 100%).
