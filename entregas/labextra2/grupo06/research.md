@@ -4,35 +4,93 @@
 **Fecha:** 2026-10-29
 **Opción elegida:** A — Herramientas reales (detección y limpieza de secretos en Git)
 
-**Declaración de uso de IA:** (pendiente de completar por el grupo antes de entregar — ver indicación aparte)
+**Declaración de uso de IA:**
+
+**Herramienta:** ChatGPT y Claude
+
+- **Finalidad:** revisión de redacción y contraste de afirmaciones con documentación oficial.
+
+- **Partes asistidas:** explicación de Gitleaks, alcance del historial y reflog, limpieza con git filter-repo, protecciones de GitHub y referencias.
 
 ## 1. Detección: Gitleaks
 
-Gitleaks es un escáner de línea de comandos, de código abierto, que busca contraseñas, claves de API y otras credenciales tanto en el árbol de trabajo actual como en **toda la historia de Git** de un repositorio. Trabaja por reglas: compara el contenido contra expresiones regulares conocidas (claves de AWS, tokens de GitHub, cadenas de conexión, etc.) y permite escribir reglas propias en TOML, además de mantener una lista de permitidos para falsos positivos ya revisados.
+Gitleaks es una herramienta de código abierto que busca posibles secretos, como contraseñas, tokens y claves de API. Permite analizar archivos de un directorio o cambios del historial de Git. Utiliza reglas configurables, expresiones regulares y, según la regla, criterios como la entropía del valor encontrado. Su configuración admite reglas propias y exclusiones para falsos positivos revisados [1].
 
-**Cómo se usaría en un pipeline de CI:** el comando `gitleaks detect` se ejecuta sobre el repositorio clonado en cada pull request o push, y puede integrarse como paso de un workflow de CI o como GitHub Action; además existe `gitleaks protect`, pensado para correr como hook `pre-commit` local y revisar únicamente los cambios que el desarrollador está por confirmar, antes de que lleguen al historial. En el caso de este laboratorio, un escaneo con `gitleaks detect --log-opts="--all"` sobre `repo-delata` habría señalado los tres secretos de R1, R2 y R3, porque recorre commits accesibles por cualquier referencia, no solo la punta de `main`.
+**Cómo se usaría en un pipeline de CI:** En una ejecución de CI se puede analizar el historial disponible en el clon con:
 
-**Qué no resuelve:** Gitleaks encuentra secretos, pero no los elimina ni los invalida. Si corre solo sobre el árbol actual (sin `--log-opts="--all"` o el flag equivalente), no ve lo que quedó en ramas no fusionadas como `feature/pasarela-pagos` del caso, ni objetos colgantes como el que R2 recuperó del reflog. Sus reglas son patrones conocidos: una credencial con un formato atípico, o un valor que no coincide con ninguna firma reconocida, puede pasar inadvertido. Y, sobre todo, detectar un secreto no lo rota: si ya se filtró, Gitleaks no hace nada por sí solo para revocarlo.
+```bash
+gitleaks git --log-opts="--all" repo-delata
+```
+
+Los comandos antiguos `gitleaks detect` y `gitleaks protect` están deprecados desde la versión 8.19.0; la documentación actual organiza el análisis en los modos `git`, `dir` y `stdin` [1].
+
+El alcance depende tanto del comando como del contenido del clon. Un checkout superficial o que no haya obtenido las referencias necesarias no permite revisar toda la historia remota. Por eso, el workflow debe recuperar el historial y las ramas que se pretenden analizar.
+
+También puede integrarse una revisión local antes del commit para detectar secretos en los cambios preparados. Esto complementa el control de CI, pero no lo reemplaza.
+
+**Qué no resuelve:** `--all` incluye los commits alcanzables desde las referencias locales y `HEAD`. No incorpora automáticamente todos los objetos existentes en `.git`. Git ofrece `--reflog` como una opción diferente para incluir commits mencionados por los reflogs [2].
+
+En el escenario descrito para R3, el escaneo podría alcanzar la rama `feature/pasarela-pagos` si su referencia e historial están disponibles localmente. Para R2, si el commit se conserva únicamente en el reflog, `--all` por sí solo no alcanza. Los objetos sin referencias ni entradas de reflog requieren una revisión adicional.
+
+Tampoco puede asegurarse que Gitleaks detecte los tres secretos del laboratorio sin ejecutarlo: el resultado depende de las reglas, las exclusiones y el formato de los valores. La herramienta no elimina ni revoca credenciales.
 
 ## 2. Limpieza: `git filter-repo`
 
-`git filter-repo` es la herramienta que el propio proyecto Git recomienda hoy para reescribir historia, en reemplazo del antiguo `git filter-branch` (lento y propenso a errores) y como alternativa más mantenida a BFG Repo-Cleaner. Permite, entre otras operaciones, eliminar un archivo de todos los commits en los que aparece, o reemplazar cadenas de texto específicas (por ejemplo, el valor de una credencial) en toda la historia.
+La documentación de Git desaconseja utilizar `git filter-branch` por sus problemas de rendimiento y seguridad, y recomienda herramientas alternativas como `git filter-repo` [3].
 
-**Cómo se usaría en una respuesta a incidente:** sobre una copia nueva y exclusiva del repositorio (el propio proyecto recomienda operar sobre un clon fresco, no sobre el checkout de trabajo diario), se ejecutaría algo equivalente a `git filter-repo --path .env.pasarela --invert-paths` para purgar el archivo comprometido de R3 de todos los commits que lo contienen, o `git filter-repo --replace-text secretos.txt` para sustituir el valor expuesto en cualquier blob donde aparezca. Tras la reescritura, hay que forzar el push de las referencias afectadas y coordinar que **todos** los colaboradores descarten sus clones viejos y vuelvan a clonar, porque los hashes de cada commit reescrito cambian.
+`git filter-repo` permite reescribir el historial para eliminar archivos o reemplazar contenido. Es una operación de remediación que debe planificarse, porque modifica identificadores de commits y puede afectar ramas, etiquetas y herramientas relacionadas [4].
 
-**Qué no resuelve:** `git filter-repo` actúa únicamente sobre las copias del repositorio a las que se le aplique; no toca clones locales de otros colaboradores, forks ya existentes en GitHub, ni copias cacheadas por la propia plataforma (por ejemplo, un commit todavía accesible por su hash directo aunque ninguna rama lo referencie). Tampoco es una herramienta de CI que corra automáticamente en cada push: es una operación puntual, coordinada y disruptiva, pensada para una remediación concreta, no para prevención continua. Y, igual que con la detección, reescribir la historia **no revoca** el secreto: si la credencial seguía siendo válida, sigue siéndolo después de la limpieza, exactamente el punto que el plan de la sección 4 de este informe prioriza (rotar antes de reescribir).
+**Cómo se usaría en una respuesta a incidente:** La primera medida es revocar o rotar la credencial, comprobando que el valor anterior quede invalidado. Después se evalúa si también resulta necesario retirarla del historial. GitHub advierte que la reescritura puede no estar justificada si la revocación ya elimina el riesgo de acceso [5].
+
+Si se decide limpiar, se trabaja sobre un clon fresco con el historial y las referencias necesarios. Los siguientes comandos ilustran dos operaciones alternativas; no representan pruebas ejecutadas en este laboratorio:
+
+```bash
+git filter-repo --sensitive-data-removal \
+  --path .env.pasarela --invert-paths
+```
+
+```bash
+git filter-repo --sensitive-data-removal \
+  --replace-text ../secretos.txt
+```
+
+El primer ejemplo elimina la ruta indicada del historial procesado. Si el archivo tuvo otros nombres o ubicaciones, deben incluirse también. El segundo utiliza un archivo de expresiones de reemplazo, que debe mantenerse fuera del repositorio y protegerse por su contenido sensible [4][5].
+
+**Qué no resuelve:** Reescribir el repositorio local y actualizar el remoto no elimina las copias existentes en clones, forks, referencias de pull requests o vistas almacenadas por la plataforma. Es necesario coordinar la limpieza de otras copias y evitar que un colaborador vuelva a publicar el historial anterior. Volver a clonar es una opción; otra es limpiar cuidadosamente el clon existente [5].
+
+La herramienta tampoco convierte la limpieza en prevención continua. Su función principal es modificar el historial seleccionado, mientras que los controles de CI y los hooks buscan evitar nuevas incorporaciones.
 
 ## 3. Pregunta de cierre — por qué el secret scanning de GitHub no alcanza
 
-GitHub escanea los *pushes* públicos en busca de patrones de secretos conocidos (GitHub Secret Scanning) y, para ciertos proveedores asociados, notifica directamente para que se revoque la credencial; además, Push Protection puede bloquear un push antes de que el secreto llegue siquiera al repositorio. Aun así, quedan ventanas de exposición abiertas:
+GitHub Secret Scanning analiza el historial de todas las ramas del repositorio y realiza nuevas revisiones cuando incorpora tipos de secretos. Por eso, una rama nunca fusionada no queda excluida simplemente por estar fuera de `main` [6].
 
-1. **El intervalo entre publicación, detección y revocación efectiva.** El escaneo no es instantáneo ni infalible para todo tipo de secreto (depende de los patrones que reconoce, igual que Gitleaks); y aunque notifique al proveedor, la revocación real depende de que ese proveedor actúe y de que el equipo afectado complete la rotación. Durante ese lapso —que puede ir de minutos a mucho más, según el caso— la credencial sigue siendo válida y explotable, tal como advierte el propio README del laboratorio sobre el tiempo mediano entre filtración y uso.
-2. **Las copias hechas antes de cualquier aviso.** Push Protection bloquea el push que intenta introducir el secreto, pero no hace nada frente a un secreto que ya estaba en la historia antes de habilitarse, ni frente a clones y forks que un tercero ya haya realizado antes de que GitHub emitiera cualquier alerta. Exactamente el escenario de este laboratorio: el secreto de R3 vive en una rama nunca fusionada y el de R2 en un commit sin referencias; ninguno de los dos pasa por un push nuevo que Push Protection pudiera interceptar, y ambos dependen de que alguien los busque deliberadamente (como hizo el grupo) o de un escaneo retroactivo de toda la historia, no de uno automático sobre el último cambio.
+Push Protection cumple otra función: puede bloquear pushes que contienen secretos reconocidos. No retira credenciales ya publicadas ni elimina copias que terceros hayan obtenido antes del bloqueo [7].
 
-Por eso el escaneo de GitHub y la notificación a proveedores reducen el riesgo, pero no sustituyen la disciplina de revisar toda la historia accesible (no solo el último commit) y de tratar cualquier secreto que haya pasado por un repositorio —aunque ya no esté en `main`— como comprometido hasta que se rote.
+Estas protecciones tienen límites. La detección depende de los tipos de secretos y funciones disponibles; una alerta no implica que la credencial ya esté invalidada. Cuando GitHub notifica a un proveedor asociado, este debe tomar las medidas correspondientes. El equipo también debe comprobar la revocación y actualizar los servicios afectados [6].
+
+Además, los reflogs locales y los objetos que solo existen en una copia particular no equivalen al historial disponible en GitHub. No corresponde asumir que el escaneo de la plataforma cubre esos datos.
+
+La respuesta debe combinar prevención, detección y remediación: evitar incorporar secretos, revisar el alcance real de los escaneos y revocar las credenciales expuestas. Borrar un archivo o reescribir commits no sustituye la rotación con invalidación del valor anterior.
 
 ## 4. Fuentes
 
-1. Gitleaks — repositorio oficial y documentación de uso (`gitleaks detect`, `gitleaks protect`, integración como hook y como acción de CI). https://github.com/gitleaks/gitleaks
-2. `git filter-repo` — repositorio oficial de Elijah Newren, recomendado por el proyecto Git en reemplazo de `git filter-branch`. https://github.com/newren/git-filter-repo
-3. GitHub Docs. *Working with secret scanning and push protection*. https://docs.github.com/en/code-security/secret-scanning/working-with-secret-scanning-and-push-protection
+1. Gitleaks. _Repositorio oficial y documentación_.  
+   https://github.com/gitleaks/gitleaks
+
+2. Git. _git-log: opciones `--all` y `--reflog`_.  
+   https://git-scm.com/docs/git-log
+
+3. Git. _git-filter-branch: advertencias y alternativas_.  
+   https://git-scm.com/docs/git-filter-branch
+
+4. Newren, E. _git-filter-repo: repositorio oficial_.  
+   https://github.com/newren/git-filter-repo
+
+5. GitHub Docs. _Removing sensitive data from a repository_.  
+   https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/removing-sensitive-data-from-a-repository
+
+6. GitHub Docs. _Secret scanning_.  
+   https://docs.github.com/en/code-security/concepts/secret-security/secret-scanning
+
+7. GitHub Docs. _Push protection_.  
+   https://docs.github.com/en/code-security/concepts/secret-security/push-protection
