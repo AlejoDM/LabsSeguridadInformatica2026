@@ -23,13 +23,16 @@ la flag defensiva para entregar con ./ctf submit extra3.
 import base64
 import os
 import sqlite3
+import tempfile
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from urllib.parse import urlparse, parse_qs
 
-VERSION = "PhantomServer/2.4.1-debug"   # D1: banner que canta todo
+# D1: nombre genérico; no expone el producto ni la versión desplegada.
+VERSION = "Servidor"
 
-DB = "/tmp/phantom_hardening.db"
-DESCARGAS = "/tmp/phantom_descargas"    # raíz "pública" de /descargar
+RUNTIME_DIR = tempfile.gettempdir()
+DB = os.path.join(RUNTIME_DIR, "phantom_hardening.db")
+DESCARGAS = os.path.join(RUNTIME_DIR, "phantom_descargas")
 
 
 def init_db():
@@ -62,9 +65,8 @@ class Handler(BaseHTTPRequestHandler):
             # D3: impedir el acceso publico al backup
             self._txt(404, "404 - no existe")
         elif path == "/api/status":
-            # D2: endpoint de debug en producción
-            self._json(200, '{"debug": true, "env": "produccion", '
-                            '"db": "' + DB + '", "pid": ' + str(os.getpid()) + '}')
+            # D2: el endpoint de diagnóstico no se publica en producción.
+            self._txt(404, "404 - no existe")
         elif path == "/login":
             # D4: parámetros enlazados; las credenciales son datos, no SQL
             user = params.get("user", [""])[0]
