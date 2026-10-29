@@ -65,3 +65,33 @@ P2 / Lab Extra 03 — 28/10/2026 — PowerShell.
 11. Se ejecutó ./ctf status extra3 desde Git Bash.
     Estado local: D3 resuelta, 1/5.
     Evidencia: evidencia/salidas/d3-status.txt.
+
+
+P4 / Lab Extra 03 — 29/10/2026 — Git Bash (bash.exe de Git para Windows).
+
+1. python3 labs/labextra3-hardening/verificar-defensa.py --dir entregas/labextra3/grupo06/objetivo
+   Verificador oficial antes de tocar D5: salida intermitente por "connection refused" en Windows (D2/D3/D5 con status 0 en algunas corridas), igual al problema ya documentado por P2/P3. No se tomó como resultado válido.
+
+2. Lectura de entregas/labextra3/grupo06/objetivo/server.py (bloque /descargar) y de labs/labextra3-hardening/verificar-defensa.py para confirmar el payload exacto de D5 (../../../../etc/passwd) sin tocar el verificador ni el manifiesto.
+
+3. Edición de objetivo/server.py: bloque /descargar reemplazado por resolución de ruta (os.path.realpath) y verificación de que el resultado quede dentro de DESCARGAS, más bloqueo explícito de rutas absolutas. Ningún otro bloque (D1-D4) modificado.
+
+4. mkdir -p /e/tmp
+   Creación del directorio que python3 resuelve como "/tmp" en este Windows (python3 -c "import os; print(os.path.abspath('/tmp'))" -> E:\tmp), requerido por DB y DESCARGAS del server.
+
+5. PORT=18777 python3 entregas/labextra3/grupo06/objetivo/server.py (en segundo plano) -> evidencia/salidas/d5-despues.txt
+   curl -i a GET /, GET /descargar?archivo=manual.txt, GET /descargar?archivo=../../../../etc/passwd, GET /descargar?archivo=../centinela-p4.txt (centinela propio creado y luego borrado, fuera de DESCARGAS) y GET /descargar?archivo=/etc/passwd (ruta absoluta). Los tres payloads de traversal devolvieron 404 real; home y manual.txt devolvieron 200 con el contenido esperado.
+
+6. git diff -- entregas/labextra3/grupo06/objetivo/server.py -> evidencia/salidas/d5-parche.diff.
+   Diff acotado al bloque /descargar (D5), sin tocar D1-D4 ya parcheados por otros integrantes.
+
+7. PYTHONIOENCODING=utf-8 python3 labs/labextra3-hardening/verificar-defensa.py --dir entregas/labextra3/grupo06/objetivo --port 19050 -> evidencia/salidas/d5-verificador.txt
+   Corrida limpia (sin errores de conexión): D3 y D4 bloqueadas, D5 bloqueada por 404 real ("traversal /etc/passwd -> 404 (bloqueado)"), D1/D2 vulnerables (pendientes de su responsable). 3/5 reportado por el verificador en esta copia parcial.
+
+8. ./ctf submit extra3 D5 'FLAG{def_traversal_bloqueado}' -> evidencia/salidas/d5-submit.txt. Aceptada sin problema de CRLF.
+
+9. ./ctf status extra3 -> mostró solo D5 resuelta (1/5): el estado del motor había perdido D3 y D4, ya validadas antes por P2 y P3. Se reenviaron esas dos flags conocidas (FLAG{def_rutas_blindadas}, FLAG{def_sqli_parametrizado}) sin repetir sus ataques, para restaurar el progreso real del grupo.
+
+10. ./ctf status extra3 -> evidencia/salidas/d5-status.txt, 3/5 (D3, D4, D5). D1 y D2 pendientes.
+
+11. Limpieza: borrado del centinela de prueba (/e/tmp/centinela-p4.txt) y de los artefactos temporales del servidor de pruebas (/e/tmp/phantom_descargas, /e/tmp/phantom_hardening.db). No se modificó labs/, el verificador ni el manifiesto.
