@@ -79,14 +79,26 @@ class Handler(BaseHTTPRequestHandler):
                 self._html(401, "<h1>Credenciales inválidas</h1>")
             db.close()
         elif path == "/descargar":
-            # D5: path traversal — concatena y lee sin validar
+            # D5: confinar la ruta RESUELTA al directorio de descargas, no
+            # filtrar la cadena ".." (eso no cubre absolutas ni symlinks, y
+            # un 404 por archivo inexistente no equivale a estar bloqueado).
             nombre = params.get("archivo", [""])[0]
-            ruta = DESCARGAS + "/" + nombre
-            try:
-                with open(ruta, "rb") as fh:
-                    self._txt(200, fh.read(8192).decode("utf-8", "ignore"))
-            except Exception:
+            base = os.path.realpath(DESCARGAS)
+            if os.path.isabs(nombre):
+                # os.path.join descarta DESCARGAS si nombre es absoluto;
+                # tratamos cualquier ruta absoluta como fuera de alcance.
                 self._txt(404, "no encontrado")
+            else:
+                ruta = os.path.realpath(os.path.join(base, nombre))
+                dentro = ruta == base or ruta.startswith(base + os.sep)
+                if not dentro:
+                    self._txt(404, "no encontrado")
+                else:
+                    try:
+                        with open(ruta, "rb") as fh:
+                            self._txt(200, fh.read(8192).decode("utf-8", "ignore"))
+                    except Exception:
+                        self._txt(404, "no encontrado")
         else:
             self._txt(404, "404 - no existe")
 
