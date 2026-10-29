@@ -94,3 +94,28 @@ P2 — seguimiento a consulta del usuario — 28/10/2026
 24. PowerShell, desde la raíz: docker compose -p cyberlab --project-directory . -f entorno/docker-compose.yml -f labs/labextra-ssrf/entorno/target.compose.yml down
     Objetivo: retirar los contenedores del Lab Extra al terminar la revisión.
 
+P2 — validación de R2 con copia LF del manifiesto — 29/10/2026
+25. Git Bash, desde la raíz:
+    tmp=$(mktemp -d)
+    sed 's/\r$//' labs/labextra-ssrf/retos.manifest > "$tmp/retos.manifest"
+    export CTF_ROOT="$PWD"
+    source bin/lib/ui.sh
+    source bin/lib/check.sh
+    ctf_submit "$tmp" extra R2 'FLAG{ssrf_intranet_descubierta}'
+    rm -rf "$tmp"
+    Objetivo: quitar el CR final de las cinco líneas del manifiesto solo en una copia temporal y validar la flag sin alterar el archivo fuente. Salida original: salidas/17-p2-submit-lf-normalized.txt.
+26. Git Bash, desde la raíz: ./ctf status extra
+    Objetivo: verificar que R2 quedó marcado después de la presentación. Salida original: salidas/18-p2-status-after-lf.txt (R2 ✓, 1/3 en el progreso local).
+27. Git Bash, desde la raíz, con una copia temporal LF de `retos.manifest`:
+    tmp=$(mktemp -d)
+    sed 's/\r$//' labs/labextra-ssrf/retos.manifest > "$tmp/retos.manifest"
+    export CTF_ROOT="$PWD"
+    source bin/lib/ui.sh
+    source bin/lib/check.sh
+    ctf_submit "$tmp" extra R1 'FLAG{ssrf_localhost_panel_interno}'
+    ctf_submit "$tmp" extra R3 'FLAG{ssrf_backup_clientes}'
+    rm -rf "$tmp"
+    Objetivo: registrar en el progreso local las flags R1 y R3, ya aceptadas en las evidencias del grupo. Ambas fueron aceptadas. Salida original: salidas/19-p1-r3-submit-lf-recheck.txt.
+28. Git Bash, desde la raíz: ./ctf status extra
+    Objetivo: conservar el estado final con las tres flags aceptadas. Salida original: salidas/20-status-all-flags.txt (3/3).
+

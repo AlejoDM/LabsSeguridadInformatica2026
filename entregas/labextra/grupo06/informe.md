@@ -31,7 +31,7 @@
 **Herramienta:** Opencode.
 
 **Finalidad y partes asistidas:** apoyo para documentar R2 y redactar la respuesta P2 sobre el oráculo de escaneo.
-**Verificación realizada:** Se contrastaron las solicitudes con las salidas crudas del contenedor del Lab Extra. La cadena mostrada por la intranet se presentó al verificador y fue rechazada; la comparación literal de los errores de R1 queda pendiente de las salidas de P1.
+**Verificación realizada:** se comparó la respuesta `502` con `Connection refused` en `127.0.0.1:1` con la respuesta `200` y el panel interno en `127.0.0.1:9000`, usando las salidas crudas de P1. También se contrastó el fallo de resolución directa de la intranet con la respuesta obtenida por preview. Tras detectar que el manifiesto local tenía finales CRLF, se presentó la misma cadena de R2 usando una copia temporal normalizada a LF; el verificador la aceptó. Se validaron las tres flags y el estado final mostró 3/3.
 
 ## 1. Cadena de explotación
 
@@ -55,9 +55,11 @@ Desde `cyberlab-attacker`, la solicitud directa a `http://phantomcorp-intra/` de
 
 Luego se envió `http://phantomcorp-intra/` como destino de `/preview` en `phantomcorp`. La respuesta HTTP 200 incluyó la página «Intranet PhantomCorp» y el contenido `FLAG{ssrf_intranet_descubierta}`, prueba de acceso indirecto a través del servidor web conectado a ambas redes. [Salida original](evidencia/salidas/09-p2-intranet-preview.txt).
 
-La cadena observada se presentó al verificador con `./ctf submit extra R2 'FLAG{ssrf_intranet_descubierta}'`, pero respondió `[FAIL] Flag incorrecta para el reto R2`. Por lo tanto, queda comprobado el acceso indirecto y documentado el contenido recibido, pero R2 no se declara resuelto ni se afirma que esa cadena sea la flag válida. El estado consultado en esta sesión mostró 0/3; la captura 07 corresponde al estado documentado durante la ejecución anterior de P3. Se conservan el intento fallido y el estado observado después del intento. [Presentación](evidencia/salidas/11-p2-submit.txt) · [Estado](evidencia/salidas/12-p2-status.txt).
+La primera presentación de `FLAG{ssrf_intranet_descubierta}` devolvió `[FAIL]`. Al revisar los finales de línea se confirmó que el manifiesto local tenía cinco líneas CRLF y ninguna LF sola: el lector del verificador conservaba el `\r` final junto al hash esperado. Se normalizó a LF una copia temporal del manifiesto, sin modificar el archivo fuente, y se volvió a presentar exactamente la misma cadena mediante `ctf_submit`; esta vez el verificador respondió `[ OK ]` y marcó R2 resuelto. El estado inmediato mostró 1/3 porque R1 y R3 aún no estaban registrados en el progreso local; se presentaron también esas dos flags con otra copia temporal LF y ambas fueron aceptadas. [Primer intento](evidencia/salidas/11-p2-submit.txt) · [Aceptación de R2](evidencia/salidas/17-p2-submit-lf-normalized.txt) · [Revalidación de R1 y R3](evidencia/salidas/19-p1-r3-submit-lf-recheck.txt) · [Estado final 3/3](evidencia/salidas/20-status-all-flags.txt).
 
-Para buscar más pistas sin adivinar rutas, se siguieron los dos enlaces publicados en la home. `/salud` devolvió únicamente el estado del servicio; `backups/clientes.json` devolvió la flag de R3 ya documentada, no otra flag para R2. [Home](evidencia/salidas/13-p2-intranet-home-recheck.txt) · [Salud](evidencia/salidas/14-p2-salud-recheck.txt) · [Backup enlazado](evidencia/salidas/15-p2-backup-link.txt). No se observó otra cadena de R2 en los recursos publicados ni se presentó una respuesta de R3 como si correspondiera a R2; la aceptación de R2 sigue pendiente.
+La segunda presentación directa contra el manifiesto CRLF también fue rechazada; esa salida se conserva en [la revalidación](evidencia/salidas/16-p2-submit-recheck.txt). La aceptación posterior con la copia LF confirma que el problema era el final de línea del hash esperado, no el valor de la flag.
+
+Para buscar más pistas sin adivinar rutas, se siguieron los dos enlaces publicados en la home. `/salud` devolvió únicamente el estado del servicio; `backups/clientes.json` devolvió la flag de R3 ya documentada, no otra flag para R2. [Home](evidencia/salidas/13-p2-intranet-home-recheck.txt) · [Salud](evidencia/salidas/14-p2-salud-recheck.txt) · [Backup enlazado](evidencia/salidas/15-p2-backup-link.txt). La flag R2 válida fue el valor observado en la home; el ajuste necesario fue normalizar a LF el manifiesto usado por el verificador.
 
 ### R3 — Exfiltración del backup
 
@@ -81,16 +83,16 @@ El recorrido observado fue: home pública → formulario `/preview?url=...` → 
 
 ## 2. Evidencia de progreso
 
-Estado real posterior a la presentación de R1 y R3 (no es el estado final grupal):
+Se obtuvieron y validaron las tres flags: R1 `FLAG{ssrf_localhost_panel_interno}`, R2 `FLAG{ssrf_intranet_descubierta}` y R3 `FLAG{ssrf_backup_clientes}`. El estado final del verificador es:
 
 ```text
 ✓  R1     El server fetchea por vos: panel interno en localhost
-·  R2     Descubrir la intranet en la red interna
+✓  R2     Descubrir la intranet en la red interna
 ✓  R3     Exfiltrar datos sensibles a traves del SSRF
-2/3 (66%)
+3/3 (100%)
 ```
 
-La [salida íntegra de ./ctf status extra](evidencia/salidas/13-status-r1-r3.txt) conserva el formato original. Al integrar la entrega se debe volver a ejecutar el verificador y reemplazar este bloque por el estado final con los tres retos aceptados.
+La [salida íntegra del estado final](evidencia/salidas/20-status-all-flags.txt) conserva el formato original de `./ctf status extra`.
 
 ## 3. Preguntas de análisis
 
@@ -109,9 +111,11 @@ El componente que vuelve alcanzable indirectamente a la intranet es el servidor 
 
 ### P2 — Oráculo de escaneo
 
-El transcript de los sondeos de localhost de R1 todavía no está en la entrega, así que no se atribuyen mensajes literales a puertos concretos. En la evidencia de P2 sí se observa el contraste de R2: desde la consola atacante, `curl` informa que no puede resolver `phantomcorp-intra`; al pedirle ese mismo destino a `/preview`, el servidor responde HTTP 200 con la página interna. Es un ejemplo de cómo el punto de observación del servidor permite conocer recursos que no están disponibles directamente desde el atacante.
+Las salidas de R1 muestran dos respuestas distintas al probar localhost a través de `/preview`. En `http://127.0.0.1:1/`, el portal respondió `502 Bad Gateway` y el cuerpo incluyó `Connection refused` (`evidencia/salidas/08-r1-oraculo-puertos.txt`): el intento de conexión TCP fue rechazado, consistente con que no hubiera un servicio escuchando en ese puerto. En `http://127.0.0.1:9000/`, el portal respondió `200 OK` y devolvió el panel interno con su contenido (`evidencia/salidas/09-r1-panel-local.txt`), lo que demuestra que un servicio HTTP respondió allí.
 
-Para R1, la comparación literal solicitada debe completarse con las salidas de P1. En general, un rechazo de conexión indica que no hay un servicio aceptando TCP en ese puerto, mientras que una respuesta HTTP demuestra que algo aceptó la conexión y habló HTTP. La aplicación SSRF puede revelar esa diferencia aunque el atacante no tenga conectividad directa, convirtiéndose en un oráculo de escaneo. La señal no es concluyente por sí sola: filtros, timeouts, protocolos distintos y errores de la aplicación pueden producir respuestas ambiguas.
+La diferencia observable permite inferir desde afuera el estado de puertos del propio servidor: por eso `/preview` actúa como un oráculo de escaneo. El atacante no consulta directamente el loopback de su consola; la aplicación realiza la petición desde el host `phantomcorp` y revela el resultado. El oráculo es limitado: un timeout, un filtro, un protocolo no HTTP o un error de la propia aplicación también pueden cambiar la respuesta, por lo que un mensaje aislado no identifica de forma infalible un servicio.
+
+En R2 se observó un fenómeno relacionado, pero distinto: la consulta directa a `phantomcorp-intra` falló con `curl: (6) Could not resolve host`, mientras que la consulta por `/preview` devolvió `200 OK` con la página interna (`evidencia/salidas/08-p2-directo.txt` y `09-p2-intranet-preview.txt`). Esto acredita el acceso indirecto mediante el servidor. La primera presentación de la flag falló por el CRLF del manifiesto; al usar la copia temporal LF, el verificador la aceptó (`evidencia/salidas/17-p2-submit-lf-normalized.txt`).
 
 ### P3 — Hallazgo profesional
 
