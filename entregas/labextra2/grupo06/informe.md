@@ -29,6 +29,11 @@
 - **Parte asistida:** pregunta P5, sobre controles locales pre-commit y protección durante el push.
 - **Verificación:** se revisó la coherencia de la respuesta con el enunciado y el alcance del laboratorio. La explicación es conceptual; no se instalaron ni ejecutaron herramientas de detección de secretos en el repositorio del caso.
 
+**Herramienta:** Claude (Anthropic), vía Claude Code.
+
+- **Finalidad y partes asistidas:** redacción del plan de remediación, y del research.md.
+- **Verificación:** el plan de remediación se fundamentó contra la evidencia ya validada de R2/R3 y la línea de tiempo existente. Las afirmaciones técnicas sobre Gitleaks, git filter-repo y el secret scanning de GitHub se contrastaron contra sus repositorios/documentación oficial antes de incluirlas.
+
 ## 1. Línea de tiempo de la filtración
 
 Aporte de P3 para integrar en la cronología del grupo. Fechas de autor y committer coinciden, con zona -03:00. No son fechas de publicación ni de descubrimiento: el caso se generó e investigó el 28/10/2026.
