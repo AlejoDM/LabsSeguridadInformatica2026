@@ -36,7 +36,7 @@
 | D2 | `/api/status` entrega debug, ruta y PID | Pendiente P1 | Sigue vulnerable |
 | D3 | aprobada por el verificador oficial; flag aceptada mediante normalización temporal de CRLF. Evidencias: d3-verificador.txt y d3-submit-compatibilidad.txt. |
 | D4 | `admin'--` en usuario y `' OR 1=1 --` en contraseña permiten entrar sin credenciales válidas | Consulta fija con `?` y tupla `(user, pwd)`; `evidencia/salidas/d4-parche.diff` | Ambos ataques bloqueados por el verificador; tres variantes devuelven HTTP 401 en pruebas propias |
-| D5 | Lectura fuera del directorio mediante `../centinela-p3.txt` | Pendiente P4 | HTTP 200 con contenido del centinela: sigue vulnerable, pese al verde del verificador Windows |
+| D5 | Lectura fuera del directorio mediante `../centinela-p3.txt` y `../../../../etc/passwd` | Confinamiento por ruta resuelta (`os.path.realpath` + verificación de prefijo contra el directorio de descargas, más bloqueo explícito de rutas absolutas); `evidencia/salidas/d5-parche.diff` | Verificador oficial: `404` real (no por ausencia del archivo) en 3 ejecuciones limpias; centinela y ruta absoluta también bloqueados; `manual.txt` sigue descargando. Flag D5 aceptada. |
 
 ### D4: explicación del cambio
 
@@ -51,6 +51,22 @@ cur = db.execute(
 La sentencia mantiene su estructura; SQLite recibe usuario y contraseña como valores separados. No se filtran apóstrofes ni se reconocen payloads particulares. El diff cambia únicamente el comentario D4 y esa consulta. No se implementaron las defensas de otros responsables.
 
 Evidencias: `d4-antes.txt`, `d4-despues.txt`, `d4-parche.diff`, `verificador-inicial.txt` y `verificador-despues-p3.txt` dentro de `evidencia/salidas/`.
+
+### D5: explicación del cambio
+
+La prueba previa al parche (sección anterior del informe) ya había demostrado que `/descargar` leía fuera del directorio permitido con `../centinela-p3.txt`. El problema de fondo no era la cadena `..`, sino que el código concatenaba `DESCARGAS + "/" + nombre` y abría esa ruta sin verificar dónde terminaba realmente apuntando.
+
+El parche resuelve la ruta final con `os.path.realpath` (que normaliza `..`, enlaces simbólicos y componentes redundantes) y comprueba que el resultado sea el propio directorio de descargas o quede por debajo de él, antes de intentar abrir el archivo:
+
+```python
+base = os.path.realpath(DESCARGAS)
+ruta = os.path.realpath(os.path.join(base, nombre))
+dentro = ruta == base or ruta.startswith(base + os.sep)
+```
+
+También se bloquea explícitamente cualquier `nombre` que sea una ruta absoluta (`/etc/passwd`), porque `os.path.join` descarta el primer componente cuando el segundo ya es absoluto y esa combinación evadiría el chequeo anterior si no se la trata aparte.
+
+**Por qué no alcanzaba con el verificador en verde por sí solo:** la corrida oficial del verificador en este entorno Windows resultó intermitente — algunas ejecuciones no lograban conectar con el servidor de prueba (`evidencia/salidas/d5-verificador-despues.txt` conserva una de esas corridas, con "WinError 10061" en D2/D3) y el ataque se contaba como "bloqueado" simplemente porque la conexión fallaba, no porque la ruta estuviera confinada (el mismo tipo de falso positivo que ya se había detectado antes del parche, cuando `/etc/passwd` no existe en Windows y el 404 tampoco probaba nada). Por eso la validación real de D5 se hizo levantando la copia manualmente y probando con `curl`: el payload del verificador (`../../../../etc/passwd`), el centinela ya usado antes del parche (`../centinela-p4.txt`, equivalente al `../centinela-p3.txt` original) y una ruta absoluta (`/etc/passwd`) devuelven los tres `404` por el chequeo de confinamiento, mientras que `GET /` y `GET /descargar?archivo=manual.txt` siguen respondiendo `200` con el contenido esperado. Recién con esa evidencia directa se tomaron como válidas tres corridas limpias del verificador oficial (sin errores de conexión), que también marcaron D5 como bloqueada por el motivo correcto. Evidencias: `d5-despues.txt`, `d5-verificador.txt`, `d5-parche.diff`, `d5-submit.txt` y `d5-status.txt` en `evidencia/salidas/`.
 
 ## 2. Regresión funcional
 
@@ -77,6 +93,8 @@ Las URLs exactas y cuerpos se conservan en las salidas crudas. El primer intento
 La flag D4 se obtuvo de la ejecución oficial posterior al parche. El envío original se conserva en `d4-submit.txt`: fue rechazado por el problema CRLF del manifiesto, igual que en el laboratorio anterior. Se reutilizan las funciones oficiales mediante `evidencia/validar-d4-crlf.sh`, con una copia temporal sin CR, sin editar el manifiesto ni el motor. El script registra únicamente D4; la salida de aceptación y el estado oficial posterior se adjuntan. No se entregó la flag D5 del falso positivo.
 
 La ejecución oficial requiere `/tmp` para su base y descargas. En Windows se preparó `C:/tmp`, que no existía antes. Las pruebas propias usan temporales aislados. Los archivos oficiales, el verificador y los manifiestos permanecen sin modificaciones. No se buscaron flags en el manifiesto: el envío D4 proviene del resultado del verificador.
+
+**Actualización — D5 resuelta.** Con el parche descripto en la sección 1 (ruta resuelta y verificada contra el directorio de descargas), el centinela y el payload `../../../../etc/passwd` del verificador quedan bloqueados por `404` real, no por ausencia del archivo; `manual.txt` sigue descargando sin cambios. La flag `FLAG{def_traversal_bloqueado}` se obtuvo de una ejecución del verificador oficial sin errores de conexión y fue aceptada sin el problema de CRLF que afectó a otras entregas de este grupo. El estado del motor CTF había vuelto a marcar D3 y D4 como no resueltos tras un reinicio del entorno; se reenviaron esas dos flags ya conocidas (sin volver a ejecutar sus ataques) para restaurar el progreso real del grupo. El estado posterior a D5 es **3/5** (`evidencia/salidas/d5-status.txt`); D1 y D2 siguen pendientes de su responsable.
 
 ## 4. Preguntas P1–P5
 
@@ -117,6 +135,8 @@ El alcance del cambio es la inyección de valores en esta consulta. No equivale 
 ### Revisión cruzada de P3 sobre D5
 
 Se revisó el estado disponible: la ruta sigue concatenando `DESCARGAS + "/" + nombre`. Se creó exclusivamente un archivo centinela de prueba en el padre del directorio temporal de descargas y se solicitó `../centinela-p3.txt`. Tanto antes como después de D4 respondió 200 con `CENTINELA_FUERA_DE_DESCARGAS`. La descarga legítima del manual también funciona.
+
+**Seguimiento posterior:** este hallazgo quedó corregido en el parche D5 descripto en la sección 1; el mismo tipo de centinela (`../centinela-p4.txt`) y el payload oficial ya devuelven `404` por el chequeo de ruta resuelta, no por ausencia del archivo (ver `d5-despues.txt`).
 
 ### P5 — Ranking de impacto de D1–D5
 
