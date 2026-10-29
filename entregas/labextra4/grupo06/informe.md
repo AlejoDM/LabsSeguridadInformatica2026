@@ -58,6 +58,25 @@ Se comprobó la compilación con `py -3 -m py_compile` y se ejecutó una prueba 
 
 La prueba aislada utiliza una implementación temporal de hash dentro del script de prueba, sin alterar el código principal. La ejecución posterior del cracker completo quedó registrada en `evidencia/salidas/r1-r2-diccionario.txt`.
 
+### R2 — SHA-256 con salt y ataque de diccionario (Persona 2)
+
+Una vez integrada la función `hash_de()` de Persona 1, se ejecutó el cracker completo utilizando el archivo `sombra.txt` y el diccionario proporcionados por la cátedra, sin aplicar reglas de transformación.
+
+La ejecución permitió recuperar dos contraseñas: la de `operador`, correspondiente a MD5, y la de `analista`, correspondiente a SHA-256. En el caso de `analista`, la contraseña encontrada fue `matecocido`.
+
+Con esa contraseña se utilizó el subcomando `descifrar` sobre el archivo `analista.enc`, recuperando el contenido del loot y la flag `FLAG{crack_sha256_diccionario}`.
+
+El envío inicial mediante `./ctf submit extra4 R2` fue rechazado por un problema de compatibilidad con los saltos de línea CRLF del manifiesto. Se utilizó una copia temporal normalizada mediante `evidencia/validar-r2-crlf.sh`, sin modificar los archivos oficiales. El sistema aceptó la flag y confirmó que R2 estaba resuelto.
+
+**Resultado:** R2 completado y registrado correctamente. El progreso local fue de 1/3 retos, ya que las flags de los demás integrantes no estaban registradas en este entorno.
+
+**Evidencias:**
+- `evidencia/salidas/p2-r2-diccionario.txt`
+- `evidencia/salidas/p2-loot-analista.txt`
+- `evidencia/salidas/p2-r2-submit.txt`
+
+Las salidas guardadas presentan algunos caracteres mal representados por la codificación de PowerShell, pero conservan los resultados, contraseñas y flag necesarios para reproducir la comprobación.
+
 ### Reglas de transformación
 
 `aplicar_reglas(palabra)` devuelve una lista de candidatos en orden estable. Combina la palabra original, capitalización inicial, minúsculas y mayúsculas con los sufijos vacíos, 2024–2026 y 1/12/123, tal como propone el contrato del esqueleto. Deduplica conservando el primer orden de aparición: máximo 28 variantes por entrada. No incluye nombres de usuarios, contraseñas completas ni flags del caso. Los años son un rango explícito de la consigna, no dependen del reloj.
