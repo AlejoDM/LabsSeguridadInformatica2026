@@ -95,3 +95,17 @@ P4 / Lab Extra 03 — 29/10/2026 — Git Bash (bash.exe de Git para Windows).
 10. ./ctf status extra3 -> evidencia/salidas/d5-status.txt, 3/5 (D3, D4, D5). D1 y D2 pendientes.
 
 11. Limpieza: borrado del centinela de prueba (/e/tmp/centinela-p4.txt) y de los artefactos temporales del servidor de pruebas (/e/tmp/phantom_descargas, /e/tmp/phantom_hardening.db). No se modificó labs/, el verificador ni el manifiesto.
+
+
+P1 / Lab Extra 03 — 29/10/2026 — PowerShell.
+
+1. Edición de `entregas/labextra3/grupo06/objetivo/server.py`: `VERSION` se reemplazó por `Servidor` y `/api/status` pasó a devolver 404 sin datos de diagnóstico.
+2. `C:/Users/marti/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe -m py_compile entregas/labextra3/grupo06/objetivo/server.py`.
+3. `C:/Users/marti/.cache/codex-runtimes/codex-primary-runtime/dependencies/python/python.exe entregas/labextra3/grupo06/evidencia/probar-d1-d2.py` -> `evidencia/salidas/d1-d2-despues.txt`. La prueba usa base, descargas y puerto temporales en loopback; resultado: home 200, banner neutralizado y `/api/status` 404.
+4. Ejecución del verificador oficial con `PYTHONIOENCODING=utf-8` y puerto 19222: D1 fue bloqueada, pero D2 figuró bloqueada por un `WinError 10061` y D3 también sufrió el mismo fallo de conexión. Esa corrida no se usa como evidencia de D2.
+5. `git diff --check` y revisión del diff acotado a `entregas/labextra3/grupo06/`.
+
+6. Se reemplazó la ruta fija `/tmp` de la copia por `tempfile.gettempdir()` porque el intérprete de Windows no podía abrir la base SQLite en `C:\tmp`; el objetivo de referencia y el verificador no fueron modificados.
+7. `PYTHONIOENCODING=utf-8 <python> labs/labextra3-hardening/verificar-defensa.py --dir entregas/labextra3/grupo06/objetivo --port 19231 2>&1 | Tee-Object .../verificador-final-5de5.txt` -> 5/5 limpio.
+8. `bash evidencia/registrar-flags-final.sh 2>&1 | Tee-Object .../ctf-registro-final.txt` -> D1–D5 aceptadas con una copia temporal del manifiesto normalizada; no se editó el manifiesto original.
+9. `./ctf status extra3 2>&1 | Tee-Object .../status-extra3-final-5de5.txt` -> 5/5 (100%).
