@@ -19,6 +19,10 @@
 - **Finalidad y partes asistidas:** apoyo en el reconocimiento, las pruebas controladas de autenticación, el registro de evidencias y la redacción del informe.
 - **Verificación:** las respuestas HTTP, el cambio de comportamiento ante las solicitudes y las flags fueron contrastados manualmente en el entorno autorizado.
 
+- **Herramienta:** Claude (Anthropic), vía Claude Code.
+- **Finalidad y partes asistidas:** apoyo en la post-explotación de R3, estructurar el hallazgo H-03 (CVSS, remediación, limitaciones).
+- **Verificación:** la solicitud a `/backup/rrhh.conf`, la respuesta `200 OK` con el secreto y la flag, el control negativo (404) y la validación de R3 ante `./ctf status final` fueron ejecutados y contrastados manualmente contra el entorno autorizado (`phantomcorp`); el texto del hallazgo se revisó contra la evidencia cruda antes de incorporarlo.
+
 ## 1. Resumen ejecutivo
 
 Se evaluó el sistema ficticio «Clientes» de PhantomCorp dentro del alcance autorizado. Durante la evaluación se identificó un portal interno no enlazado y se demostró que su autenticación puede eludirse sin credenciales mediante una inyección SQL. La prueba obtuvo acceso al dashboard de RRHH presentado como `admin`.
