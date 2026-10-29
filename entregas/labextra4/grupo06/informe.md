@@ -24,6 +24,11 @@
 - **Partes asistidas:** implementación de las dos funciones, script `evidencia/probar-p2.py`, documentación de P2 y registro de pruebas.
 - **Verificación:** se comprobó que el archivo de hashes contiene cuatro registros, que `cracker.py` compila correctamente y que el ataque de diccionario encuentra una contraseña ficticia en una prueba aislada. La ejecución integrada de R2 sigue pendiente de la implementación de `hash_de()` por Persona 1.
 
+**Herramienta:** Opencode.
+
+- **Finalidad y partes asistidas:** apoyo para estructurar la medición controlada de PBKDF2 y redactar la respuesta P4, incluida la estimación condicionada para GPUs.
+- **Verificación:** la muestra de 20 candidatos y el cálculo se revisaron personalmente contra `evidencia/salidas/p4-pbkdf2-muestra.txt`. La tasa por GPU se identifica como supuesto y no como benchmark medido.
+
 ## 1. Tabla de resultados
 
 | Usuario | Algoritmo | ¿Cayó? | Técnica | Contraseña del caso | Tiempo |
@@ -112,5 +117,13 @@ Una política que cuenta caracteres de distintas clases no mide cuán fácil es 
 Según NIST SP 800-63B-4, sección 3.1.1.2, la longitud mínima es 15 caracteres para contraseñas usadas como único factor; pueden admitirse ocho cuando forman parte de MFA. Se recomienda permitir al menos 64 como longitud máxima admitida. No se deben imponer mezclas obligatorias de tipos de caracteres ni cambios periódicos sin indicios de compromiso. Debe contrastarse la contraseña completa con una lista de valores comunes, esperables o comprometidos. [Fuente oficial, consultada el 28/10/2026](https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver).
 
 Para el caso, una longitud mayor y evitar elecciones previsibles es más útil que añadir mecánicamente una mayúscula y un año. La limitación de intentos en el login protege frente a intentos online, pero no detiene este ataque offline contra una copia de hashes; el almacenamiento con salt y derivación costosa aborda ese segundo escenario. No debe interpretarse que una regla de longitud garantiza por sí sola resistencia a cualquier ataque.
+
+### P4 — Trabajo por intento y por qué root no cayó
+
+PBKDF2-HMAC-SHA256 repite la función de derivación 200.000 iteraciones por candidato, frente a una sola operación de MD5 o SHA-256 en los registros rápidos. En la muestra controlada se calcularon 20 candidatos sintéticos usando el salt de `root`, sin compararlos con su hash ni intentar recuperar su contraseña. En Python 3.13, sobre Windows 11 y el procesador informado en la salida, el cálculo tomó 1,431237 s: 13,97 candidatos/s (71,562 ms por candidato). La ejecución reproducible es `python entregas/labextra4/grupo06/evidencia/medir-pbkdf2.py`; la salida está en `evidencia/salidas/p4-pbkdf2-muestra.txt`.
+
+La copia actual de `cracker.py` todavía tiene pendiente `hash_de()` de P1, por lo que esta medición usa directamente `hashlib.pbkdf2_hmac` de la biblioteca estándar y no se presenta como prueba del CLI integrado. P5 deberá repetirla cuando integre la función. Al ritmo observado, recorrer los 49 candidatos del diccionario en esta misma máquina tomaría aproximadamente 3,51 s; es una extrapolación del promedio, no una corrida adicional. El salt no evita probar palabras, pero obliga a calcularlas por registro. Además, el caso establece que la contraseña de `root` no está en el diccionario: completar la búsqueda no produciría una coincidencia.
+
+Para el escenario de 1.000 GPUs no hay benchmark local de GPU. Si se supone, solo como ejemplo, una tasa de `v = 100` candidatos/s por GPU, el cálculo ideal de trabajo agregado es `T ≈ N/(1000·v) = 49/(1000·100) = 0,00049 s`. Como hay solo 49 candidatos, no pueden aprovecharse más de 49 GPUs para esa búsqueda; el límite ideal de pared sería aproximadamente un intento por GPU (`1/v = 0,01 s`), más el costo de distribución y arranque. Ambas cifras son escenarios teóricos, no una medición ni una extrapolación de la tasa de CPU.
 
 ## 6. Conclusión
