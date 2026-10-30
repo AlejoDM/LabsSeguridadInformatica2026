@@ -109,3 +109,18 @@ P1 / Lab Extra 03 — 29/10/2026 — PowerShell.
 7. `PYTHONIOENCODING=utf-8 <python> labs/labextra3-hardening/verificar-defensa.py --dir entregas/labextra3/grupo06/objetivo --port 19231 2>&1 | Tee-Object .../verificador-final-5de5.txt` -> 5/5 limpio.
 8. `bash evidencia/registrar-flags-final.sh 2>&1 | Tee-Object .../ctf-registro-final.txt` -> D1–D5 aceptadas con una copia temporal del manifiesto normalizada; no se editó el manifiesto original.
 9. `./ctf status extra3 2>&1 | Tee-Object .../status-extra3-final-5de5.txt` -> 5/5 (100%).
+
+P2 / Revisión cruzada D1 — 29/10/2026 — PowerShell.
+
+1. Lectura de evidencia/probar-d1-d2.py y d1-d2-parche.diff.
+   Se revisó la eliminación de la información de versión del banner.
+
+2. py -3 entregas/labextra3/grupo06/evidencia/probar-d1-d2.py
+   Resultado: GET / HTTP 200; Server: 'Servidor '.
+   GET /api/status HTTP 404. Pruebas D1 y D2: OK.
+
+3. Repetición de la prueba y captura con Tee-Object.
+   Evidencia: evidencia/salidas/p2-revision-d1.txt.
+
+4. Verificador oficial de las cinco defensas.
+   Resultado observado: 5/5 defensas correctas.

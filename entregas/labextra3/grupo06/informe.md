@@ -128,3 +128,14 @@ Para gerencia, el hallazgo prioritario es **D4**: el bypass de autenticación se
 ## 5. Conclusión
 
 La corrección fue más exigente que explotar PhantomCorp: además de cerrar cada vector, hubo que preservar los flujos legítimos y comprobar el mecanismo de cada parche. El verificador final acredita 5/5 contra la copia del grupo, y las pruebas de regresión confirman portal, login y descarga. Esto no prueba que no existan fallos futuros o vectores no ensayados, pero sí que las cinco debilidades planteadas quedaron corregidas estructuralmente y verificadas con evidencia reproducible.
+### Revisión cruzada de D1 — Persona 2
+
+Se revisó la implementación de la defensa D1 realizada por Persona 1, comparando el código anterior y posterior al parche.
+
+Originalmente, el servidor exponía el banner `PhantomServer/2.4.1-debug`. Después de la corrección, utiliza el identificador genérico `Servidor`, que no revela el producto ni su versión.
+
+Se ejecutó `evidencia/probar-d1-d2.py` sobre la copia del grupo. La página principal respondió HTTP 200 con el banner `Servidor`, sin exponer la versión. Como comprobación complementaria, el endpoint de depuración `/api/status` respondió HTTP 404.
+
+**Resultado de la revisión:** D1 aprobada para las comprobaciones realizadas. No se modificó el código de Persona 1.
+
+**Evidencia:** `evidencia/salidas/p2-revision-d1.txt`.
