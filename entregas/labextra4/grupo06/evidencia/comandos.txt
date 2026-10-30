@@ -111,3 +111,13 @@ P2 / R2 SHA-256 — 29/10/2026 — PowerShell.
 15. Se repitieron las pruebas con PYTHONIOENCODING=utf-8.
     Las salidas conservan los resultados, aunque presentan
     algunos caracteres mal representados por PowerShell.
+
+Verificación final Extra 04 — integración de R1, R2 y R3.
+
+1. Descifrado del loot de operador con la contraseña recuperada por diccionario.
+2. Validación de R1 mediante ctf_submit.
+3. Confirmación de R2, previamente registrado.
+4. Validación de R3 mediante ctf_submit.
+5. Ejecución de ctf_status con manifiesto temporal normalizado a LF.
+6. Resultado: R1, R2 y R3 aceptados — 3/3 (100 %).
+7. Evidencia: evidencia/salidas/status-extra4-final-3de3.txt.

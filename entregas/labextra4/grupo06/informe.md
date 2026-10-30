@@ -171,3 +171,13 @@ Para el escenario de 1.000 GPUs no hay benchmark local de GPU. Si se supone, sol
 ## 6. Conclusión
 
 El caso demuestra que un salt evita reutilizar cálculos precalculados, pero no vuelve resistente una contraseña incluida en un diccionario ni una variante previsible de esa palabra. Las mediciones locales ubican MD5 y SHA-256 en el mismo orden de magnitud y muestran que PBKDF2-200k eleva el costo por candidato en más de cuatro órdenes de magnitud en este equipo. Para un sistema real, la política debe combinar contraseñas largas y bloqueadas contra listas de valores comprometidos con un algoritmo de almacenamiento lento y adaptable, salt único y parámetros revisables. La guía de OWASP prioriza Argon2id y, cuando se necesita PBKDF2-HMAC-SHA256 por requisitos de compatibilidad o FIPS, indica al menos 600.000 iteraciones; ese número es una recomendación externa actual, no una medición de este laboratorio. [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+
+### Verificación final de las tres flags
+
+Se consolidó la validación de los tres retos mediante el verificador CTF del laboratorio. R1 se obtuvo descifrando el loot del usuario `operador` con la contraseña recuperada mediante diccionario. R2 ya había sido validado y R3 se registró con la flag obtenida mediante reglas de transformación.
+
+Para evitar problemas de compatibilidad de saltos de línea CRLF, se utilizó una copia temporal del manifiesto normalizada a LF, sin modificar el original.
+
+El estado final confirmó R1, R2 y R3 completados: **3/3 (100 %)**.
+
+**Evidencia:** `evidencia/salidas/status-extra4-final-3de3.txt`.
