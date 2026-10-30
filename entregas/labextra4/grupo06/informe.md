@@ -1,7 +1,7 @@
-# Informe — Laboratorio Extra 4: Cracking de contraseñas
+# Informe — Laboratorio Extra 4: cracking de contraseñas
 
 **Grupo:** 06
-**Fecha:** 2026-10-29
+**Fecha de las pruebas consignadas:** 2026-10-29
 
 | Nombre y apellido | Usuario de GitHub |
 |---|---|
@@ -11,122 +11,66 @@
 | Tomás Giudici | TomasGiudici |
 | Carolina Suppo | carosuppo |
 
-## 0. Declaración de uso de IA
+## Declaración de uso de IA
 
-**Herramienta:** Codex (OpenAI).
+Se utilizó Codex para implementar y probar `hash_de()` y `aplicar_reglas()`, medir tasas locales y revisar la redacción. ChatGPT asistió en `cargar_sombra()`, `crackear()`, pruebas aisladas y análisis del salt. Opencode ayudó a estructurar la medición de PBKDF2, y Claude Code realizó una comprobación independiente de integración y flags.
 
-- **Finalidad y partes asistidas:** asistencia para generar la implementación de `aplicar_reglas` y sus pruebas, implementar `hash_de()`, ejecutar comprobaciones sobre el caso, medir tasas locales, consultar la documentación de NIST y redactar el análisis y las evidencias del informe.
-- **Verificación:** Revisión del código, reproducción manual de las pruebas y ejecución de `evidencia/medir-p1.py` sobre la copia entregable.
+Las implementaciones se revisaron contra el código entregado, las pruebas se reprodujeron sobre el caso ficticio y las afirmaciones de resultados se respaldan con las salidas conservadas en `evidencia/salidas/`. No se emplearon hashes ni credenciales ajenas al laboratorio.
 
-**Herramienta:** ChatGPT (OpenAI).
-
-- **Finalidad:** asistencia para implementar las funciones `cargar_sombra()` y `crackear()`, preparar las pruebas aisladas y redactar el análisis sobre el salt.
-- **Partes asistidas:** implementación de las dos funciones, script `evidencia/probar-p2.py`, documentación del análisis sobre el salt y registro de pruebas.
-- **Verificación:** se comprobó que el archivo de hashes contiene cuatro registros, que `cracker.py` compila correctamente y que el ataque de diccionario encuentra una contraseña ficticia en una prueba aislada. La ejecución integrada posterior documenta la recuperación de `operador` y `analista`.
-
-**Herramienta:** Opencode.
-
-- **Finalidad y partes asistidas:** apoyo para estructurar la medición controlada de PBKDF2 y redactar su análisis, incluida la estimación condicionada para GPUs.
-- **Verificación:** la muestra de 20 candidatos y el cálculo se revisaron personalmente contra `evidencia/salidas/p4-pbkdf2-muestra.txt`. La tasa por GPU se identifica como supuesto y no como benchmark medido.
-
-**Herramienta:** Claude (Anthropic), vía Claude Code.
-
-**Finalidad y partes asistidas:** verificación independiente de la integración final de cracker.py y confirmación de las flags.
-**Verificación:** cada resultado se obtuvo ejecutando el cracker.py real del grupo contra el caso oficial, confirmando los resultados obtenidos.
-
-## Alcance y criterio de evidencia
-
-Las pruebas se limitaron a los artefactos ficticios del laboratorio y a candidatos sintéticos para las mediciones. Se distinguen tres tipos de afirmaciones: resultados observados en salidas conservadas, estimaciones derivadas de tasas locales y escenarios teóricos expresamente identificados. Una prueba aislada de una función no se presenta como sustituto de una ejecución integrada del CLI.
+---
 
 ## 1. Tabla de resultados
 
-| Usuario | Algoritmo | ¿Cayó? | Técnica | Contraseña del caso | Tiempo |
+| Usuario | Algoritmo | ¿Cayó? | Técnica | Contraseña | Tiempo aprox. |
 |---|---|---|---|---|---|
-| operador | md5 | Sí, mediante CLI integrado | diccionario | `riverplate` | No medido en la corrida de recuperación |
-| analista | sha256 | Sí, mediante CLI integrado | diccionario | `matecocido` | No medido en la corrida de recuperación |
-| admin | sha256 | Sí, en prueba aislada de reglas; falta CLI integrada | palabra + año | `phantom2026` | 0,000337 s, 95 intentos en esta ejecución aislada |
-| root | pbkdf2 | No recuperada; control negativo del caso | Muestra de costo acotada, sin búsqueda exhaustiva | — | 13,97 candidatos/s en la muestra independiente |
+| operador | MD5 con salt | Sí | Diccionario | `riverplate` | No medido por cuenta; la estimación de 49 candidatos es 0,000108 s |
+| analista | SHA-256 con salt | Sí | Diccionario | `matecocido` | No medido por cuenta; la estimación de 49 candidatos es 0,000099 s |
+| admin | SHA-256 con salt | Sí | Reglas: palabra + año | `phantom2026` | 95 intentos y 0,000337 s en la prueba aislada |
+| root | PBKDF2-HMAC-SHA256, 200.000 iteraciones | No aplicable | — | — | 13,73 candidatos/s en la medición controlada |
 
-### Carga de registros y ataque de diccionario
+La regresión integrada sin reglas recuperó `operador` y `analista`; con reglas recuperó además `admin`. Las evidencias son `p5-regresion-diccionario.txt` y `p5-regresion-reglas.txt`.
 
-Se completaron las funciones `cargar_sombra()` y `crackear()` en `cracker.py`.
+`root` fue excluido deliberadamente por `crackear()` para evitar una búsqueda PBKDF2 masiva. Además, la rúbrica establece que su contraseña no existe en el caso: no puede recuperarse por diseño. Por ello, no se presenta como una búsqueda fallida ni como una contraseña resistente demostrada experimentalmente.
 
-La función `cargar_sombra()` lee el archivo de hashes, ignora las líneas vacías y los comentarios, y devuelve una lista de tuplas con usuario, algoritmo, salt y hash. Se verificó que el archivo proporcionado por la cátedra contiene cuatro registros: operador, analista, admin y root.
+## 2. Medición de velocidad (P1)
 
-La función `crackear()` recorre las palabras de un diccionario y compara sus hashes con los registros pendientes. Cuando se habilita `con_reglas`, utiliza las variantes generadas por `aplicar_reglas()`. Devuelve un diccionario con las contraseñas encontradas. En la ejecución general se omite PBKDF2 para evitar pruebas masivas de alto costo; su medición se realiza por separado.
+Se ejecutó `evidencia/medir-p1.py` con Python 3.12.13 en Windows 11. El script importa el `cracker.py` entregado, usa candidatos sintéticos y los salts del caso, y mide con `time.perf_counter()`. Toma la mediana de 25 series de 100 intentos para MD5 y SHA-256, y de tres series de 20 para PBKDF2.
 
-Se comprobó la compilación con `py -3 -m py_compile` y se ejecutó una prueba aislada con un usuario ficticio, un hash SHA-256 con salt y un diccionario temporal. La prueba encontró correctamente la contraseña esperada.
+| Algoritmo | Intentos/segundo (máquina local) | Diccionario completo de 49 candidatos tardaría… |
+|---|---:|---:|
+| MD5 con salt | 454.545,45 | 0,000108 s |
+| SHA-256 con salt | 493.096,65 | 0,000099 s |
+| PBKDF2-HMAC-SHA256, 200.000 iteraciones | 13,73 | 3,569 s |
 
-**Resultado:** `PRUEBA P2 SUPERADA`.
+La salida cruda está en `evidencia/salidas/p1-benchmark.txt`. Esos tiempos son estimaciones de cálculo de hashes; una corrida completa agrega lectura, generación y comparación de candidatos.
 
-**Evidencia:** `evidencia/probar-p2.py` y `evidencia/salidas/p2-prueba-aislada.txt`.
+Como control adicional, `evidencia/medir-pbkdf2.py` calculó 20 candidatos sintéticos con el salt de `root`, sin compararlos con su hash: 1,431237 s en total, 13,97 candidatos/s y 71,562 ms por candidato. Esta ejecución es independiente de la tasa de 13,73 y no se mezclan ambas muestras.
 
-La prueba aislada utiliza una implementación temporal de hash dentro del script de prueba, sin alterar el código principal. La ejecución posterior del cracker completo quedó registrada en `evidencia/salidas/r1-r2-diccionario.txt`.
-
-### R2 — SHA-256 con salt y ataque de diccionario (Persona 2)
-
-Una vez integrada la función `hash_de()` de Persona 1, se ejecutó el cracker completo utilizando el archivo `sombra.txt` y el diccionario proporcionados por la cátedra, sin aplicar reglas de transformación.
-
-La ejecución permitió recuperar dos contraseñas: la de `operador`, correspondiente a MD5, y la de `analista`, correspondiente a SHA-256. En el caso de `analista`, la contraseña encontrada fue `matecocido`.
-
-Con esa contraseña se utilizó el subcomando `descifrar` sobre el archivo `analista.enc`, recuperando el contenido del loot y la flag `FLAG{crack_sha256_diccionario}`.
-
-El envío inicial mediante `./ctf submit extra4 R2` fue rechazado por un problema de compatibilidad con los saltos de línea CRLF del manifiesto. Se utilizó una copia temporal normalizada mediante `evidencia/validar-r2-crlf.sh`, sin modificar los archivos oficiales. El sistema aceptó la flag y confirmó que R2 estaba resuelto.
-
-**Resultado:** R2 completado y registrado correctamente. El progreso local fue de 1/3 retos, ya que las flags de los demás integrantes no estaban registradas en este entorno.
-
-**Evidencias:**
-- `evidencia/salidas/p2-r2-diccionario.txt`
-- `evidencia/salidas/p2-loot-analista.txt`
-- `evidencia/salidas/p2-r2-submit.txt`
-
-Las salidas guardadas presentan algunos caracteres mal representados por la codificación de PowerShell, pero conservan los resultados, contraseñas y flag necesarios para reproducir la comprobación.
-
-### Reglas de transformación
-
-`aplicar_reglas(palabra)` devuelve una lista de candidatos en orden estable. Combina la palabra original, capitalización inicial, minúsculas y mayúsculas con los sufijos vacíos, 2024–2026 y 1/12/123, tal como propone el contrato del esqueleto. Deduplica conservando el primer orden de aparición: máximo 28 variantes por entrada. No incluye nombres de usuarios, contraseñas completas ni flags del caso. Los años son un rango explícito de la consigna, no dependen del reloj.
-
-Pruebas con `luna`, `LuNa`, cadena vacía, números y Unicode confirman lista de strings, original primero, ausencia de duplicados, repetibilidad y combinaciones de capitalización/sufijos. `capitalize()` normaliza a minúsculas el resto; la variante original también se conserva. La función no elimina espacios de la entrada; el tratamiento de líneas corresponde a la lectura del diccionario.
-
-### Alcance de la prueba de R3
-
-En la etapa documentada por esta prueba, el programa completo todavía no estaba integrado. Por eso se adjunta `evidencia/probar-p3.py`: prueba aislada que importa la función del cracker y compara sus candidatos con SHA-256(salt_bytes + password_bytes) usando hashlib. Recibe las rutas y el usuario por argumentos, se limita al caso SHA-256 y no intenta PBKDF2. No sustituye una ejecución integrada del CLI.
-
-Sobre las 49 palabras del diccionario puro no hubo coincidencia. Con las reglas se encontró `phantom2026`, derivada de `phantom`, en el intento 95. La contraseña no se obtuvo del generador ni de soluciones. Se confirmó el loot con el subcomando oficial `descifrar` de la copia. En aquella etapa, la ejecución `crackear ... --reglas` fallaba en `cargar_sombra`, y su error se conserva en `cli-pendiente-integracion.txt`. **La prueba aislada no se presenta como ejecución exitosa del cracker integrado.**
-
-### Revisión cruzada de las reglas
-
-Se revisó la implementación de `aplicar_reglas()` y se ejecutó el script `evidencia/probar-p3.py` sobre el código del grupo.
-
-Las pruebas confirmaron que la función genera variantes con capitalización y sufijos, conserva un orden estable, evita candidatos duplicados y funciona con distintas entradas.
-
-En la prueba aislada sobre `admin`, el diccionario sin reglas no encontró coincidencias en 49 intentos. Con reglas se recuperó la contraseña del caso en 95 intentos y se comprobó el descifrado del loot.
-
-**Resultado de la revisión:** aprobada para los casos evaluados. No se modificó la implementación revisada.
-
-**Evidencia:** `evidencia/salidas/p2-revision-p3.txt`.
-## 2. Medición de velocidad
-
-Se ejecutó `evidencia/medir-p1.py` con Python 3.12.13 en Windows 11, en el procesador indicado en la salida cruda. El script importa la copia entregable de `cracker.py`, llama a `hash_de()` para candidatos sintéticos y usa los salts del caso; no intenta recuperar secretos durante la medición. Para reducir el ruido de mediciones muy cortas, se toma la mediana de 25 series de 100 intentos para MD5/SHA-256 y de 3 series de 20 intentos para PBKDF2, con `time.perf_counter()`.
-
-| Algoritmo | Intentos/segundo (máquina local) | Muestra | Estimación para 49 candidatos |
-|---|---:|---:|---:|
-| MD5 con salt | 454545,45 | Mediana de 25 × 100 | 0,000108 s |
-| SHA-256 con salt | 493096,65 | Mediana de 25 × 100 | 0,000099 s |
-| PBKDF2-HMAC-SHA256 (200.000 iteraciones) | 13,73 | Mediana de 3 × 20 | 3,567582 s |
-
-La evidencia completa —versión de Python, sistema, procesador, tamaños de salida y manejo del algoritmo no soportado— está en `evidencia/salidas/p1-benchmark.txt`; el procedimiento reproducible es `evidencia/medir-p1.py`. Los tiempos de diccionario son estimaciones de `49 / tasa`, no ejecuciones adicionales.
-
-### Tasas medidas y significado para un atacante
-
-MD5 y SHA-256 quedaron en el mismo orden de magnitud: SHA-256 resultó 1,08 veces más rápido en esta corrida, una diferencia demasiado pequeña para generalizarla como propiedad del algoritmo o del hardware. PBKDF2-200k fue aproximadamente 33.106 veces más lento que MD5 (4,52 órdenes de magnitud) y 35.914 veces más lento que SHA-256 (4,56 órdenes). La diferencia relevante proviene de que MD5 y SHA-256 hacen un hash rápido por candidato, mientras que PBKDF2 aplica 200.000 iteraciones de HMAC-SHA256. La documentación de Python describe a PBKDF2 como una función de derivación ajustable, lenta y con salt, diseñada para contraseñas, no como un hash rápido directo. [Python `hashlib`](https://docs.python.org/3/library/hashlib.html#key-derivation).
-
-La consigna propone como escenario pedagógico una GPU capaz de realizar `10^9` intentos/s contra MD5. Esa tasa hipotética es unas 2.200 veces la tasa MD5 local medida (3,34 órdenes de magnitud); sobre 49 candidatos, el cociente idealizado sería `49 / 10^9 = 4,9 × 10⁻⁸ s`. Ese cociente expresa solo trabajo de cómputo: para un lote de 49 candidatos no representa una latencia de extremo a extremo, porque omite preparación, transferencia y ejecución. No es una medición de esta GPU ni una tasa aplicable a SHA-256 o PBKDF2: para esos algoritmos depende de la implementación, la memoria y las iteraciones. En particular, trasladar `10^9` intentos/s a PBKDF2-200k sería incorrecto; su propósito es elevar el trabajo de cada candidato incluso en hardware paralelo.
-
+MD5 y SHA-256 quedaron en el mismo orden de magnitud en este equipo. PBKDF2-200k resultó aproximadamente 33.106 veces más lento que MD5 y 35.914 veces más lento que SHA-256. La diferencia relevante es que MD5 y SHA-256 realizan un hash rápido por candidato, mientras PBKDF2 repite HMAC-SHA256 200.000 veces.
 
 ## 3. El loot
 
-Salida real del CLI, también conservada en `evidencia/salidas/loot-admin.txt`:
+Los tres descifrados se realizaron con el subcomando `descifrar` y las contraseñas recuperadas. Las salidas crudas están en `p5-loot-operador.txt`, `p5-loot-analista.txt` y `p5-loot-admin.txt`.
+
+### operador
+
+```text
+Notas de operador — CONFIDENCIAL
+==========================
+Recuperaste esto porque la contraseña era débil.
+Evidencia: FLAG{crack_diccionario_md5}
+```
+
+### analista
+
+```text
+Notas de analista — CONFIDENCIAL
+==========================
+Recuperaste esto porque la contraseña era débil.
+Evidencia: FLAG{crack_sha256_diccionario}
+```
+
+### admin
 
 ```text
 Notas de admin — CONFIDENCIAL
@@ -135,74 +79,67 @@ Recuperaste esto porque la contraseña era débil.
 Evidencia: FLAG{crack_reglas_mangling}
 ```
 
-Demuestra acceso al texto cifrado del ejercicio con la contraseña recuperada. En una empresa, la reutilización de una contraseña como clave de cifrado podría extender el impacto de una filtración de hashes a documentos protegidos con ella. Este caso no demuestra acceso a cuentas o servicios reales; su XOR repetido es un mecanismo educativo.
+El impacto en la empresa ficticia es que una filtración de hashes puede extenderse a datos cifrados si la misma contraseña se usa como clave. Estos resultados solo acreditan el descifrado de artefactos educativos: no demuestran acceso a cuentas o servicios reales. El XOR repetido del caso tampoco es un esquema apropiado de cifrado para producción.
 
 ## 4. Las flags
 
-R3 se presentó después de obtenerla del loot. El primer envío fue rechazado por el formato CRLF del manifiesto. `evidencia/validar-r3-crlf.sh` reutiliza las funciones oficiales con una copia temporal normalizada, sin editar motor ni manifiesto ni escribir el progreso a mano. La salida de aceptación y el estado oficial muestran **R3 resuelto, 1/3**. La flag aceptada no elimina la necesidad de repetir R3 con el CLI integrado.
+Se enviaron las tres flags recuperadas y el estado final fue 3/3. La salida completa de `./ctf status extra4`, también guardada en `evidencia/salidas/p5-status-final.txt`, fue:
 
-## 5. Preguntas de análisis
+```text
+╭────────────────────────────────────────────────────────────╮
+│                   PROGRESO · LAB extra4                   │
+╰────────────────────────────────────────────────────────────╯
 
-### ¿Para qué sirve el salt y por qué no impide ataques de diccionario?
+ ✓  R1     MD5 + diccionario (caida instantanea)
+ ✓  R2     SHA-256 + diccionario
+ ✓  R3     SHA-256 + regla de mangling (no esta literal en el diccionario)
 
-El *salt* es un valor aleatorio y no secreto que se incorpora al proceso de generación del hash de una contraseña. Su finalidad es evitar que dos usuarios con la misma contraseña tengan necesariamente el mismo hash y dificultar el uso reutilizable de tablas precalculadas, como las *rainbow tables*.
+██████████████████████████████  3/3 (100%)
 
-Al utilizar un salt diferente para cada usuario, es necesario calcular los candidatos para cada registro, en lugar de reutilizar directamente los mismos hashes.
+[ OK ] ¡Lab extra4 COMPLETO! Ponete las pilas con la próxima unidad.
+```
 
-Sin embargo, el salt no impide un ataque de diccionario. Si una contraseña es común o predecible y aparece entre los candidatos, se puede calcular su hash utilizando el salt correspondiente y compararlo con el hash almacenado.
+Las aceptaciones individuales se conservan en `p5-r1-submit.txt`, `p5-r2-submit.txt` y `p5-r3-submit.txt`.
 
-En este laboratorio trabajamos con hashes MD5 y SHA-256 que incorporan salt. Esto permite comprobar que el salt no reemplaza la necesidad de utilizar contraseñas difíciles de adivinar ni algoritmos de derivación costosos, como PBKDF2. OWASP recomienda algoritmos lentos y adaptables para almacenar contraseñas y salt único por contraseña; SHA-256 rápido no es adecuado para ese fin. [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
+## 5. Preguntas P1–P5
 
-**En conclusión**, el salt dificulta los ataques basados en tablas precalculadas y evita que hashes iguales revelen directamente contraseñas compartidas, pero no impide probar contraseñas mediante un diccionario.
+### P1. Trabajo por intento y significado para un atacante
 
-### Complejidad predecible y NIST
+La medición de la sección 2 muestra que un KDF cambia la cantidad de candidatos que puede probar un atacante. La consigna propone como escenario pedagógico una GPU capaz de realizar `10^9` intentos/s contra MD5. Para 49 candidatos, el cociente idealizado es `49 / 10^9 = 4,9 × 10⁻⁸ s`. No representa una latencia de extremo a extremo, porque omite generación de candidatos, transferencia y arranque, y no debe trasladarse a SHA-256 o PBKDF2.
 
-Una política que cuenta caracteres de distintas clases no mide cuán fácil es adivinar la elección humana. Nuestro generador no exploró todas las cadenas posibles: probó unas pocas transformaciones previsibles de palabras conocidas. Agregar el año produce candidatos baratos de enumerar.
+PBKDF2-200k elevó el trabajo por candidato más de cuatro órdenes de magnitud en la máquina medida. Una GPU puede acelerar una implementación concreta, pero su tasa depende del algoritmo, sus parámetros y su implementación.
 
-**Discrepancia del enunciado:** la contraseña observada es `phantom2026` (11 caracteres, minúsculas y dígitos, sin mayúsculas). Por eso no cumple literalmente la condición de mayúsculas que afirma la pregunta. No se modifica el resultado para ajustarlo al relato. La debilidad conceptual permanece: una variante con inicial mayúscula también está cubierta por las reglas, aunque no es la contraseña recuperada.
+### P2. Salt y ataques de diccionario
 
-Según NIST SP 800-63B-4, sección 3.1.1.2, la longitud mínima es 15 caracteres para contraseñas usadas como único factor; pueden admitirse ocho cuando forman parte de MFA. Se recomienda permitir al menos 64 como longitud máxima admitida. No se deben imponer mezclas obligatorias de tipos de caracteres ni cambios periódicos sin indicios de compromiso. Debe contrastarse la contraseña completa con una lista de valores comunes, esperables o comprometidos. [NIST SP 800-63B-4, consultado el 29/10/2026](https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver).
+Un salt es un valor no secreto incorporado al cálculo y almacenado junto al hash. Con salts distintos, una misma contraseña produce resultados distintos; por eso limita la reutilización de tablas precalculadas y de cálculos entre registros.
 
-Para el caso, una longitud mayor y evitar elecciones previsibles es más útil que añadir mecánicamente una mayúscula y un año. La limitación de intentos en el login protege frente a intentos online, pero no detiene este ataque offline contra una copia de hashes; el almacenamiento con salt y derivación costosa aborda ese segundo escenario. No debe interpretarse que una regla de longitud garantiza por sí sola resistencia a cualquier ataque.
+No impide un ataque de diccionario: quien obtiene un hash y su salt puede calcular cada candidato con ese salt y compararlo. El salt obliga a trabajar por registro, pero no protege una contraseña común como `riverplate` ni una predecible como `matecocido`. Para almacenamiento de contraseñas hace falta además un esquema lento y ajustable; MD5 y SHA-256 rápidos no son adecuados aunque usen salt.
 
-### Trabajo por intento y por qué root no cayó
+### P3. Complejidad predecible y recomendación de NIST
 
-PBKDF2-HMAC-SHA256 repite la función de derivación 200.000 iteraciones por candidato, frente a una sola operación de MD5 o SHA-256 en los registros rápidos. En la muestra controlada se calcularon 20 candidatos sintéticos usando el salt de `root`, sin compararlos con su hash ni intentar recuperar su contraseña. En Python 3.13, sobre Windows 11 y el procesador informado en la salida, el cálculo tomó 1,431237 s: 13,97 candidatos/s (71,562 ms por candidato). La ejecución reproducible es `python entregas/labextra4/grupo06/evidencia/medir-pbkdf2.py`; la salida está en `evidencia/salidas/p4-pbkdf2-muestra.txt`.
+`phantom2026` tiene 11 caracteres, minúsculas y dígitos. No cumple la condición de mayúsculas mencionada en la pregunta; se informa el resultado observado sin alterarlo. La debilidad sigue siendo conceptual: una palabra de diccionario más un año es una transformación barata de enumerar. Una variante con inicial mayúscula también estaba cubierta por las reglas, aunque no fue la contraseña hallada.
 
-La muestra usa directamente `hashlib.pbkdf2_hmac` de la biblioteca estándar para aislar el costo de derivación, por lo que no se presenta como una prueba del CLI integrado. Al ritmo observado, recorrer los 49 candidatos del diccionario en esta misma máquina tomaría aproximadamente 3,51 s; es una extrapolación del promedio, no una corrida adicional. El salt no evita probar palabras, pero obliga a calcularlas por registro. Además, el caso establece que la contraseña de `root` no está en el diccionario: completar la búsqueda no produciría una coincidencia.
+NIST SP 800-63B-4 exige un mínimo de 15 caracteres cuando la contraseña es el único factor y permite un mínimo de ocho cuando solo integra MFA. Recomienda permitir al menos 64 caracteres, no imponer reglas obligatorias de composición ni cambios periódicos sin evidencia de compromiso, y contrastar la contraseña completa con una lista de valores comunes, esperables o comprometidos. Una política basada solo en “mayúscula + número + símbolo” fomenta sustituciones previsibles.
 
-Para el escenario de 1.000 GPUs no hay benchmark local de GPU. Si se supone, solo como ejemplo, una tasa de `v = 100` candidatos/s por GPU, el cociente de trabajo agregado es `T ≈ N/(1000·v) = 49/(1000·100) = 0,00049 s`. Sin embargo, como hay solo 49 candidatos, no pueden aprovecharse más de 49 GPUs para esa búsqueda: el límite ideal de pared es aproximadamente un intento por GPU (`1/v = 0,01 s`), más el costo de distribución y arranque. Ambas cifras son escenarios teóricos, no una medición ni una extrapolación de la tasa de CPU. La comparación de Hashcat y KDFs resistentes a GPU se amplía en [research.md](research.md).
+### P4. Por qué root no cayó y escenario con 1.000 GPU
 
-### Respuesta ante una filtración real de hashes
+En este laboratorio, `root` no puede caer porque la contraseña no existe en el caso, según la rúbrica. Además, el programa excluye PBKDF2 de la corrida general y la medición de 20 candidatos no compara ningún resultado con el hash de `root`. Esto evita afirmar incorrectamente que se ejecutó una búsqueda exhaustiva que PBKDF2 resistió.
 
-Este laboratorio trabajó offline y sobre un caso ficticio ya looteado; una filtración real de un volcado como este exige una secuencia de respuesta a incidentes que no se limita a "cambiar la contraseña caída". Un orden razonable, derivado de lo que el propio caso demuestra:
+PBKDF2-HMAC-SHA256 realiza 200.000 iteraciones por candidato. Al ritmo local de 13,73 candidatos/s, 49 derivaciones costarían aproximadamente 3,569 s. No hay benchmark local de GPU; por eso cualquier cálculo requiere declarar un supuesto. Si cada GPU procesara un candidato por vez a `v = 100` candidatos/s, 49 candidatos solo ocuparían como máximo 49 de las 1.000 GPU: el límite ideal sería un intento por GPU, `1/v = 0,01 s`, más distribución y arranque. Es un modelo pedagógico, no un benchmark ni una extrapolación de la CPU.
 
-1. **Activar la gestión del incidente** apenas se confirma que un volcado de credenciales salió del sistema, con un responsable designado y una ventana de contención.
-2. **Contener e investigar el alcance real de la exposición**: qué tabla/volcado salió, desde cuándo, y si hay indicios de que ya circuló o se usó (no asumirlo ni descartarlo sin evidencia, igual que este informe no afirma el uso de las contraseñas recuperadas fuera del caso).
-3. **Revocar sesiones y secretos activos** de las cuentas cuyo hash formaba parte del volcado, no solo de las que "cayeron" en el ejercicio de cracking: un hash todavía no roto puede romperse después con más tiempo o mejor hardware, como ilustra la comparación de tasas de este mismo informe.
-4. **Forzar un restablecimiento seguro de contraseña** para los usuarios afectados, sin reutilizar el valor filtrado ni sus variantes evidentes (este caso mostró que `admin` usaba exactamente ese patrón: una palabra de diccionario más un sufijo predecible).
-5. **Comunicar según el alcance y las obligaciones aplicables**, a los usuarios afectados y, si corresponde, a la autoridad regulatoria pertinente, con los tiempos que exija la normativa del sector.
-6. **Migrar o verificar el esquema de almacenamiento**: como señala la conclusión de este informe, pasar a un algoritmo de derivación lento y con salt único por registro (Argon2id u otro equivalente), revisando también los parámetros de los hashes que ya eran PBKDF2.
-7. **Monitorear** intentos de acceso con las credenciales expuestas y las contraseñas que se recuperen después, incluso tiempo más tarde.
+### P5. Respuesta a una filtración real de hashes
 
-La prevención, el almacenamiento y la respuesta son controles distintos: ninguno sustituye a los otros. Un algoritmo de derivación costoso (punto 6) reduce cuántas contraseñas se recuperan y en cuánto tiempo, pero no reemplaza revocar y comunicar una vez que el volcado ya salió; y una buena respuesta a incidentes no compensa haber almacenado los hashes con un algoritmo rápido y sin salt único desde el principio.
+1. Activar la gestión del incidente, designar responsables, preservar registros y contener la vía de exposición.
+2. Determinar qué datos salieron, durante qué período y qué cuentas pueden estar afectadas.
+3. Invalidar sesiones, tokens o credenciales relacionados según el alcance, y forzar un restablecimiento seguro de contraseñas para las cuentas expuestas.
+4. Comunicar a los afectados y gestionar las notificaciones aplicables con apoyo legal o de cumplimiento.
+5. Corregir la causa de la filtración y revisar el almacenamiento de contraseñas, sus parámetros y el proceso de migración.
+6. Monitorear accesos anómalos e intentos de toma de cuentas, sin registrar ni reutilizar contraseñas recuperadas.
+
+La secuencia es una propuesta para un incidente real, no una actividad efectuada en el laboratorio.
+
+**Fuentes:** [Python `hashlib`](https://docs.python.org/3/library/hashlib.html#key-derivation); [OWASP Password Storage Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html); [NIST SP 800-63B-4](https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver); [NIST SP 800-61 Rev. 3](https://doi.org/10.6028/NIST.SP.800-61r3).
 
 ## 6. Conclusión
 
-El caso demuestra que un salt evita reutilizar cálculos precalculados, pero no vuelve resistente una contraseña incluida en un diccionario ni una variante previsible de esa palabra. Las mediciones locales ubican MD5 y SHA-256 en el mismo orden de magnitud y muestran que PBKDF2-200k eleva el costo por candidato en más de cuatro órdenes de magnitud en este equipo. Para un sistema real, la política debe combinar contraseñas largas y bloqueadas contra listas de valores comprometidos con un algoritmo de almacenamiento lento y adaptable, salt único y parámetros revisables. La guía de OWASP prioriza Argon2id y, cuando se necesita PBKDF2-HMAC-SHA256 por requisitos de compatibilidad o FIPS, indica al menos 600.000 iteraciones; ese número es una recomendación externa actual, no una medición de este laboratorio. [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
-
-### Verificación final e integración de punta a punta
-
-Como control independiente sobre la versión final de `cracker.py` (ya con `hash_de`, `cargar_sombra`, `crackear` y `aplicar_reglas` integradas), se repitió toda la cadena desde cero, sin asumir los resultados ya documentados por cada responsable:
-
-1. `python3 -m py_compile cracker.py`: sin errores.
-2. `crackear` **sin** `--reglas` sobre `sombra.txt`/`diccionario.txt`: recupera exactamente `operador: riverplate` y `analista: matecocido`; `admin` y `root` no caen. Coincide con lo documentado por cada responsable. Evidencia: `evidencia/salidas/p5-regresion-diccionario.txt`.
-3. `crackear` **con** `--reglas`: recupera además `admin: phantom2026`, sin perder `operador` ni `analista`. Evidencia: `evidencia/salidas/p5-regresion-reglas.txt`.
-4. `descifrar` sobre los tres `.enc` con las contraseñas recuperadas, de forma independiente: `operador` → `FLAG{crack_diccionario_md5}`, `analista` → `FLAG{crack_sha256_diccionario}`, `admin` → `FLAG{crack_reglas_mangling}`. Evidencias: `p5-loot-operador.txt`, `p5-loot-analista.txt`, `p5-loot-admin.txt`.
-5. `root` (PBKDF2) no se intenta descifrar ni se le atribuye contraseña: el cracker la omite deliberadamente en la corrida general y la muestra de P4 nunca la compara contra su hash. Se mantiene como control negativo, no como R4.
-
-El estado del motor CTF de este entorno había vuelto a marcar los tres retos como no resueltos tras un reinicio (mismo comportamiento ya observado en otras entregas del grupo); se presentaron las tres flags recién confirmadas de forma independiente —no las de una ejecución anterior sin verificar— y se capturó el estado resultante sin editar el manifiesto ni el motor.
-
-El estado final confirmó R1, R2 y R3 completados: **3/3 (100 %)**.
-
-**Evidencia:** `p5-r1-submit.txt`, `p5-r2-submit.txt`, `p5-r3-submit.txt`, `p5-status-final.txt` (reemplaza a `status-extra4-final-3de3.txt`, que registraba el mismo resultado sin una ejecución propia que lo respalde).
+PhantomCorp debe almacenar contraseñas con Argon2id y parámetros revisables; si necesita PBKDF2-HMAC-SHA256 por compatibilidad o FIPS, OWASP recomienda 600.000 iteraciones. Cada registro debe tener un salt único y las contraseñas nuevas deben contrastarse contra listas de valores comprometidos. Las cuentas expuestas deben restablecer sus contraseñas, invalidar sus sesiones activas y revisarse por actividad anómala. Un KDF lento reduce la velocidad de adivinación, pero no reemplaza la respuesta a una filtración ya ocurrida.
