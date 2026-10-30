@@ -29,6 +29,11 @@
 - **Finalidad y partes asistidas:** apoyo para estructurar la medición controlada de PBKDF2 y redactar su análisis, incluida la estimación condicionada para GPUs.
 - **Verificación:** la muestra de 20 candidatos y el cálculo se revisaron personalmente contra `evidencia/salidas/p4-pbkdf2-muestra.txt`. La tasa por GPU se identifica como supuesto y no como benchmark medido.
 
+**Herramienta:** Claude (Anthropic), vía Claude Code.
+
+**Finalidad y partes asistidas:** verificación independiente de la integración final de cracker.py y confirmación de las flags.
+**Verificación:** cada resultado se obtuvo ejecutando el cracker.py real del grupo contra el caso oficial, confirmando los resultados obtenidos.
+
 ## Alcance y criterio de evidencia
 
 Las pruebas se limitaron a los artefactos ficticios del laboratorio y a candidatos sintéticos para las mediciones. Se distinguen tres tipos de afirmaciones: resultados observados en salidas conservadas, estimaciones derivadas de tasas locales y escenarios teóricos expresamente identificados. Una prueba aislada de una función no se presenta como sustituto de una ejecución integrada del CLI.
