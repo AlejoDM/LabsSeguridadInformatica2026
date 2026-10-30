@@ -1,7 +1,7 @@
 # Research — Lab Extra 3: Defendé PhantomCorp
 
 **Grupo:** 06
-**Fecha:** 2026-10-29
+**Fecha:** 30/10/2026
 **Opción elegida:** A — Guías reales de hardening web
 
 **Declaración de uso de IA:** Codex (OpenAI), ChatGPT (OpenAI), OpenCode y Claude Code (Anthropic) se usaron como apoyo para estructurar y revisar el texto, relacionar los parches con fuentes públicas y mejorar la claridad. El grupo contrastó las fuentes, el código y las salidas de evidencia antes de incluir afirmaciones de ejecución.
@@ -10,11 +10,11 @@
 
 Las cinco defensas corregidas en `objetivo/server.py` tienen un equivalente directo en guías públicas de OWASP:
 
-- **D4 (SQLi en `/login`):** la *SQL Injection Prevention Cheat Sheet* de OWASP recomienda consultas parametrizadas con variables enlazadas como defensa primaria [1]. El cambio aplicado pasa de concatenar `user`/`pass` a `db.execute("... WHERE user = ? AND password = ?", (user, pwd))`, de modo que SQLite recibe valores separados de la estructura SQL.
-- **D1 (banner `Server`):** reemplazar un banner que revela producto y versión reduce el *fingerprinting*. Es una medida complementaria: ocultar ese dato no corrige una vulnerabilidad explotable por sí misma [2].
+- **D4 (SQLi en `/login`):** la _SQL Injection Prevention Cheat Sheet_ de OWASP recomienda consultas parametrizadas con variables enlazadas como defensa primaria [1]. El cambio aplicado pasa de concatenar `user`/`pass` a `db.execute("... WHERE user = ? AND password = ?", (user, pwd))`, de modo que SQLite recibe valores separados de la estructura SQL.
+- **D1 (banner `Server`):** reemplazar un banner que revela producto y versión reduce el _fingerprinting_. Es una medida complementaria: ocultar ese dato no corrige una vulnerabilidad explotable por sí misma [2].
 - **D2 (`/api/status` con `debug:true`, rutas y PID):** publicar diagnóstico, rutas internas o información innecesaria en producción es consistente con **A05:2021 — Security Misconfiguration** [3]. El campo `debug:true` no demuestra, por sí solo, que exista un depurador interactivo accesible.
 - **D3 (backup sin autorización):** entregar un recurso sensible sin un control efectivo corresponde principalmente a **A01:2021 — Broken Access Control** [4]. Que `robots.txt` publique la ruta facilita descubrirla, pero no causa ni soluciona la falta de autorización.
-- **D5 (path traversal en `/descargar`):** OWASP describe esta clase de ataque como la manipulación de rutas para acceder a archivos fuera del directorio previsto [5]. La corrección debe comprobar el destino resuelto, no limitarse a filtrar la cadena literal `..`.
+- **D5 (path traversal en `/descargar`):** OWASP describe esta clase de ataque como la manipulación de rutas para acceder a archivos fuera del directorio previsto [5]. La corrección debe comprobar el destino resuelto, no limitarse a filtrar la cadena literal `..`. En una aplicación con otros actores que puedan alterar enlaces simbólicos o directorios, una comprobación previa a abrir el archivo tampoco elimina por sí sola las posibles carreras; el alcance debe evaluarse según el sistema de archivos y sus permisos [10].
 
 ## 2. Un control que las guías recomiendan y el laboratorio no cubre
 
@@ -32,7 +32,7 @@ El parche de D3 aplica dos capas, no una: deja de anunciar la ruta en `robots.tx
 
 ## 4. Pregunta de cierre — el verificador del lab frente a un escáner real (Nessus, OpenVAS, nuclei)
 
-El `verificar-defensa.py` del laboratorio ejecuta un conjunto predefinido de solicitudes y evalúa sus respuestas. Comparte con Nuclei el uso de condiciones y plantillas, pero no debe equipararse sin matices con todos los escáneres: según la herramienta y su configuración, Nessus u OpenVAS también pueden realizar comprobaciones de versión, revisiones autenticadas u otros métodos que no explotan la vulnerabilidad [10].
+El `verificar-defensa.py` del laboratorio ejecuta un conjunto predefinido de solicitudes y evalúa sus respuestas. Comparte con Nuclei el uso de condiciones y plantillas, pero no debe equipararse sin matices con todos los escáneres: según la herramienta y su configuración, Nessus u OpenVAS también pueden realizar comprobaciones de versión, revisiones autenticadas u otros métodos que no explotan la vulnerabilidad [11].
 
 Lo que un escaneo automático de este tipo **puede** demostrar es exactamente lo que este laboratorio demostró para D5: que un payload concreto, conocido de antemano, ya no produce el resultado vulnerable esperado bajo las condiciones exactas de la prueba (puerto, timing, entorno de red).
 
@@ -44,13 +44,14 @@ Lo que **no** puede demostrar, y que este mismo laboratorio evidenció en carne 
 
 ## 5. Fuentes
 
-1. OWASP Cheat Sheet Series. *SQL Injection Prevention Cheat Sheet*. https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
-2. OWASP. *Secure Headers Project*. https://owasp.org/www-project-secure-headers/
-3. OWASP. *A05:2021 – Security Misconfiguration* (OWASP Top 10 2021). https://owasp.org/Top10/2021/A05_2021-Security_Misconfiguration/
-4. OWASP. *A01:2021 – Broken Access Control*. https://owasp.org/Top10/2021/A01_2021-Broken_Access_Control/
-5. OWASP. *Path Traversal*. https://owasp.org/www-community/attacks/Path_Traversal
-6. OWASP. *Error Handling Cheat Sheet*. https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
-7. Python Software Foundation. *http.server*. https://docs.python.org/3/library/http.server.html
-8. Python Software Foundation. *socketserver*, método `handle_error`. https://docs.python.org/3/library/socketserver.html
-9. IETF. *RFC 9309 — Robots Exclusion Protocol*. https://www.rfc-editor.org/rfc/rfc9309.html
-10. ProjectDiscovery. *Introduction to Nuclei Templates*. https://docs.projectdiscovery.io/templates/introduction
+1. OWASP Cheat Sheet Series. _SQL Injection Prevention Cheat Sheet_. https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+2. OWASP Cheat Sheet Series. _HTTP Headers Cheat Sheet_, apartado _Server_. https://cheatsheetseries.owasp.org/cheatsheets/HTTP_Headers_Cheat_Sheet.html#server
+3. OWASP. _A05:2021 – Security Misconfiguration_ (OWASP Top 10 2021). https://owasp.org/Top10/2021/A05_2021-Security_Misconfiguration/
+4. OWASP. _A01:2021 – Broken Access Control_. https://owasp.org/Top10/2021/A01_2021-Broken_Access_Control/
+5. OWASP. _Path Traversal_. https://owasp.org/www-community/attacks/Path_Traversal
+6. OWASP. _Error Handling Cheat Sheet_. https://cheatsheetseries.owasp.org/cheatsheets/Error_Handling_Cheat_Sheet.html
+7. Python Software Foundation. _http.server_. https://docs.python.org/3/library/http.server.html
+8. Python Software Foundation. _socketserver_, método `handle_error`. https://docs.python.org/3/library/socketserver.html
+9. IETF. _RFC 9309 — Robots Exclusion Protocol_. https://www.rfc-editor.org/rfc/rfc9309.html
+10. Python Software Foundation. _os.path: realpath y commonpath_. https://docs.python.org/3/library/os.path.html
+11. ProjectDiscovery. _Introduction to Nuclei Templates_. https://docs.projectdiscovery.io/templates/introduction
