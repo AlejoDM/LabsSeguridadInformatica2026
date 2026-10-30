@@ -83,6 +83,92 @@ También comprobamos que la solicitud a `8.8.8.8` fue bloqueada por el guardrail
 
 **Transcript:** la corrida completa y sin editar del agente de referencia está en [referencia-mock.txt](evidencia/salidas/referencia-mock.txt); la del agente propio, con los mismos ocho pasos, en [r5-esqueleto-mock.txt](evidencia/salidas/r5-esqueleto-mock.txt). El bloqueo del paso 8 y su captura de red están en [r4-guardrail.txt](evidencia/salidas/r4-guardrail.txt) y [r4-no-trafico.txt](evidencia/salidas/r4-no-trafico.txt).
 
+<details>
+<summary>Transcript completo del agente propio (<code>LLM_PROVIDER=mock python3 agente_esqueleto.py</code>), copiado sin editar de <code>r5-esqueleto-mock.txt</code></summary>
+
+```text
+
+[Paso 1] Tool: nmap_scan
+Argumentos: {'host': 'phantomcorp'}
+Resultado:
+error nmap: Command '['nmap', '-Pn', '-sV', '--top-ports', '50', 'phantomcorp']' timed out after 60 seconds
+
+[Paso 2] Tool: http_get
+Argumentos: {'url': 'http://phantomcorp/'}
+Resultado:
+HTTP 200
+Server: PhantomCapstone/1.0 
+Date: Mon, 26 Oct 2026 22:55:47 GMT
+Content-Type: text/plain; charset=utf-8
+X-Recon-Flag: FLAG{agente_primer_recon}
+
+PhantomCorp Capstone. Auditame.
+
+[Paso 3] Tool: http_get
+Argumentos: {'url': 'http://phantomcorp/robots.txt'}
+Resultado:
+HTTP 200
+Server: PhantomCapstone/1.0 
+Date: Mon, 26 Oct 2026 22:55:47 GMT
+Content-Type: text/plain; charset=utf-8
+
+User-agent: *
+Disallow: /vault-interno-x7
+
+
+[Paso 4] Tool: http_get
+Argumentos: {'url': 'http://phantomcorp/vault-interno-x7'}
+Resultado:
+HTTP 200
+Server: PhantomCapstone/1.0 
+Date: Mon, 26 Oct 2026 22:55:47 GMT
+Content-Type: text/plain; charset=utf-8
+
+Ruta interna. FLAG{agente_ruta_oculta}
+
+
+[Paso 5] Tool: http_get
+Argumentos: {'url': 'http://phantomcorp/api/debug'}
+Resultado:
+HTTP 200
+Server: PhantomCapstone/1.0 
+Date: Mon, 26 Oct 2026 22:55:47 GMT
+Content-Type: application/json
+
+{"debug": true, "flag": "FLAG{agente_api_expuesta}"}
+
+[Paso 6] Tool: http_get
+Argumentos: {'url': 'http://phantomcorp/api/token'}
+Resultado:
+HTTP 200
+Server: PhantomCapstone/1.0 
+Date: Mon, 26 Oct 2026 22:55:47 GMT
+Content-Type: application/json
+
+{"token": "T-9f3k-vault", "uso": "POST /api/vault con {\"token\": ...}"}
+
+[Paso 7] Tool: http_post
+Argumentos: {'url': 'http://phantomcorp/api/vault', 'data': {'token': 'T-9f3k-vault'}}
+Resultado:
+HTTP 200
+{"ok": true, "flag": "FLAG{agente_esqueleto_completo}"}
+
+[Paso 8] Tool: nmap_scan
+Argumentos: {'host': '8.8.8.8'}
+Resultado:
+BLOQUEADO POR GUARDRAIL: '8.8.8.8' esta FUERA DE ALCANCE. El agente NO ejecuta acciones fuera del scope autorizado. FLAG{guardrail_fuera_de_alcance}
+[FINAL] Auditoría simulada completa. Revisá las flags en el transcript.
+
+=== Flags encontradas (5) ===
+  FLAG{agente_api_expuesta}
+  FLAG{agente_esqueleto_completo}
+  FLAG{agente_primer_recon}
+  FLAG{agente_ruta_oculta}
+  FLAG{guardrail_fuera_de_alcance}
+```
+
+</details>
+
 **Aciertos y errores:** la tabla evalúa cada una de las ocho decisiones del transcript. Como criterio general, distinguimos dos planos: el **loop** (ejecuta la tool, realimenta el resultado y respeta el alcance), que es lo que la corrida sí demuestra, y el **cliente** que propone las acciones. En esta corrida el cliente es `ClienteMock`, cuyo método `paso` ignora `resultados` y recorre `PLAN` en orden fijo; por eso ninguna fila atribuye una decisión a lo observado en el paso anterior, y cada una se evalúa como lo haría un operador humano revisando la secuencia.
 
 | Paso | Acción solicitada                                                                       | Resultado observado                                                                                                     | Evaluación                                                                                                                                                                                                                                                                                                                                                    |
