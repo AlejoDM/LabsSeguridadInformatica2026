@@ -2,16 +2,16 @@
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Fernando Boiero — CyberLab UTN FRVM
 """
-agente_esqueleto.py — TU agente (a completar). Entregable del Lab 09.
+agente_esqueleto.py — agente propio del grupo 06. Entregable del Lab 09.
 
-El agente de referencia (agente_pentest.py) ya funciona. Este es el TUYO: tiene
-el andamiaje, pero el LOOP de tool-use está a medio hacer. Completá los TODO para
-entender el mecanismo desde adentro. Un agente no es magia: es este loop.
+Implementa el loop de tool-use: pide una acción al cliente LLM, la ejecuta con
+ejecutar_tool (que aplica el guardrail de alcance), detecta flags en la salida y
+devuelve el resultado al cliente. Corta ante una acción "final" o al llegar a
+MAX_PASOS.
 
-Cuando funcione, corré:
+Uso:
     LLM_PROVIDER=mock python3 agente_esqueleto.py
-y tiene que llegar a encadenar /api/token -> POST /api/vault y traer el flag
-capstone que devuelve el vault.
+Con el cliente mock encadena /api/token -> POST /api/vault y trae el flag R5.
 """
 import re
 import sys
@@ -35,23 +35,19 @@ def main() -> int:
             print(f"[FINAL] {accion['texto']}")
             break
 
-        # TODO 1: si la acción es de tipo "final", imprimí el texto y salí del loop.
-        # ...
-
-        # TODO 2: si es una tool, ejecutala con ejecutar_tool(nombre, argumentos)
-        #         y guardá la salida. Pista: accion["nombre"], accion["argumentos"].
         salida = ejecutar_tool(accion["nombre"], accion["argumentos"])
         print(f"\n[Paso {n}] Tool: {accion['nombre']}")
         print(f"Argumentos: {accion['argumentos']}")
         print(f"Resultado:\n{salida}")
 
-        # (esto ya está: detectar flags en la salida)
+        # Detectar flags en la salida de la tool
         for f in re.findall(r"FLAG\{[^}]*\}", salida):
             flags.add(f)
 
-        # TODO 3: devolvele el resultado al LLM para el próximo paso. El formato es
-        #         una lista con un dict {"id": accion["id"], "output": salida}.
+        # Realimentar al cliente con el resultado para el próximo paso
         resultados = [{"id": accion["id"], "output": salida}]
+    else:
+        print(f"\n[CORTE] Se alcanzó MAX_PASOS ({MAX_PASOS}) sin acción final.")
 
     print(f"\n=== Flags encontradas ({len(flags)}) ===")
     for f in sorted(flags):
