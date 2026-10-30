@@ -168,16 +168,36 @@ La muestra usa directamente `hashlib.pbkdf2_hmac` de la biblioteca estándar par
 
 Para el escenario de 1.000 GPUs no hay benchmark local de GPU. Si se supone, solo como ejemplo, una tasa de `v = 100` candidatos/s por GPU, el cociente de trabajo agregado es `T ≈ N/(1000·v) = 49/(1000·100) = 0,00049 s`. Sin embargo, como hay solo 49 candidatos, no pueden aprovecharse más de 49 GPUs para esa búsqueda: el límite ideal de pared es aproximadamente un intento por GPU (`1/v = 0,01 s`), más el costo de distribución y arranque. Ambas cifras son escenarios teóricos, no una medición ni una extrapolación de la tasa de CPU. La comparación de Hashcat y KDFs resistentes a GPU se amplía en [research.md](research.md).
 
+### Respuesta ante una filtración real de hashes
+
+Este laboratorio trabajó offline y sobre un caso ficticio ya looteado; una filtración real de un volcado como este exige una secuencia de respuesta a incidentes que no se limita a "cambiar la contraseña caída". Un orden razonable, derivado de lo que el propio caso demuestra:
+
+1. **Activar la gestión del incidente** apenas se confirma que un volcado de credenciales salió del sistema, con un responsable designado y una ventana de contención.
+2. **Contener e investigar el alcance real de la exposición**: qué tabla/volcado salió, desde cuándo, y si hay indicios de que ya circuló o se usó (no asumirlo ni descartarlo sin evidencia, igual que este informe no afirma el uso de las contraseñas recuperadas fuera del caso).
+3. **Revocar sesiones y secretos activos** de las cuentas cuyo hash formaba parte del volcado, no solo de las que "cayeron" en el ejercicio de cracking: un hash todavía no roto puede romperse después con más tiempo o mejor hardware, como ilustra la comparación de tasas de este mismo informe.
+4. **Forzar un restablecimiento seguro de contraseña** para los usuarios afectados, sin reutilizar el valor filtrado ni sus variantes evidentes (este caso mostró que `admin` usaba exactamente ese patrón: una palabra de diccionario más un sufijo predecible).
+5. **Comunicar según el alcance y las obligaciones aplicables**, a los usuarios afectados y, si corresponde, a la autoridad regulatoria pertinente, con los tiempos que exija la normativa del sector.
+6. **Migrar o verificar el esquema de almacenamiento**: como señala la conclusión de este informe, pasar a un algoritmo de derivación lento y con salt único por registro (Argon2id u otro equivalente), revisando también los parámetros de los hashes que ya eran PBKDF2.
+7. **Monitorear** intentos de acceso con las credenciales expuestas y las contraseñas que se recuperen después, incluso tiempo más tarde.
+
+La prevención, el almacenamiento y la respuesta son controles distintos: ninguno sustituye a los otros. Un algoritmo de derivación costoso (punto 6) reduce cuántas contraseñas se recuperan y en cuánto tiempo, pero no reemplaza revocar y comunicar una vez que el volcado ya salió; y una buena respuesta a incidentes no compensa haber almacenado los hashes con un algoritmo rápido y sin salt único desde el principio.
+
 ## 6. Conclusión
 
 El caso demuestra que un salt evita reutilizar cálculos precalculados, pero no vuelve resistente una contraseña incluida en un diccionario ni una variante previsible de esa palabra. Las mediciones locales ubican MD5 y SHA-256 en el mismo orden de magnitud y muestran que PBKDF2-200k eleva el costo por candidato en más de cuatro órdenes de magnitud en este equipo. Para un sistema real, la política debe combinar contraseñas largas y bloqueadas contra listas de valores comprometidos con un algoritmo de almacenamiento lento y adaptable, salt único y parámetros revisables. La guía de OWASP prioriza Argon2id y, cuando se necesita PBKDF2-HMAC-SHA256 por requisitos de compatibilidad o FIPS, indica al menos 600.000 iteraciones; ese número es una recomendación externa actual, no una medición de este laboratorio. [OWASP](https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html).
 
-### Verificación final de las tres flags
+### Verificación final e integración de punta a punta
 
-Se consolidó la validación de los tres retos mediante el verificador CTF del laboratorio. R1 se obtuvo descifrando el loot del usuario `operador` con la contraseña recuperada mediante diccionario. R2 ya había sido validado y R3 se registró con la flag obtenida mediante reglas de transformación.
+Como control independiente sobre la versión final de `cracker.py` (ya con `hash_de`, `cargar_sombra`, `crackear` y `aplicar_reglas` integradas), se repitió toda la cadena desde cero, sin asumir los resultados ya documentados por cada responsable:
 
-Para evitar problemas de compatibilidad de saltos de línea CRLF, se utilizó una copia temporal del manifiesto normalizada a LF, sin modificar el original.
+1. `python3 -m py_compile cracker.py`: sin errores.
+2. `crackear` **sin** `--reglas` sobre `sombra.txt`/`diccionario.txt`: recupera exactamente `operador: riverplate` y `analista: matecocido`; `admin` y `root` no caen. Coincide con lo documentado por cada responsable. Evidencia: `evidencia/salidas/p5-regresion-diccionario.txt`.
+3. `crackear` **con** `--reglas`: recupera además `admin: phantom2026`, sin perder `operador` ni `analista`. Evidencia: `evidencia/salidas/p5-regresion-reglas.txt`.
+4. `descifrar` sobre los tres `.enc` con las contraseñas recuperadas, de forma independiente: `operador` → `FLAG{crack_diccionario_md5}`, `analista` → `FLAG{crack_sha256_diccionario}`, `admin` → `FLAG{crack_reglas_mangling}`. Evidencias: `p5-loot-operador.txt`, `p5-loot-analista.txt`, `p5-loot-admin.txt`.
+5. `root` (PBKDF2) no se intenta descifrar ni se le atribuye contraseña: el cracker la omite deliberadamente en la corrida general y la muestra de P4 nunca la compara contra su hash. Se mantiene como control negativo, no como R4.
+
+El estado del motor CTF de este entorno había vuelto a marcar los tres retos como no resueltos tras un reinicio (mismo comportamiento ya observado en otras entregas del grupo); se presentaron las tres flags recién confirmadas de forma independiente —no las de una ejecución anterior sin verificar— y se capturó el estado resultante sin editar el manifiesto ni el motor.
 
 El estado final confirmó R1, R2 y R3 completados: **3/3 (100 %)**.
 
-**Evidencia:** `evidencia/salidas/status-extra4-final-3de3.txt`.
+**Evidencia:** `p5-r1-submit.txt`, `p5-r2-submit.txt`, `p5-r3-submit.txt`, `p5-status-final.txt` (reemplaza a `status-extra4-final-3de3.txt`, que registraba el mismo resultado sin una ejecución propia que lo respalde).
