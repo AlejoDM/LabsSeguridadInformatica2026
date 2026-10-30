@@ -1,26 +1,39 @@
 # Mini-research — Laboratorio 08
 
-**Tema elegido:** C. Gestión de secretos: riesgos de archivos `.env` legibles y alternativas de gestión segura.
+**Grupo:** 06
+**Tema elegido:** C. Gestión de secretos: por qué un `.env` en el servidor es un problema y qué lo reemplaza.
 
 ## Desarrollo
 
-Los secretos de una aplicación —contraseñas de base de datos, claves de API, certificados y tokens— requieren un ciclo de vida: creación, entrega, uso, auditoría, rotación, revocación y expiración. Un archivo `.env` puede separar la configuración del código, pero no protege automáticamente sus valores. Si el archivo queda incluido en una imagen, un backup, un volumen o una ruta legible por un usuario de servicio, cualquier proceso con ese acceso puede leer credenciales en texto claro.
+Los secretos de una aplicación (contraseñas de base de datos, claves de API, certificados, tokens) tienen un ciclo de vida: se crean, se entregan a quien los usa, se rotan, se revocan y deberían expirar. OWASP plantea la gestión de secretos en esos términos y recomienda centralizar su almacenamiento, aprovisionamiento, auditoría y rotación, con acceso regido por el principio de mínimo privilegio [1]. Un archivo `.env` resuelve una parte menor del problema: saca la configuración del código, pero no protege los valores que contiene ni gestiona su ciclo de vida.
 
-El riesgo observado en R2 no es que el formato `.env` sea intrínsecamente inseguro. El problema es de control de acceso y de gestión: `operador`, un usuario limitado, pudo leer valores destinados a la aplicación. Además, las credenciales estáticas elevan el impacto de una filtración, porque permanecen útiles hasta que alguien las detecta, revoca y rota.
+En R2 el problema concreto fue de permisos. `/var/www/.env` era de `root` con permisos `0644`, así que `operador`, una cuenta sin privilegios, pudo leer la contraseña de la base y el secreto de la aplicación. A eso se suma que la credencial era estática: una vez copiada, sirve hasta que alguien note la filtración y la cambie. OWASP recomienda usar secretos dinámicos cuando sea posible y crearlos con vencimiento, justamente para acortar ese período [1].
 
-OWASP recomienda centralizar y estandarizar el almacenamiento, aprovisionamiento, auditoría y rotación de secretos, con controles de acceso acordes al principio de mínimo privilegio. Un gestor de secretos permite entregar a cada workload únicamente el valor y el período de uso necesarios, registrar quién o qué identidad lo solicitó y revocar rápidamente el acceso ante un incidente. En entornos donde la plataforma lo permita, es preferible usar identidad de workload y credenciales dinámicas o de corta vida antes que una contraseña estática compartida.
+El enfoque Twelve-Factor propone separar estrictamente configuración y código y guardar la configuración, credenciales incluidas, en variables de entorno, porque cambian entre despliegues sin tocar el código y es difícil versionarlas por accidente [2]. Ese criterio evita contraseñas escritas en el código o subidas al repositorio, pero no alcanza como medida de seguridad. La misma guía de OWASP, en su apartado sobre contenedores, desaconseja las variables de entorno para secretos salvo que no haya otra opción, y prefiere que la aplicación los obtenga en tiempo de ejecución desde un gestor, o los monte como archivos con permisos acotados [1]. Las dos fuentes no se contradicen del todo: Twelve-Factor responde a dónde no tiene que estar la configuración, y OWASP a cómo proteger un secreto una vez que sale del código.
 
-El enfoque Twelve-Factor distingue configuración de código y propone valores de despliegue en variables de entorno. Esto evita que una credencial termine hardcodeada o versionada por accidente, pero no elimina la necesidad de proteger el entorno de ejecución, los logs y las herramientas de diagnóstico. Por ello, una implementación madura combina inyección controlada en runtime, permisos restrictivos, secretos de corta duración, rotación automatizada y monitoreo de accesos. Para claves criptográficas, NIST subraya que la protección y el ciclo de vida del material de claves forman parte de la gestión de seguridad, no de un detalle opcional de configuración.
+Cuando el secreto es una clave criptográfica, NIST trata su protección como parte de la gestión de claves: cada clave tiene un período de uso definido, requisitos de protección según su tipo y funciones de gestión como la generación, la distribución, el reemplazo y la destrucción [3]. Es una norma para claves criptográficas, no para contraseñas de aplicación, pero respalda la misma idea: un secreto que no expira ni se rota no está gestionado.
 
-Aplicado a PhantomCorp, la respuesta inmediata es revocar y rotar las credenciales expuestas, reducir permisos de lectura sobre la configuración y revisar los accesos que ya pudieron usarla. Como corrección estructural, la aplicación debería recuperar el secreto desde un servicio de gestión autorizado para su identidad, no conservar una contraseña reutilizable en un archivo legible por cuentas locales.
+Para PhantomCorp, la respuesta inmediata sería rotar la contraseña de `phantom_app` y el `APP_SECRET`, quitar la lectura del `.env` a otros usuarios y revisar si alguien usó la credencial. Como corrección de fondo, la aplicación debería pedir la credencial a un gestor de secretos con una identidad propia, recibir un valor de corta duración y dejar registro de cada acceso.
+
+## Bonus: un pipeline recon → enum → explotación
+
+Si encadenáramos en un solo script lo que hicimos a mano en los labs anteriores, cada etapa tomaría la salida estructurada de la anterior:
+
+| Etapa | Lab | Entrada → salida | Herramienta base |
+| --- | --- | --- | --- |
+| Recon | 05 | objetivo autorizado → `host:puerto:servicio` | `nmap -sV` con salida XML |
+| Enumeración | 06 | servicios HTTP → rutas, métodos y archivos expuestos | wordlist de directorios, `robots.txt`, `OPTIONS` |
+| Explotación | 07 | endpoints candidatos → confirmación de inyección de comandos | payload inocuo (`id`) y comparación de la respuesta |
+| Post-explotación | 08 | shell como usuario limitado → loot, SUID, hosts internos | comandos de recon del host y `recolector.py` |
+
+Dos controles irían fuera de las etapas: una lista de alcance que se verifica antes de cada solicitud, y una pausa para que una persona apruebe antes de pasar de la enumeración a la explotación. Lo que el pipeline no resuelve es la interpretación: decidir qué ruta vale la pena o qué respuesta indica una inyección sigue dependiendo de reglas que escribimos nosotros. Esa es la parte que en el Lab 09 se delega en un agente.
 
 ## Fuentes
 
-1. OWASP Foundation. *Secrets Management Cheat Sheet*, secciones “Introduction”, “Access Control” y “Secret Lifecycle”. https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html
-2. Wiggins, Adam. *The Twelve-Factor App*, “III. Config”. https://12factor.net/config
-3. NIST. *SP 800-57 Part 1 Rev. 5: Recommendation for Key Management — Part 1: General* (mayo de 2020). https://csrc.nist.gov/pubs/sp/800/57/pt1/r5/final
+1. OWASP Cheat Sheet Series. «[Secrets Management Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/Secrets_Management_Cheat_Sheet.html)», secciones 1 (Introduction), 2.2 (Centralize and Standardize), 2.3 (Access Control), 2.4 (Automate Secrets Management), 2.7 (Secret Lifecycle) y 5.1 (Containers & Orchestrators). Consultado el 30/10/2026.
+2. Wiggins, A. «[The Twelve-Factor App — III. Config](https://12factor.net/config)». Consultado el 30/10/2026.
+3. Barker, E. *Recommendation for Key Management: Part 1 – General*. NIST SP 800-57 Part 1 Rev. 5, mayo de 2020. DOI: [10.6028/NIST.SP.800-57pt1r5](https://doi.org/10.6028/NIST.SP.800-57pt1r5).
 
 ## Reflexión
 
-R2 mostró que separar secretos del código no alcanza si el archivo que los contiene es legible por una cuenta local limitada. La evidencia también obliga a pensar en el tiempo: una contraseña estática filtrada continúa siendo un problema hasta su revocación. Para el equipo, la mejora relevante es combinar mínimo privilegio, secretos de corta vida y registro de accesos, no solo mover el mismo valor a otro archivo.
-
+R2 mostró que separar los secretos del código no alcanza si el archivo que los guarda lo puede leer cualquier cuenta local. También nos hizo pensar en el tiempo: una contraseña estática filtrada sigue siendo un problema hasta que se rota. Mover el mismo valor a una variable de entorno no cambia eso; lo que cambia el riesgo es limitar quién puede pedir el secreto, que dure poco y que cada acceso quede registrado.

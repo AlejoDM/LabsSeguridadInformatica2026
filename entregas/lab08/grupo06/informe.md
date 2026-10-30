@@ -1,163 +1,131 @@
 # Informe — Laboratorio 08 · Post-explotación y automatización
 
-**Grupo:** 06 ·
-**Integrantes:**
-| Nombre y apellido | Legajo | Usuario de GitHub |
-|---|---:|---|
-| Martín Beccereca | 15154 | @martinbeccereca |
-| María Belén Benito | 14625 | @belubenito603 |
-| Alejo De Miguel | 15138 | @AlejoDM |
-| Tomás Giudici | 14977 | @TomasGiudici |
-| Carolina Suppo | 15057 | @carosuppo |
-**Fecha:** 23/10/2026
+**Grupo:** 06
+**Fecha:** 23/10/2026 (última actualización: 28/10/2026)
+
+| Nombre y apellido  | Legajo | Usuario de GitHub |
+| ------------------ | -----: | ----------------- |
+| Martín Beccereca   |  15154 | martinbeccereca   |
+| María Belén Benito |  14625 | belubenito603     |
+| Alejo De Miguel    |  15138 | AlejoDM           |
+| Tomás Giudici      |  14977 | TomasGiudici      |
+| Carolina Suppo     |  15057 | carosuppo         |
 
 ## 0. Declaración de uso de IA
 
-Se utilizó Codex (OpenAI) para asistir en la organización de la evidencia, la redacción inicial de la fila de Loot, la respuesta P2 y el mini-research. Las credenciales y flags consignadas se verificaron mediante comandos ejecutados por el equipo dentro del entorno autorizado del Lab 08; las fuentes del research fueron leídas y contrastadas antes de incorporarlas. El grupo debe revisar este texto, completar los datos de integrantes y declarar cualquier otra herramienta utilizada.
+**Codex (OpenAI).** Lo usamos para organizar la evidencia y redactar la primera versión de la fila de loot, la respuesta P2 y el mini-research. Las credenciales y flags consignadas salen de comandos que ejecutamos dentro del entorno del Lab 08, y las fuentes del research se leyeron antes de incorporarlas.
 
-**Herramienta:** Claude Code.
+**Claude Code.** Lo usamos para ejecutar el reconocimiento de R1 sobre `/opt` en el host víctima, consolidar `evidencia/comandos.txt` y redactar la fila de recon y su análisis. Los comandos se ejecutaron como `operador` y la salida se guardó sin editar en `evidencia/salidas/`. En la revisión final también lo usamos para corregir la redacción del informe y del research, contrastar las afirmaciones con las salidas guardadas, verificar las fuentes, redactar el esbozo del pipeline (bonus) en el research y limpiar los comentarios de plantilla de `src/recolector.py` (sin cambiar su lógica).
 
-- **Finalidad del uso:** apoyo para ejecutar el reconocimiento de R1 contra el host víctima (`/opt`) y la consolidación de `comandos.txt`.
-- **Partes asistidas:** fila "R1 — Recon" en la tabla de flags, fila "Recon (R1)" y su análisis en la tabla de post-explotación y sección de comandos de R1 en `evidencia/comandos.txt`.
-- **Verificación:** los comandos se ejecutaron como `operador` y la salida se guardó cruda y sin editar en `evidencia/salidas/`. Se revisó el contenido antes de incorporarlo.
+**ChatGPT (OpenAI).** Lo usamos para implementar y probar `buscar_flag()` en `src/recolector.py`, interpretar respuestas HTTP y redactar la sección de automatización, la respuesta P4 y los comandos de R5. El script se ejecutó como `operador` dentro de la víctima contra `phantomcorp-db`.
 
-**Herramienta:** ChatGPT (OpenAI).
+**OpenCode.** Lo usamos para ejecutar el pivoting de R4, guardar sus salidas (`r4-pivot-victima.txt`, `r4-pivot-atacante.txt`, `r4-submit.txt`) y redactar la fila de pivoting, su análisis, la respuesta P5 y el bloque de R4 en la bitácora. Los comandos se ejecutaron en la víctima como `operador` y en la consola atacante, y la flag fue aceptada por `./ctf submit 08 R4` desde la raíz del repositorio.
 
-- **Finalidad del uso:** asistencia en la implementación y prueba del script de automatización del Reto 5, interpretación de respuestas HTTP y redacción de la documentación.
-- **Partes asistidas:** función `buscar_flag()` de `src/recolector.py`, sección 3 de Automatización, respuesta P4 y registro de comandos de R5.
-- **Verificación:** el programa se ejecutó como `operador` dentro del contenedor víctima y se comprobó su funcionamiento contra `phantomcorp-db`. Se verificó el hallazgo en el legajo 187, el comportamiento con rangos sin resultados y la aceptación de la flag mediante una copia temporal del validador.
-
-**Herramienta:** Opencode
-
-- **Finalidad del uso:** apoyo para ejecutar el R4 de pivoting, documentar sus salidas, redactar la documentación y la bitácora de comandos correspondiente.
-- **Partes asistidas:** fila "Pivoting (R4)" de la tabla de post-explotación, fila de R4 en la tabla de flags, sección "Observación, inferencia y límite — R4", respuesta P5, bloque de P4 en `evidencia/comandos.txt` y las salidas `r4-pivot-victima.txt`, `r4-pivot-atacante.txt` y `r4-submit.txt`.
-- **Verificación:** los comandos se ejecutaron en el entorno autorizado del Lab 08 (víctima como `operador` y consola atacante), las salidas se guardaron crudas y sin editar, y la flag `FLAG{pivot_internal_host}` fue aceptada por `./ctf submit 08 R4` desde la raíz del repositorio.
+En todos los casos revisamos el contenido antes de incorporarlo.
 
 ## 1. Flags capturadas
 
-| Reto      | Estado   | Evidencia                                               |
-| --------- | -------- | ------------------------------------------------------- |
-| R1 — Recon | Obtenida | [Salida cruda de R1](evidencia/salidas/r1-recon-opt.txt) y [envío de R1](evidencia/salidas/r1-submit.txt) |
-| R2 — Loot | Obtenida | [Salida cruda de R2](evidencia/salidas/r2-loot-env.txt) |
-| R3 — Escalada de privilegios (SUID) | Obtenida | [Elevación a root](evidencia/salidas/r3-privesc-identidad.txt) y [lectura de la flag](evidencia/salidas/r3-privesc-flag.txt). Flag `FLAG{privesc_suid_root}`, aceptada mediante `./ctf submit 08 R3`. |
-| R4 — Pivoting | Obtenida | [Consulta desde la víctima](evidencia/salidas/r4-pivot-victima.txt), [contraste desde el atacante](evidencia/salidas/r4-pivot-atacante.txt) y [envío de R4](evidencia/salidas/r4-submit.txt). Flag `FLAG{pivot_internal_host}`, aceptada mediante `./ctf submit 08 R4`. |
-| R5 — Automatización | Obtenida | [Código del recolector](src/recolector.py), [salida de la ejecución](evidencia/salidas/r5-recolector.txt) y [envío de R5](evidencia/salidas/r5-status-08.txt). Flag `FLAG{automation_pays_off}` en el legajo 187, aceptada mediante `./ctf submit 08 R5`. |
+| Reto                    | Flag                                | Evidencia                                                                                                                                                                                                          |
+| ----------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| R1 — Recon del host     | `FLAG{post_situational_awareness}`  | [r1-recon-opt.txt](evidencia/salidas/r1-recon-opt.txt), [r1-submit.txt](evidencia/salidas/r1-submit.txt)                                                                                                          |
+| R2 — Loot               | `FLAG{loot_credentials_found}`      | [r2-loot-env.txt](evidencia/salidas/r2-loot-env.txt)                                                                                                                                                               |
+| R3 — Privesc (SUID)     | `FLAG{privesc_suid_root}`           | [r3-suid-enumeracion.txt](evidencia/salidas/r3-suid-enumeracion.txt), [r3-privesc-identidad.txt](evidencia/salidas/r3-privesc-identidad.txt), [r3-privesc-flag.txt](evidencia/salidas/r3-privesc-flag.txt)       |
+| R4 — Pivoting           | `FLAG{pivot_internal_host}`         | [r4-pivot-victima.txt](evidencia/salidas/r4-pivot-victima.txt), [r4-pivot-atacante.txt](evidencia/salidas/r4-pivot-atacante.txt), [r4-submit.txt](evidencia/salidas/r4-submit.txt)                               |
+| R5 — Automatización     | `FLAG{automation_pays_off}`         | [r5-recolector.txt](evidencia/salidas/r5-recolector.txt), [r5-status-08.txt](evidencia/salidas/r5-status-08.txt)                                                                                                  |
 
-Estado final consolidado: [`./ctf status 08`](evidencia/salidas/status-08.txt) muestra las cinco flags aceptadas (5/5).
+El estado final de `./ctf status 08` es 5/5 ([status-08.txt](evidencia/salidas/status-08.txt)). Ese archivo muestra una consolidación del 28/10: las cinco flags se volvieron a presentar desde la raíz del repositorio y el validador respondió «Correcta (ya la tenías)» en todas, es decir, no son cinco validaciones nuevas de ese día sino la confirmación del progreso registrado. Antes de eso, R5 se había validado con una copia temporal del validador dentro de la consola atacante, que mostraba solo ese reto (1/5, [r5-status-08.txt](evidencia/salidas/r5-status-08.txt)), y R4 con el validador del repositorio ([r4-submit.txt](evidencia/salidas/r4-submit.txt)).
 
 ## 2. Informe de post-explotación
 
-| Fase      | Qué hicimos                                                                                                                                                                                            | Comando/técnica                                                                                                                | Evidencia                                                                                                                         | Defensa                                                                                                                                                                                                                                 |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Recon (R1) | Como `operador`, recién caído en el host, enumeramos `/opt` buscando información de despliegue que no debería estar ahí. Encontramos un subdirectorio con una nota de deploy legible por el usuario limitado. | `ls -la /opt`, `ls -la /opt/phantom-deploy` y `cat /opt/phantom-deploy/DEPLOY_NOTES.txt`, ejecutados desde el host víctima mediante `make shell-victima` (en esta sesión, `docker exec -u operador`). | [Salida R1](evidencia/salidas/r1-recon-opt.txt): confirma la identidad `operador`, el hostname `phantomcorp` y el contenido de `DEPLOY_NOTES.txt` con el `deploy_token` que incluye la flag. | Retirar notas y archivos de despliegue de rutas accesibles a cuentas de aplicación; aplicar permisos mínimos sobre `/opt`, inventariar qué queda en el filesystem tras un deploy y revisar ese inventario antes de pasar a producción. |
-| Loot (R2) | Como el usuario limitado `operador`, leímos el archivo de configuración de la aplicación. El archivo reveló el host de BD, el usuario de aplicación, una contraseña y el secreto que contiene la flag. | `cat /var/www/.env` ejecutado desde el host víctima mediante `make shell-victima` (en esta sesión, `docker exec -u operador`). | [Salida R2](evidencia/salidas/r2-loot-env.txt): confirma la identidad `operador`, la existencia de `/var/www/.env` y sus valores. | Retirar secretos de archivos legibles por usuarios no autorizados; usar un gestor de secretos, identidad de workload/credenciales de corta vida, permisos mínimos, auditoría, rotación y revocación inmediata de los valores expuestos. |
-| Privesc (R3) | Desde la cuenta limitada `operador`, identificamos un ejecutable no estándar con permisos SUID perteneciente a `root`. Comprobamos que permitía ejecutar comandos conservando privilegios efectivos de administrador y leer el archivo protegido indicado por la consigna. | `find / -type f -perm -4000 2>/dev/null` permitió localizar `/usr/local/bin/system-check`. Comprobamos sus permisos con `ls -l` y verificamos mediante SHA-256 que era una copia de Bash. Luego ejecutamos `/usr/local/bin/system-check -p -c 'id'` y `/usr/local/bin/system-check -p -c 'cat /root/flag.txt'`. | [Enumeración SUID](evidencia/salidas/r3-suid-enumeracion.txt), [identidad inicial](evidencia/salidas/r3-identidad.txt), [privilegios efectivos](evidencia/salidas/r3-privesc-identidad.txt) y [lectura del archivo protegido](evidencia/salidas/r3-privesc-flag.txt). Se observó `euid=0(root)` y se obtuvo la flag `FLAG{privesc_suid_root}`. No se comprobó persistencia ni acceso a otros sistemas. | Eliminar el permiso SUID de intérpretes y ejecutables que no lo necesiten, evitar utilizar herramientas de propósito general con privilegios de `root`, revisar periódicamente los archivos SUID/SGID y aplicar el principio de mínimo privilegio. |
-| Pivoting (R4) | Desde el host comprometido confirmamos que la base interna `phantomcorp-db` es alcanzable y responde, mientras que la consola atacante externa ni siquiera resuelve ese nombre. Lo que habilita el acceso es la posición de red de la víctima, no una debilidad de la base. | `ip addr`, `cat /etc/hosts`, `getent hosts phantomcorp-db` y `curl -isS http://phantomcorp-db/` ejecutados como `operador` desde el host víctima; contraste con `getent hosts phantomcorp-db` y `curl http://phantomcorp-db/` desde la consola atacante. | [Consulta desde la víctima](evidencia/salidas/r4-pivot-victima.txt): la víctima tiene interfaz en `labnet` (172.21.0.3) y en `internalnet` (172.20.0.3); `phantomcorp-db` resuelve a 172.20.0.2 y responde HTTP 200 con `FLAG{pivot_internal_host}`. [Intento desde el atacante](evidencia/salidas/r4-pivot-atacante.txt): solo posee 172.21.0.2 y no resuelve el host interno (curl error 6). No se desplegó túnel ni proxy. | Segmentación con políticas de este-oeste por defecto denegado: permitir desde la zona de aplicación únicamente los servicios y puertos que la base necesita, autenticación y autorización por servicio en la base, listas de permitidos de origen y monitoreo de conexiones internas anómalas. |
+| Fase           | Qué hicimos                                                                                                                                                                  | Comando/técnica                                                                                                                                                                                      | Evidencia                                                                                                                                                                                                 | Defensa                                                                                                                                                                                                                                        |
+| -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Recon del host | Como `operador`, confirmamos identidad y host y enumeramos `/opt`. Encontramos una nota de despliegue legible por el usuario limitado.                                      | `id`, `hostname`, `hostname -I`, `ls -la /opt /opt/phantom-deploy`, `cat /opt/phantom-deploy/DEPLOY_NOTES.txt`                                                                                    | [r1-recon-opt.txt](evidencia/salidas/r1-recon-opt.txt): `uid=1000(operador)`, host `phantomcorp`, `DEPLOY_NOTES.txt` con permisos `-rw-r--r--` y la línea `deploy_token=FLAG{post_situational_awareness}`. | No dejar notas ni artefactos de despliegue en el servidor; si un archivo es necesario, restringir su lectura a la cuenta que lo usa. Revisar el filesystem resultante de cada deploy antes de pasarlo a producción.                           |
+| Loot           | Leímos el archivo de configuración de la aplicación con la misma cuenta limitada.                                                                                            | `ls -la /var/www`, `cat /var/www/.env`                                                                                                                                                              | [r2-loot-env.txt](evidencia/salidas/r2-loot-env.txt): `.env` de `root:root` con permisos `0644`; contiene `DB_HOST`, `DB_USER=phantom_app`, `DB_PASS` y `APP_SECRET=FLAG{loot_credentials_found}`.       | Quitar el permiso de lectura para otros usuarios (`chmod 640` con el grupo del servicio, o `600`), entregar la credencial desde un gestor de secretos y rotar la contraseña expuesta.                                                         |
+| Privesc (SUID) | Buscamos binarios SUID y encontramos uno no estándar, `/usr/local/bin/system-check`. Lo ejecutamos con `-p` y leímos `/root/flag.txt`.                                     | `find / -type f -perm -4000 2>/dev/null`, `ls -l`, `sha256sum` contra `/bin/bash`, `system-check -p -c 'id'`, `system-check -p -c 'cat /root/flag.txt'`                                           | [r3-suid-enumeracion.txt](evidencia/salidas/r3-suid-enumeracion.txt) lista `system-check` junto a binarios SUID habituales; [r3-privesc-identidad.txt](evidencia/salidas/r3-privesc-identidad.txt) muestra `uid=1000(operador) ... euid=0(root)`; [r3-privesc-flag.txt](evidencia/salidas/r3-privesc-flag.txt) contiene la flag. | Quitar el bit SUID con `chmod u-s /usr/local/bin/system-check` y controlar en cada despliegue que la lista de binarios SUID coincida con una línea base aprobada.                                                                             |
+| Pivoting       | Desde la víctima resolvimos y consultamos `phantomcorp-db`; desde la consola atacante repetimos la consulta como contraste.                                                 | Víctima: `ip addr`, `cat /etc/hosts`, `getent hosts phantomcorp-db`, `curl -isS http://phantomcorp-db/`. Atacante: `hostname -I`, `getent hosts phantomcorp-db`, `curl http://phantomcorp-db/`. | [r4-pivot-victima.txt](evidencia/salidas/r4-pivot-victima.txt): interfaces 172.21.0.3 y 172.20.0.3, `phantomcorp-db` en 172.20.0.2, `HTTP/1.0 200 OK` con la flag. [r4-pivot-atacante.txt](evidencia/salidas/r4-pivot-atacante.txt): solo 172.21.0.2 y `curl: (6) Could not resolve host`. | Filtrar el tráfico entre zonas con política de denegación por defecto: desde la red de aplicación, permitir solo el puerto que la aplicación usa y solo desde su proceso o cuenta de servicio. La base debe exigir autenticación propia. |
 
-### Observación, inferencia y límite — R1
+### Recon del host
 
-**Observación.** El proceso se ejecutó como `uid=1000(operador)` en el host `phantomcorp`. Dentro de `/opt` existe un único subdirectorio, `phantom-deploy`, propiedad de `root:root`, que contiene un archivo `DEPLOY_NOTES.txt` legible por `operador`. Su contenido es `PhantomCorp - notas de despliegue (NO borrar)` seguido de `deploy_token=FLAG{post_situational_awareness}`.
+La salida de R1 muestra que el proceso corría como `uid=1000(operador)` en `phantomcorp`. En `/opt` había un solo directorio, `phantom-deploy`, de `root:root`, con un archivo `DEPLOY_NOTES.txt` legible por cualquier usuario. Su contenido era `PhantomCorp - notas de despliegue (NO borrar)` y `deploy_token=FLAG{post_situational_awareness}`.
 
-**Inferencia.** Una nota de despliegue dejada en un directorio legible por una cuenta de aplicación de bajo privilegio indica que el proceso de deploy no limpió artefactos operacionales del sistema en producción. El nombre del campo (`deploy_token`) sugiere que, en un escenario real, ese valor podría usarse para autenticar o identificar un despliegue ante algún sistema externo, aunque este paquete no permite comprobar contra qué servicio se validaría.
+Que una cuenta de aplicación pueda leer una nota de despliegue indica que el proceso de deploy dejó artefactos operativos en el servidor. El nombre `deploy_token` sugiere que en un caso real podría servir para autenticar un despliegue, pero no verificamos contra qué servicio se usaría ni si estaba vigente. Encontrar el archivo no implica privilegios elevados: eso se evaluó recién en R3.
 
-**No verificado.** Esta evidencia no demuestra que el `deploy_token` esté vigente, que habilite por sí solo alguna acción privilegiada, ni que existan otros archivos sensibles fuera de `/opt` accesibles a `operador`. Encontrar información operacional no equivale a tener privilegios elevados; eso se evalúa recién en R3.
+### Loot
 
-### Observación, inferencia y límite — R2
+`/var/www/.env` pertenecía a `root:root` con permisos `0644`, por lo que `operador` podía leerlo. Incluía el host de la base, el usuario `phantom_app`, su contraseña y `APP_SECRET` con la flag. El problema no es que el archivo exista, sino que cualquier cuenta local lo pueda leer: con esa contraseña, el acceso a la base interna depende solo de llegar a ella por red.
 
-**Observación.** El proceso se ejecutó como `uid=1000(operador)`. `/var/www/.env` era un archivo de propiedad `root:root`, con permisos `0644`, y su contenido resultó legible para ese usuario. Incluía `DB_HOST=phantomcorp-db`, `DB_USER=phantom_app`, `DB_PASS=…` y `APP_SECRET=FLAG{loot_credentials_found}`.
+No probamos la contraseña contra la base ni contra otros sistemas, así que no sabemos qué permisos tiene `phantom_app` ni si la credencial se reutiliza.
 
-**Inferencia.** Una cuenta local de bajo privilegio que pueda leer este archivo puede obtener credenciales de la aplicación y secretos que deberían estar restringidos. Si la contraseña sigue vigente y el usuario conserva permisos de conexión, esto reduce el costo de acceder al servicio interno de base de datos.
+### Privesc (SUID)
 
-**No verificado.** Esta evidencia no demuestra por sí sola qué permisos tiene `phantom_app` dentro de la base, que la contraseña se reutilice en otros sistemas, ni que puedan modificarse datos. Esos aspectos requieren pruebas adicionales y permanecen fuera de R2.
+La enumeración devolvió nueve binarios SUID. Ocho son habituales en Debian (`passwd`, `su`, `mount`, `umount`, `chfn`, `chsh`, `gpasswd`, `newgrp`); el noveno, `/usr/local/bin/system-check`, está en `/usr/local`, la ubicación reservada para software instalado a mano y no por los paquetes de la distribución. Comparamos su SHA-256 con el de `/bin/bash` y coincidió, lo que indica que es una copia de Bash con otro nombre. La salida de esa comparación no quedó guardada; el comando figura en la [bitácora](evidencia/comandos.txt).
 
-### Observación, inferencia y límite — R4
+Ejecutado con `-p`, el proceso mostró `uid=1000(operador)` y `euid=0(root)`: el usuario real sigue siendo `operador`, pero el efectivo es root, y eso alcanza para leer `/root/flag.txt`. No buscamos persistencia ni otras vías de escalada.
 
-**Diagrama de tres zonas.**
+### Pivoting
 
 ```text
 ┌─────────────────────┐             ┌───────────────────────────┐             ┌─────────────────────┐
 │  Consola atacante   │   labnet    │  Host víctima             │ internalnet │  Host interno       │
 │  attacker           ├────────────►│  phantomcorp              ├────────────►│  phantomcorp-db     │
-│  172.21.0.2 (root)  │ 172.21.0/16 │  172.21.0.3 + 172.20.0.3  │ 172.20.0/16 │  172.20.0.2         │
-└──────────┬──────────┘             └─────────────┬─────────────┘             └──────────▲──────────┘
-           │                                      │                                     │
-           └─────────── ✗ el atacante no resuelve ni alcanza phantomcorp-db ───────────────┘
+│  172.21.0.2         │ 172.21.0/16 │  172.21.0.3 + 172.20.0.3  │ 172.20.0/16 │  172.20.0.2         │
+└─────────────────────┘             └───────────────────────────┘             └─────────────────────┘
 ```
 
-La consola atacante pertenece únicamente a `labnet`; el host víctima posee una interfaz en cada zona; el host interno solo existe en `internalnet`.
+La víctima tiene una interfaz en cada red (`eth0` 172.21.0.3 y `eth1` 172.20.0.3). Desde ahí, `phantomcorp-db` resuelve a 172.20.0.2 y responde `HTTP/1.0 200 OK` con un JSON que dice «Base de datos interna. Acceso restringido a la LAN.» y la flag. La consola atacante solo tiene 172.21.0.2; `getent` no resuelve el nombre y `curl` termina con el error 6 (`Could not resolve host`).
 
-**Observación.** Desde la víctima, como `uid=1000(operador)`, el host posee `eth0` 172.21.0.3 y `eth1` 172.20.0.3; `getent hosts phantomcorp-db` resuelve a 172.20.0.2 y `curl -isS http://phantomcorp-db/` devuelve `HTTP/1.0 200 OK` con el JSON que incluye `FLAG{pivot_internal_host}`. Desde la consola atacante, que solo tiene la interfaz 172.21.0.2, `getent` no resuelve el nombre y `curl` falla con el error 6 (`Could not resolve host: phantomcorp-db`).
-
-**Inferencia.** La conectividad observada desde la víctima se debe a su pertenencia a la red interna, no a una debilidad del servicio de base de datos: cuando la consulta proviene de la zona interna, el servicio responde normalmente. El fallo del atacante es de posición de red (segmentación), no de indisponibilidad. El pivote, entonces, consiste en usar el host comprometido como punto de presencia en la red interna; no se desplegó túnel ni proxy porque la práctica pedía demostrar el alcance posicional del acceso, no construir uno.
-
-**No verificado.** Esta evidencia no demuestra acceso a datos más allá de la ruta raíz del servicio, el uso de las credenciales de R2 contra la base, la modificación de datos, ni que se pueda construir un túnel que exponga `phantomcorp-db` al atacante externo; nada de eso se intentó.
+La diferencia entre los dos puntos de vista es de posición en la red: la víctima pertenece a `internalnet` y el atacante no. El fallo del atacante es de resolución de nombres. No intentamos conectarnos por IP a 172.20.0.2, así que la prueba no muestra un bloqueo por IP; lo que sí muestra es que el atacante no tiene ninguna interfaz en 172.20.0.0/16, lo que es consistente con que no tenga ruta hacia esa red. No montamos túneles ni proxies: el pivote consistió en usar la víctima como punto de presencia y se limitó a la ruta raíz del servicio. Tampoco usamos las credenciales de R2 contra la base.
 
 ## 3. Automatización
 
-Para el Reto 5 desarrollamos un script en Python que automatiza la consulta de legajos de empleados a través del endpoint `/empleado?id=N`, perteneciente al servidor interno `phantomcorp-db`.
+Completamos `buscar_flag()` en [src/recolector.py](src/recolector.py). La función recorre los IDs del rango recibido, consulta cada legajo con `consultar_legajo()` (provista por la cátedra) y devuelve el ID y el valor apenas encuentra la clave `legajo_oculto`, que es la que distingue al legajo especial de los normales (`nombre` y `area`). Los errores HTTP, incluido el 404 de un legajo inexistente, y los errores de red se convierten en `None` y el recorrido sigue. El rango y la URL base se pasan por argumentos, y solo usa la biblioteca estándar.
 
-Partimos del archivo proporcionado por la cátedra, conservando la función `consultar_legajo()` y completando la función `buscar_flag()`. Esta última recorre los identificadores dentro del rango indicado, consulta cada legajo y analiza la respuesta JSON para detectar el campo especial `legajo_oculto`, que contiene la flag.
+Lo ejecutamos como `operador` dentro de la víctima, porque `phantomcorp-db` solo se alcanza desde ahí:
 
-El programa utiliza únicamente bibliotecas estándar de Python. Además, contempla respuestas fallidas, como los errores HTTP 404, y se detiene inmediatamente cuando encuentra el registro buscado, evitando realizar consultas innecesarias.
+```text
+$ python3 /tmp/recolector.py --base http://phantomcorp-db --desde 1 --hasta 250
+[*] Enumerando legajos 1..250 en http://phantomcorp-db
+[+] Flag en el legajo id=187: FLAG{automation_pays_off}
+```
 
-**Ejecución:** El script se ejecutó desde el contenedor víctima `phantomcorp`, utilizando el usuario limitado `operador`, ya que el servidor `phantomcorp-db` solo es accesible desde la red interna del laboratorio.
-
-**Resultado obtenido:** Al recorrer los legajos del 1 al 250, el programa identificó el legajo **187**, correspondiente a `cuenta-servicio`, y recuperó la flag `FLAG{automation_pays_off}`. Posteriormente, la flag fue aceptada por el validador del laboratorio.
-
-También realizamos pruebas con el rango del 1 al 5 y con el identificador 251. En ambos casos, el programa finalizó correctamente informando que no encontró la flag, sin producir errores de ejecución.
-
-**Evidencias:** [Código del recolector](src/recolector.py) y [salida de la ejecución](evidencia/salidas/r5-recolector.txt).
-
-**Alcance:** Las consultas se limitaron al servicio interno del entorno autorizado. El script no modifica datos ni realiza solicitudes fuera del rango requerido para la prueba principal.
+El script se detuvo en el legajo 187, así que hizo 187 consultas y no 250. También lo corrimos con los rangos 1–5 y 251–251 para comprobar el caso sin hallazgo; en ambos terminó informando que no encontró el flag. Esas dos salidas no se guardaron en `evidencia/salidas/`; los comandos están en la [bitácora](evidencia/comandos.txt).
 
 ## 4. Preguntas de análisis
 
 ### P1 — ¿Por qué un binario SUID es peligroso? ¿Qué hace el flag `-p`?
 
-El bit SUID (`set-user-ID`) hace que, al ejecutar el binario, el proceso corra con los permisos del **dueño del archivo**, no con los del usuario que lo invocó. Esto existe para casos legítimos y acotados: por ejemplo, `passwd` necesita escribir en `/etc/shadow`, que un usuario común no puede tocar directamente, así que `passwd` es SUID de `root` para esa única operación controlada. El problema aparece cuando el binario con SUID es una herramienta de propósito general (un intérprete, un editor, una utilidad de archivos, etc.) que además permite ejecutar comandos arbitrarios o leer/escribir rutas arbitrarias. Si ese binario pertenece a `root` y tiene SUID activo, cualquier usuario que pueda invocarlo hereda, para esa invocación, los privilegios de `root` — y si la herramienta permite lanzar un shell o leer cualquier archivo, el usuario limitado termina con acceso de administrador. GTFOBins documenta, para decenas de binarios comunes, la invocación exacta que logra ese efecto.
+Un binario con el bit SUID se ejecuta con el UID efectivo de su dueño y no con el de quien lo invoca. Tiene usos legítimos y acotados: `passwd` es SUID de root porque tiene que escribir `/etc/shadow`, pero solo hace esa operación. El riesgo aparece cuando el binario es una herramienta de propósito general que permite ejecutar comandos o leer y escribir archivos arbitrarios. Si además pertenece a root, cualquier usuario que lo ejecute obtiene privilegios de root para todo lo que esa herramienta permita hacer. GTFOBins recopila, para muchos binarios comunes, la invocación que logra esto.
 
-El flag `-p` aparece en varias de esas invocaciones (por ejemplo en intérpretes o editores que de otro modo *bajarían* sus propios privilegios al detectar que corren con un UID efectivo distinto del real, como medida de seguridad del propio binario). `-p` le indica al programa que **preserve** los privilegios efectivos en vez de resignarlos automáticamente; sin esa opción, el binario podría "notar" que fue invocado vía SUID y renunciar por su cuenta a los privilegios elevados antes de ejecutar nada, frustrando el intento de escalada. Con `-p`, el proceso que arranca —por ejemplo un shell— conserva el UID efectivo de `root` en lugar de caer al UID real del usuario que lo invocó.
+En PhantomCorp el caso es el más directo posible: `system-check` es una copia de Bash con SUID de root. Bash tiene una protección propia: si arranca con UID efectivo distinto del real, baja el efectivo al real antes de ejecutar nada. La opción `-p` (modo privilegiado) desactiva ese descenso y conserva el UID efectivo. Por eso `system-check -p -c 'id'` mostró `euid=0(root)` con `uid=1000(operador)`, y sin `-p` el mismo binario habría corrido como `operador`.
 
-Esta respuesta describe el mecanismo general de SUID y de `-p`. La identificación del binario SUID no estándar presente en PhantomCorp, la invocación concreta usada contra él y la evidencia de la escalada lograda corresponden a R3 y quedan a cargo de ese responsable; esta sección no reemplaza esa evidencia.
+### P2 — ¿Por qué el atacante no alcanzaba `phantomcorp-db` y desde la víctima sí?
 
-### P2 — ¿Por qué el atacante no alcanzaba `phantomcorp-db` y sí pudo hacerlo desde la víctima?
+Porque la consola atacante está solo en `labnet` y `phantomcorp-db` solo en `internalnet`; la víctima está en las dos (ver el diagrama de la sección de pivoting). El servicio se presenta como «Acceso restringido a la LAN» ([p2-pivot-apoyo.txt](evidencia/salidas/p2-pivot-apoyo.txt)), es decir, confía en la ubicación de red del cliente. Al comprometer la víctima quedamos dentro de esa ubicación, y un `curl` desde ahí bastó. Eso es pivotear: usar el host comprometido como punto de apoyo hacia una red que no estaba expuesta.
 
-El atacante inicial opera desde la red `labnet`, donde solo está expuesto el host `phantomcorp`. La base `phantomcorp-db` pertenece a una red interna separada y no es alcanzable desde esa consola externa. En cambio, el host víctima participa también en la red interna; por eso, una vez obtenido acceso como `operador`, pudo resolver y consultar `http://phantomcorp-db/`. La salida de apoyo de [pivoting](evidencia/salidas/p2-pivot-apoyo.txt) identifica al servicio como una base interna con acceso restringido a la LAN.
+### P3 — ¿Qué práctica evita que los secretos queden en `.env` y `.bash_history`?
 
-Esto ilustra un pivote: el host comprometido funciona como punto de apoyo desde una zona visible por el atacante hacia una red que no estaba expuesta directamente. No se creó un túnel ni se desplegó un proxy en esta práctica; se demostró únicamente que la posición de red de la víctima permite la conexión. La mitigación no es solo ocultar el nombre del host: requiere segmentación con reglas de salida mínimas, autenticación y autorización del servicio de base de datos, credenciales de mínimo privilegio y monitoreo de conexiones este-oeste inusuales.
+Para el `.env`, la práctica central es no guardar credenciales estáticas en archivos que lean otras cuentas. La aplicación debería obtenerlas en tiempo de ejecución desde un gestor de secretos, con acceso limitado a su propia identidad. Si el archivo es inevitable, debe tener permisos restrictivos (no `0644`), quedar fuera del control de versiones y contener solo lo necesario. Una credencial que ya quedó expuesta, como la de R2, se rota.
 
-### P3 — ¿Cómo evitar que los secretos queden expuestos en archivos `.env` e historiales de comandos?
+Para el historial, la práctica es no pasar contraseñas ni tokens como argumentos en la línea de comandos, porque quedan en `.bash_history` y también son visibles en la lista de procesos mientras el comando corre. Conviene leerlos desde un archivo protegido, desde la entrada estándar o desde el gestor de secretos. En este laboratorio el loot salió del `.env`; no encontramos secretos en un historial.
 
-La exposición de credenciales y secretos en archivos de configuración o historiales de comandos representa un riesgo importante, ya que un usuario con acceso limitado al sistema podría obtener información que le permita acceder a otros servicios.
+### P4 — ¿Qué decidimos nosotros que el script no decide solo?
 
-Para prevenirlo, una medida fundamental es utilizar un gestor de secretos, evitando almacenar contraseñas y tokens directamente en archivos `.env`. Cuando estos archivos sean necesarios, deben tener permisos restrictivos y ser accesibles únicamente para los usuarios o procesos autorizados. También se deben excluir del control de versiones y revisar que no contengan credenciales innecesarias.
+El script repite una consulta y aplica una regla; todo lo demás lo decidimos nosotros:
 
-En cuanto al historial de comandos, se debe evitar introducir contraseñas o tokens directamente en la terminal, especialmente como argumentos que puedan quedar registrados. Es preferible utilizar mecanismos seguros de autenticación y suministro de credenciales que no las expongan en el historial.
+- **Qué consultar y desde dónde.** Elegimos `phantomcorp-db` porque R4 mostró que solo se alcanza desde la víctima, y por eso el script corre ahí.
+- **El rango.** 1 a 250 sale de la consigna; el script no sabe cuántos legajos existen.
+- **Qué cuenta como hallazgo.** Antes de escribir la condición consultamos un legajo normal con `curl` y vimos qué claves tenía; la regla «tiene `legajo_oculto`» la definimos nosotros.
+- **Cuándo parar.** Cortar en el primer hallazgo fue una decisión de diseño para no hacer consultas innecesarias.
+- **Qué hacer con el resultado.** El script imprime la flag; presentarla, documentarla y no usar los datos de los demás legajos lo decidimos nosotros.
 
-Finalmente, si una credencial queda expuesta, debe revocarse o rotarse. Estas medidas, junto con el principio de mínimo privilegio, reducen tanto la posibilidad de obtener secretos como el impacto de una eventual filtración.
+Un agente podría tomar algunas de estas decisiones, por ejemplo deducir la regla a partir de las respuestas, pero el alcance autorizado y el límite de lo que se hace con los datos tienen que seguir fijados por una persona. En el research esbozamos cómo se encadenarían recon, enumeración y explotación en un solo pipeline, y dónde quedarían esos controles.
 
-En PhantomCorp, el hallazgo de R2 demuestra la importancia de proteger los archivos de configuración, ya que `/var/www/.env` era legible por el usuario `operador`. Sin embargo, esa observación no demuestra que las credenciales hayan sido utilizadas para comprometer otros sistemas.
+### P5 — Mitigación para el privesc por SUID y para el pivoting
 
-### P4 — ¿Qué decisiones humanas no toma el script y debería evaluar un agente?
+**SUID.** La corrección puntual es `chmod u-s /usr/local/bin/system-check`, o directamente borrar el archivo, ya que es una copia de Bash sin función legítima. Para que no vuelva a pasar, cada despliegue debería comparar la salida de `find / -perm -4000 -type f` con una línea base aprobada y bloquear el pase si aparece un binario nuevo; una herramienta de integridad como AIDE puede alertar sobre cambios de permisos. Sin el bit SUID, `operador` no puede leer `/root/flag.txt` por esta vía, aunque eso no descarta otras escaladas que no buscamos.
 
-El script desarrollado para el Reto 5 automatiza una tarea repetitiva: consultar legajos, analizar las respuestas y detenerse cuando encuentra una flag. Sin embargo, no toma decisiones sobre el contexto, la autorización ni las consecuencias de las acciones que realiza.
+**Pivoting.** La víctima tiene que llegar a la base solo para lo que la aplicación necesita. La mitigación concreta es una regla de firewall en la víctima o en el borde de `internalnet` que, por defecto, deniegue el tráfico hacia `phantomcorp-db` y permita solo el puerto del servicio que usa la aplicación, idealmente solo desde su cuenta de servicio. Además, la base no debería confiar en la ubicación de red («acceso restringido a la LAN») y tendría que exigir autenticación propia. Con esa regla, el `curl` que ejecutó `operador` desde una shell habría sido rechazado; monitorear las conexiones entre zonas permitiría además detectar el intento.
 
-Por ejemplo, una persona debe definir previamente qué sistema está autorizado a consultar, qué rango de identificadores corresponde utilizar y cuál es el objetivo de la búsqueda. El script solamente ejecuta esas instrucciones; no puede determinar por sí mismo si una consulta está permitida o si sus resultados deberían utilizarse para realizar otras acciones.
+## 5. Bitácora de comandos
 
-Un agente podría incorporar decisiones adicionales, como interpretar respuestas inesperadas, adaptar el procedimiento ante errores o seleccionar entre distintas herramientas. Sin embargo, esas capacidades también requieren límites y supervisión humana, especialmente cuando podrían implicar acceder a información sensible o ampliar el alcance de una prueba.
-
-En nuestro laboratorio, el programa se limitó a recorrer los legajos del 1 al 250, identificar el registro que contenía la flag y detenerse inmediatamente. Esto demuestra cómo la automatización permite ahorrar tiempo en tareas repetitivas, pero **no reemplaza el criterio humano para definir objetivos, permisos y límites de seguridad**.
-
-### P5 — Defensor: proponé una mitigación concreta para el privesc por SUID y otra para el pivoting
-
-**Contra el privesc por SUID.** La causa raíz de R3 fue un binario de propósito general (una copia de Bash, `/usr/local/bin/system-check`) con bit SUID de `root`. La mitigación concreta es auditar y eliminar el bit de los binarios que no lo necesiten: ejecutar periódicamente `find / -perm -4000 -type f` contra una línea base conocida, remover el permiso con `chmod u-s` de todo intérprete o herramienta de propósito general que aparezca, y usar alternativas de propósito acotado (por ejemplo, el propio `passwd` que delega solo la escritura a `/etc/shadow`). En el entorno de la víctima, la corrección puntual sería `chmod u-s /usr/local/bin/system-check`. Para que el control sea sostenible, el inventario SUID debería verificarse en cada despliegue (con `dpkg -V` o un control de integridad tipo AIDE) de modo que un SUID nuevo dispare una alerta antes de pasar a producción.
-
-Esta mitigación ataca exactamente lo observado: sin el bit SUID, `operador` vuelve a ser un usuario sin capacidad de leer `/root/flag.txt`. Lo que no queda demostrado con esta evidencia es si existen otras vías de escalada en el host; la auditoría sería la que lo determine.
-
-**Contra el pivoting.** La causa raíz de R4 es la conectividad sin restricciones del host comprometido hacia la red interna. La mitigación concreta es una política este-oeste de defecto denegado: el servidor de aplicación solo debería poder iniciar conexiones hacia la base por el puerto del servicio que consume, y la base solo aceptar conexiones del servicio de aplicación (lista de permitidos por origen y autenticación por servicio, no credenciales compartidas en un `.env`). Aplicado al lab: una regla de firewall en la víctima o en el gateway de `internalnet` que limite las salidas hacia `phantomcorp-db` al puerto del servicio y al origen autorizado habría bloqueado el `curl http://phantomcorp-db/` que devolvió la flag.
-
-Además, la resolución de nombres y el tráfico este-oeste deberían monitorearse: una consulta DNS interna por `phantomcorp-db` originada en una cuenta de shell como `operador` es anómala y detectable. Esta propuesta cubre el caso observado; no afirma que impida todo movimiento lateral, ya que la evidencia de R4 no explora otras rutas internas.
-
-## 5. Bitácora de P2
-
-Ver [comandos de P2](evidencia/comandos.txt). Todos se ejecutaron exclusivamente en los contenedores autorizados del Lab 08.
+Los comandos de cada reto, con fecha y punto de ejecución, están en [evidencia/comandos.txt](evidencia/comandos.txt). Todos se ejecutaron en los contenedores del Lab 08.

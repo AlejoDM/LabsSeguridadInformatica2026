@@ -21,9 +21,6 @@ docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; echo '--- /
 # Ejecutado desde el host anfitrión para entrar como `operador` al contenedor víctima:
 docker exec -u operador cyberlab-phantomcorp bash -lc "id; hostname; echo '--- consulta al host interno ---'; curl -sS http://phantomcorp-db/ 2>&1"
 
-# 3. Presentación de flags: pendiente de ejecutar desde una instalación Unix/WSL
-# con finales de línea LF. No se registró una salida de `ctf submit` en esta entrega.
-
 # --- P3 — R3: escalada de privilegios mediante SUID ---
 # Fecha de ejecución: 2026-10-23
 
@@ -120,11 +117,8 @@ docker exec cyberlab-attacker bash -c "id; hostname; hostname -I; echo '--- reso
 ./ctf status 08
 
 # Resultado: [ OK ] Reto R4 resuelto: Pivoting al host interno.
-# Estado en el validador real: R4 ✓ (1/5, sin consolidar los retos de los demás).
 
 # --- Consolidación del estado del validador (2026-10-28) ---
-# El progreso de .progreso/ es local por máquina (está en .gitignore),
-# por lo que las submisiones del 23 y 26/10 no figuraban en esta instalación.
 # Se presentaron desde la raíz del repositorio (Git Bash) las cinco flags
 # ya obtenidas y documentadas por el grupo:
 ./ctf submit 08 R1 'FLAG{post_situational_awareness}'
