@@ -117,3 +117,17 @@ curl -sS http://phantomcorp/soc > /tmp/soc-raw.txt
 # Salidas en evidencia/salidas/r4-submit.txt y evidencia/salidas/status-10.txt.
 # Progreso consolidado copiado al host:
 # docker cp cyberlab-attacker:/tmp/lab10-p4/.progreso/10.done .progreso/10.done
+
+# --- Revalidación final de R1–R5 desde progreso vacío (2026-10-30) ---
+# Se creó una copia temporal de ctf, bin/lib y labs/lab10-deteccion-evasion.
+# Solo en esa copia se normalizaron CRLF a LF para ctf, sus bibliotecas y
+# retos.manifest; los originales del repositorio no se editaron.
+# Desde la raíz temporal se ejecutó:
+# ./ctf submit 10 R1 soc_log_access
+# ./ctf submit 10 R2 detection_triggered
+# ./ctf submit 10 R3 signature_ruleset
+# ./ctf submit 10 R4 signature_evaded
+# ./ctf submit 10 R5 intrusion_in_the_noise
+# ./ctf status 10 > entregas/lab10/grupo06/evidencia/salidas/status-10-revalidado-lf.txt
+# Las cinco presentaciones fueron aceptadas. Luego se copió únicamente
+# .progreso/10.done al repositorio para registrar el estado 5/5.
