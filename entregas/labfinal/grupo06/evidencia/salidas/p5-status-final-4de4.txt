@@ -1,0 +1,13 @@
+
+[36m  ╭────────────────────────────────────────────────────────────╮
+  │                    PROGRESO · LAB final                    │
+  ╰────────────────────────────────────────────────────────────╯[0m
+
+   [32m✓[0m  R1     Recon/enum: portal interno localizado
+   [32m✓[0m  R2     Explotacion: foothold por SQLi
+   [32m✓[0m  R3     Post: token de API looteado
+   [32m✓[0m  R4     Impacto: crown jewels (datos de clientes)
+
+  [32m██████████████████████████████[90m[0m  4/4 (100%)
+
+[32m[ OK ][0m ¡Lab final COMPLETO! Ponete las pilas con la próxima unidad.
