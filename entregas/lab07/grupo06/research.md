@@ -1,13 +1,16 @@
 # Mini-research — Laboratorio 07
 
-**Grupo:** 06 · **Tema A:** consultas parametrizadas / prepared statements.
-**Fecha:** 2026-10-23 · **Responsabilidad:** P4.
+**Grupo:** 06
+**Tema elegido:** A. Consultas parametrizadas: cómo separan datos de código y por qué eliminan la SQLi de raíz.
+**Fecha:** 30/10/2026
 
 ## Desarrollo
 
-La SQL Injection ocurre cuando una aplicación incorpora datos controlados por el usuario directamente en la estructura de una sentencia SQL. Las consultas parametrizadas previenen este problema porque mantienen fija la instrucción y transmiten los valores por separado. En Python, el módulo `sqlite3` permite utilizar marcadores `?` y proporcionar los valores mediante una tupla [1]. SQLite documenta cómo se enlazan estos parámetros [2], mientras que OWASP recomienda esta técnica como una de las principales defensas contra SQL Injection [3].
+Una SQL injection ocurre cuando la aplicación arma la sentencia SQL pegando dentro del texto valores que controla el usuario. En R1 y R2 lo vimos: una comilla en el valor cerraba el texto previsto y lo que venía después (`--`, `UNION`) pasaba a ser parte de la consulta. El problema no es un carácter en particular, sino que código y datos viajan juntos en el mismo string.
 
-Este ejemplo defensivo reproduce el enlace de parámetros en una base creada en RAM. Los nombres y claves son ficticios; no son cuentas del laboratorio. No se ejecuta una consulta vulnerable ni se envían requests a otro reto.
+Una consulta parametrizada separa las dos cosas. La aplicación envía la sentencia con marcadores en lugar de los valores, y después entrega los valores por otra vía. En SQLite, los marcadores pueden ser `?`, `?NNN` o nombres como `:nombre`, y los valores se asignan en tiempo de ejecución con la familia de funciones `sqlite3_bind()` [2]. Como la sentencia ya está analizada cuando llegan los datos, un valor no puede cambiar su estructura. OWASP lo resume así: la estructura SQL se define aparte de los valores, que se enlazan mediante la API de la base y se tratan como datos y no como sintaxis; por eso la ubica como primera defensa [3].
+
+En Python, el módulo `sqlite3` aplica esta idea con el segundo argumento de `execute()`. Su documentación advierte que armar consultas con operaciones de strings de Python es vulnerable a inyección y pide usar siempre marcadores [1]. El siguiente ejemplo usa una base en memoria con datos ficticios, sin relación con el laboratorio:
 
 ```python
 import sqlite3
@@ -22,23 +25,24 @@ for nombre, clave in casos:
     assert bool(filas) == (nombre == "admin" and clave == "clave-ficticia")
 con.close()
 print("OK: el texto con comilla y comentario se trata como un valor literal.")
-
 ```
 
-El ejemplo utiliza una base de datos SQLite en memoria y contempla tres casos: credenciales válidas, contraseña incorrecta y un nombre de usuario que contiene caracteres utilizados habitualmente en SQL Injection. El programa está diseñado para demostrar que la entrada maliciosa se interpreta como un valor literal y no modifica la estructura de la consulta. Su ejecución puede reproducirse con Python y no requiere conectarse al servidor de PhantomCorp.
+Al ejecutarlo, solo el primer caso devuelve una fila. El tercero usa el mismo payload de R1, `admin' --`, y no devuelve nada: el motor buscó un usuario cuyo nombre es literalmente `admin' --`, y no existe. La comilla y el comentario no tuvieron ningún efecto sobre la consulta.
 
-La propiedad importante es la separación entre sintaxis y valores, no una sustitución textual manual. Por ello una llamada a `execute` con un SQL previamente concatenado sigue siendo insegura. Los marcadores no reemplazan nombres de tabla, columnas ni palabras clave: cualquier selección dinámica de esos elementos requiere alternativas predefinidas. Tampoco resuelven autorización, traversal o almacenamiento de contraseñas. En una aplicación real corresponde verificar hashes de contraseñas; el ejemplo usa texto ficticio solo para mostrar el filtro.
+La protección depende de usar bien el mecanismo. Si el SQL se concatena antes de pasarlo a `execute()`, la consulta sigue siendo vulnerable aunque se use la misma función [3]. Los marcadores representan valores, no nombres de tablas, columnas ni palabras clave como `ASC` o `DESC`; cuando esas partes tienen que ser dinámicas, OWASP recomienda elegirlas de una lista cerrada definida por la aplicación [3]. Escapar caracteres a mano no reemplaza el enlace de parámetros, y validar un valor no lo vuelve seguro para concatenarlo [3]. Por último, parametrizar resuelve la inyección SQL y nada más: no corrige un control de acceso roto como el de R5 ni el guardado de contraseñas en texto plano, que el ejemplo usa solo para simplificar.
 
 ## Fuentes
 
-1. Python Software Foundation. *sqlite3 — DB-API 2.0 interface for SQLite databases*. Documentación oficial de Python 3.12. https://docs.python.org/3.12/library/sqlite3.html
-2. SQLite. *SQL Language Expressions*, apartado 4: Parameters. https://www.sqlite.org/lang_expr.html#varparam
-3. OWASP Foundation. *SQL Injection Prevention Cheat Sheet*. https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html
+1. Python Software Foundation. «[sqlite3 — DB-API 2.0 interface for SQLite databases](https://docs.python.org/3.12/library/sqlite3.html)», apartado «How to use placeholders to bind values in SQL queries». Documentación de Python 3.12.
+2. SQLite. «[SQL Language Expressions](https://www.sqlite.org/lang_expr.html#varparam)», sección 4: Parameters.
+3. OWASP Cheat Sheet Series. «[SQL Injection Prevention Cheat Sheet](https://cheatsheetseries.owasp.org/cheatsheets/SQL_Injection_Prevention_Cheat_Sheet.html)».
+
+Fuentes consultadas el 30/10/2026.
 
 ## Reflexión
 
-El ejemplo de SQLite permite comprender cómo las consultas parametrizadas evitan que los datos ingresados por un usuario modifiquen las instrucciones SQL. La principal enseñanza es que la seguridad no depende únicamente de filtrar caracteres peligrosos, sino de separar correctamente los datos del código. En una aplicación real, utilizaríamos consultas parametrizadas en todos los accesos a la base de datos y revisaríamos cualquier sentencia construida dinámicamente. Este mecanismo previene SQL Injection a través de los valores parametrizados, aunque debe complementarse con otros controles de seguridad, como la autorización y la protección de contraseñas.
+El ejemplo nos ayudó a entender por qué el mismo `admin' --` que nos dio acceso en R1 no tiene efecto contra una consulta parametrizada. La seguridad no viene de detectar caracteres peligrosos, sino de que los datos nunca lleguen a interpretarse como código. Si tuviéramos que corregir PhantomCorp, empezaríamos por buscar toda consulta armada con strings y reemplazarla por una parametrizada, sabiendo que eso no resuelve las otras fallas del laboratorio.
 
-## Declaración de IA
+## Declaración de uso de IA
 
-Codex (OpenAI) asistió en la investigación local, redacción y demostración. La verificación consistió en la lectura de las fuentes citadas y en la ejecución del ejemplo incluido, replicable localmente con Python y SQLite sin conexión a ninguna red. El responsable de la sección (P4) revisó las fuentes, comprobó que cada cita respalda la afirmación asociada y ejecutó el código de ejemplo antes de incorporarlo; la reflexión final fue revisada y apropiada por el autor responsable de esta sección.
+Codex (OpenAI) asistió en la investigación, la redacción y el ejemplo. Claude Code se usó en la revisión final para corregir la redacción, verificar que cada fuente respalde lo que se le atribuye y volver a ejecutar el ejemplo. El ejemplo corre localmente con Python y SQLite, sin conexión a ninguna red ni al entorno del laboratorio.
