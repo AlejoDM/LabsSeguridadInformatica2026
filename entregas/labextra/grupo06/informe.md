@@ -18,7 +18,7 @@
 **Finalidad y partes asistidas:** apoyo para la ejecución de R1 y R3, el ordenamiento de evidencias y la redacción técnica inicial.
 **Verificación realizada:** Se ejecutaron los comandos en el entorno autorizado del laboratorio y se analizaron las respuestas obtenidas para comprobar que el acceso al recurso interno se realizó mediante la vulnerabilidad SSRF. Se verificó la presencia de la información expuesta y se validó la flag mediante el sistema oficial de retos.
 
-**Herramienta:** ChatGPT (OpenAI), aporte de la Persona 5.
+**Herramienta:** ChatGPT (OpenAI)
 
 - **Finalidad del uso:** asistencia para comprender los riesgos de SSRF en entornos cloud, redactar la pregunta P5 y revisar la integración de la entrega grupal.
 - **Partes asistidas:** respuesta P5 sobre servicios de metadatos y revisión preliminar del informe.
@@ -165,4 +165,6 @@ Como conclusión, entendimos que una vulnerabilidad SSRF puede ser especialmente
 
 ## 4. Conclusión
 
-Pendiente de integración por P5. Aporte comprobado para el resumen ejecutivo: la previsualización pública permitió recuperar un backup interno con dos registros ficticios de clientes. Priorizar la restricción del destino y egreso de preview y retirar/proteger los backups internos. El resultado demuestra exposición de datos, no control de toda la red.
+La previsualización pública permitió recuperar un panel local, la página de intranet y un backup con dos registros ficticios de clientes. La evidencia demuestra una pérdida de confidencialidad por SSRF: el portal actuó como intermediario hacia recursos que la consola atacante no obtuvo directamente. No demuestra ejecución de código, escritura ni control general de la red o del sistema operativo.
+
+La prioridad para PhantomCorp es limitar por diseño los destinos que puede consultar `/preview` y aislar su salida de red de la intranet y de servicios locales innecesarios. Esa política debe complementarse con validación del destino efectivo —incluidas redirecciones y resolución DNS— y con retirar o proteger los backups internos mediante autorización. El estado final de los retos es 3/3; las mitigaciones son recomendaciones para un entorno real y no se implementaron ni probaron contra el objetivo de este laboratorio.
