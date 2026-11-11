@@ -1,8 +1,8 @@
 # Tasks — Change 002
 
 ## Spec y diseño
-- [ ] 1.1 Escribir `design.md` (esquema SQLite, política de integridad, concurrencia)
-- [ ] 1.2 Delta de `audit-log` con ≥ 4 Requirements nuevos y Scenarios negativos
+- [x] 1.1 Escribir `design.md` (esquema SQLite, política de integridad, concurrencia)
+- [x] 1.2 Delta de `audit-log` con ≥ 4 Requirements nuevos y Scenarios negativos
 - [ ] 1.3 Revisión del delta por otro integrante
 
 ## Implementación
