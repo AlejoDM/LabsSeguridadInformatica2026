@@ -10,6 +10,7 @@ import time
 from pathlib import Path
 
 import pytest
+import yaml
 
 from harness.contracts import (
     AuditLog,
@@ -22,7 +23,7 @@ from harness.contracts import (
     ScopeViolation,
 )
 from harness.policy_loader import phase_allowlist
-from harness.roe import RoEValidationError, parse
+from harness.roe import RoEValidationError, load, parse
 from harness.tokens import TokenIssuanceError, issue
 from tests.conftest import FakeAdapter, act, make_token
 
@@ -59,6 +60,20 @@ def roe_dict(**overrides):
 
 def valid_roe():
     return parse(roe_dict())
+
+
+def test_load_lee_yaml_y_conserva_la_aprobacion(tmp_path):
+    path = tmp_path / "roe.yaml"
+    path.write_text(yaml.safe_dump(roe_dict()), encoding="utf-8")
+    roe = load(path)
+    assert roe.engagement_id == "eng-lab-001"
+    assert roe.approval_hash
+    assert roe.scope_cidrs == ("10.99.0.0/24",)
+
+
+def test_load_de_archivo_inexistente_no_emite_token(tmp_path):
+    with pytest.raises(RoEValidationError, match="leer"):
+        load(tmp_path / "no-existe.yaml")
 
 
 def _env(guard: Guard | None = None) -> tuple[Harness, AuditLog]:
