@@ -23,6 +23,7 @@ La bitácora hoy vive en memoria (`AuditLog` en `harness/contracts.py`). El cont
 ### Verificación: al abrir y bajo demanda
 - Al abrir un engagement se verifica la cadena completa. Si falla, el engagement **no continúa**: no se aceptan `append` y se devuelve el índice del primer registro inválido.
 - `python -m harness.audit verify <archivo>` ejecuta la misma verificación y devuelve código de salida 0 si la cadena está íntegra, distinto de 0 si no.
+- **Firma decidida:** `verify()` sin argumentos. El archivo queda fijado al abrir el almacén; la CLI abre el archivo y llama a `verify()`. Así una sola firma sirve para la implementación en memoria y para la SQLite.
 
 ### Ancla de cabeza (límite conocido de la cadena)
 - Una cadena por sí sola **no detecta el borrado del último registro**: el registro anterior sigue siendo una cadena válida.
