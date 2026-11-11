@@ -7,7 +7,7 @@ import subprocess
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
-from urllib.parse import urljoin, urlsplit
+from urllib.parse import SplitResult, urljoin, urlsplit
 
 import yaml
 
@@ -107,7 +107,7 @@ class RedirectPolicy:
     def __init__(self, allowed_domains: tuple[str, ...] | list[str]):
         self.allowed_domains = tuple(d.lower().rstrip(".") for d in allowed_domains)
 
-    def _parse(self, url: str):
+    def _parse(self, url: str) -> SplitResult:
         try:
             partes = urlsplit(url.strip())
         except ValueError as exc:

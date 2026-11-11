@@ -48,7 +48,7 @@ def _dominios_restantes(roe: RoE) -> tuple[str, ...]:
 
 def issue(roe: RoE, phase: Phase | str, *, now: float | None = None,
           audit: Any = None, agent: str = "scope-guard",
-          policy: dict | None = None) -> ScopeToken:
+          policy: dict[str, Any] | None = None) -> ScopeToken:
     """Emite un token solo para ``phase``, dentro de la ventana y con TTL."""
     phase = Phase(phase)
     now = time.time() if now is None else float(now)

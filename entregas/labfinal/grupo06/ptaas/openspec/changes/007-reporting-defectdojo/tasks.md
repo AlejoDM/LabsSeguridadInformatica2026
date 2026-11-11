@@ -14,9 +14,13 @@
 - [ ] 2.6 Gate de entrega conectado a la CLI de aprobación
 
 ## Verificación
-- [ ] 3.1 Test: hallazgo sin CWE/CVSS/remediación → falla indicando el campo
+- [x] 3.1 Test: hallazgo sin CWE/CVSS/remediación → falla indicando el campo
 - [ ] 3.2 Test: estado "validado" vs "no validado" visible en el informe
-- [ ] 3.3 Test: entrega sin aprobación → rechazada
+- [x] 3.3 Test: entrega sin aprobación → rechazada
 - [ ] 3.4 Test: el informe no contiene datos sensibles del lab (lista de patrones)
 - [ ] 3.5 Recorrido end-to-end con un solo comando contra el lab
 - [ ] 3.6 Archivar el delta en `openspec/specs/reporting/spec.md`
+
+**Evidencia de P2 (3.1 y 3.3):** `tests/test_reporting_gates.py` (8 tests),
+`entrega/evidencia/salidas/red-007-gates.txt`. No se modificó
+`harness/reporting.py` (propiedad de P5); los gates ya pasaban en la línea base.

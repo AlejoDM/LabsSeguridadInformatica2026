@@ -1,6 +1,6 @@
 # Delta — reporting
 
-Tests: tests/test_reporting.py
+Tests: tests/test_reporting.py, tests/test_reporting_gates.py
 
 ## Requirement: Hallazgo completo
 Cada hallazgo del informe DEBE incluir CWE, CVSS v4.0 y recomendación de remediación.

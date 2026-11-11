@@ -59,6 +59,32 @@ Para el MVP se eligen **7 herramientas/fuentes**, todas con salida parseable y c
 - **nmap:** `-sV --top-ports 100 -T3 --max-rate 100`, sin scripts NSE, sin `-A/-O/-sU`; argumentos prohibidos validados por test.
 - **Catálogo de validación:** 6 verificaciones **inertes** (cabeceras, cookies, listado de directorio, reflexión con canario, divulgación de errores). Se evalúan sobre la respuesta observada; no ejecutan código en el objetivo.
 
+## Revisión P2 — change 003 y red team (2026-11-11)
+
+Revisión pedida por el plan (P2 revisa `docs/tool-selection.md`). Resultado:
+**no cambia el conjunto de herramientas del MVP**. Los hallazgos A1–A10 se
+resuelven en el harness o en el contrato de adaptador, no comprando otra
+herramienta.
+
+| Hallazgo | Impacto en la selección | Decisión |
+|---|---|---|
+| A4 (hostname que resuelve fuera de alcance) | Aplica a cualquier herramienta que reciba un hostname | El adaptador debe usar `Guard(resolver=...)`; no se agrega herramienta |
+| A5 (redirecciones HTTP) | Aplica a `httpx.probe`, `zap.baseline_scan` y cualquier cliente HTTP | `RedirectPolicy` compartida; el adaptador HTTP del change 004 no sigue saltos fuera de alcance |
+| A9 (argumentos inyectados) | Aplica a nmap, Nuclei y futuros adaptadores CLI | `validate_target` + `validate_parameters` + `reject_forbidden` antes de argv; no cambia la herramienta |
+| A6/A8 (token y CIDR) | No depende de la herramienta | Parser de RoE y emisor de tokens (change 003) |
+
+Notas de consistencia:
+
+- La tabla tiene **7 productos/fuentes** si se cuenta `NVD/EPSS` como un solo
+  grupo de feeds; las capabilities se listan por separado (`cve.lookup`,
+  `epss.lookup`, `cwe.map`). No se modificó la tabla para no inventar licencias
+  ni versiones.
+- ZAP sigue en modo baseline y DefectDojo sigue como exportación/JSON; ambos
+  son alcance de 005 y 007, no de este change.
+- No se ejecutó ninguna herramienta real en este change: los tests de A1–A10
+  usan fakes, resolver y política inyectados. La verificación de flags contra
+  las versiones instaladas sigue pendiente (ver abajo).
+
 ## Pendientes
 - Curar y revisar los primeros templates de `templates/allowlist/`.
 - Verificar los flags contra las versiones instaladas de nmap y Nuclei.
