@@ -12,10 +12,22 @@ from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
-from harness.adapters.common import (InvalidTarget, RedirectPolicy, validate_parameters,
-                                     validate_target)
-from harness.contracts import (Action, AuditLog, Guard, Harness, KillSwitch, Phase, Result,
-                               ScopeToken, ScopeViolation)
+from harness.adapters.common import (
+    InvalidTarget,
+    RedirectPolicy,
+    validate_parameters,
+    validate_target,
+)
+from harness.contracts import (
+    AuditLog,
+    Guard,
+    Harness,
+    KillSwitch,
+    Phase,
+    Result,
+    ScopeToken,
+    ScopeViolation,
+)
 from harness.policy_loader import phase_allowlist
 from harness.roe import RoEValidationError, parse
 from tests.conftest import FakeAdapter, act, make_token
@@ -47,7 +59,8 @@ def _roe(cidrs=("10.99.0.0/24",), domains=("dvwa.lab.test",), **overrides):
 ])
 def test_a1_hostname_se_normaliza_antes_de_decidir(env, target):
     h, *_ = env
-    assert h.invoke("recon", act("httpx.probe", Phase.RECON), target, make_token())["ok"]
+    token = make_token(domains=("dvwa.lab.test",))
+    assert h.invoke("recon", act("httpx.probe", Phase.RECON), target, token)["ok"]
 
 
 # A2 — sufijo engañoso
@@ -78,10 +91,10 @@ def test_a3_ipv4_mapeada_a_ipv6_se_evalua_contra_los_cidr_autorizados(env):
 
 def test_a3_ipv6_se_evalua_contra_su_cidr(env):
     h, *_ = env
-    token = make_token(cidrs=("fd00:lab::/64",))
-    assert h.invoke("recon", act("httpx.probe", Phase.RECON), "fd00:lab::5", token)["ok"]
+    token = make_token(cidrs=("fd00:abcd::/64",))
+    assert h.invoke("recon", act("httpx.probe", Phase.RECON), "fd00:abcd::5", token)["ok"]
     with pytest.raises(ScopeViolation):
-        h.invoke("recon", act("httpx.probe", Phase.RECON), "fd00:otro::5", token)
+        h.invoke("recon", act("httpx.probe", Phase.RECON), "fd00:beef::5", token)
 
 
 # A4 — hostname autorizado que resuelve a una IP fuera de alcance

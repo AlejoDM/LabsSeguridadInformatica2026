@@ -10,7 +10,9 @@ from __future__ import annotations
 import hashlib
 import ipaddress
 import json
+import threading
 import time
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass, field
 from enum import Enum
 from typing import Protocol
@@ -43,6 +45,7 @@ class ScopeToken:
     window_start: float
     window_end: float
     phase: Phase
+    excluded_domains: tuple[str, ...] = ()
 
     def is_live(self, now: float | None = None) -> bool:
         now = time.time() if now is None else now
@@ -70,9 +73,13 @@ class ToolAdapter(Protocol):
 class Guard:
     """Autorización determinista. Sin LLM, sin heurísticas."""
 
-    def __init__(self, phase_allowlist: dict[Phase, set[str]], approvals: set[str] | None = None):
+    def __init__(self, phase_allowlist: dict[Phase, set[str]], approvals: set[str] | None = None,
+                 engagement_id: str | None = None,
+                 resolver: Callable[[str], Iterable[str]] | None = None):
         self.phase_allowlist = phase_allowlist
         self._approvals = approvals or set()
+        self.engagement_id = engagement_id
+        self.resolver = resolver
 
     def approve(self, action_name: str, target: str) -> None:
         self._approvals.add(f"{action_name}@{target}")
@@ -87,37 +94,85 @@ class Guard:
             return False
         if action.name not in self.phase_allowlist.get(token.phase, set()):
             return False
-        return self._in_scope(target, token)
+        if self.engagement_id is not None and token.engagement_id != self.engagement_id:
+            return False
+        if not self._in_scope(target, token):
+            return False
+        return self._resolves_in_scope(target, token)
 
     @staticmethod
-    def _in_scope(target: str, token: ScopeToken) -> bool:
+    def _normalize(target: str) -> str:
+        return target.strip().lower().rstrip(".")
+
+    @staticmethod
+    def _as_ip(value: str):
+        ip = ipaddress.ip_address(value)
+        return ip.ipv4_mapped if ip.version == 6 and ip.ipv4_mapped is not None else ip
+
+    @classmethod
+    def _in_scope(cls, target: str, token: ScopeToken) -> bool:
+        host = cls._normalize(target)
         try:
-            ip = ipaddress.ip_address(target)
+            ip = cls._as_ip(host)
             return any(ip in ipaddress.ip_network(c) for c in token.allowed_cidrs)
         except ValueError:
-            host = target.lower().rstrip(".")
+            if any(host == ex or host.endswith("." + ex) for ex in token.excluded_domains):
+                return False
             return any(
                 host == d or host.endswith("." + d) for d in token.allowed_domains
             )
 
+    def _resolves_in_scope(self, target: str, token: ScopeToken) -> bool:
+        """A4: si hay resolver, todas las direcciones del host deben estar en alcance."""
+        if self.resolver is None:
+            return True
+        host = self._normalize(target)
+        try:
+            self._as_ip(host)
+            return True
+        except ValueError:
+            pass
+        try:
+            direcciones = list(self.resolver(host))
+        except OSError:
+            return False
+        if not direcciones:
+            return False
+        redes = tuple(ipaddress.ip_network(c) for c in token.allowed_cidrs)
+        for direccion in direcciones:
+            try:
+                ip = self._as_ip(str(direccion).strip())
+            except ValueError:
+                return False
+            if not any(ip in red for red in redes):
+                return False
+        return True
+
 
 @dataclass
 class AuditLog:
-    """Append-only con hash encadenado (detecta manipulación)."""
+    """Append-only con hash encadenado (detecta manipulación y escrituras concurrentes)."""
 
     entries: list[dict] = field(default_factory=list)
+    _lock: threading.Lock = field(default_factory=threading.Lock, repr=False, compare=False)
+
+    def record_decision(self, agent: str, action_name: str, target: str,
+                        engagement_id: str, phase: str, result: Result) -> dict:
+        with self._lock:
+            prev = self.entries[-1]["hash"] if self.entries else "GENESIS"
+            body = {
+                "ts": time.time(), "engagement": engagement_id, "agent": agent,
+                "action": action_name, "target": target, "phase": phase,
+                "result": result.value, "prev": prev,
+            }
+            body["hash"] = hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
+            self.entries.append(body)
+            return body
 
     def record(self, agent: str, action: Action, target: str,
                token: ScopeToken, result: Result) -> dict:
-        prev = self.entries[-1]["hash"] if self.entries else "GENESIS"
-        body = {
-            "ts": time.time(), "engagement": token.engagement_id, "agent": agent,
-            "action": action.name, "target": target, "phase": token.phase.value,
-            "result": result.value, "prev": prev,
-        }
-        body["hash"] = hashlib.sha256(json.dumps(body, sort_keys=True).encode()).hexdigest()
-        self.entries.append(body)
-        return body
+        return self.record_decision(agent, action.name, target, token.engagement_id,
+                                    token.phase.value, result)
 
 
 class KillSwitch:

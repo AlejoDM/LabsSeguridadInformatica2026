@@ -12,9 +12,9 @@ VEC = "CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:N/SC:N/SI:N/SA:N"
 
 
 def finding(**overrides):
-    base = dict(id="F-7", title="Cabecera ausente", asset="dvwa.lab.test", cwe="CWE-693",
-                cvss_v4_vector=VEC, remediation="Agregar la cabecera",
-                validation_status="validated")
+    base = {"id": "F-7", "title": "Cabecera ausente", "asset": "dvwa.lab.test",
+            "cwe": "CWE-693", "cvss_v4_vector": VEC,
+            "remediation": "Agregar la cabecera", "validation_status": "validated"}
     return Finding(**{**base, **overrides})
 
 

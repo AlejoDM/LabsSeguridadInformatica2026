@@ -6,13 +6,21 @@ rojo por importación/atributos faltantes, no por fallas accidentales.
 """
 from __future__ import annotations
 
-import ipaddress
 import time
 from pathlib import Path
 
 import pytest
 
-from harness.contracts import Action, AuditLog, Guard, Harness, KillSwitch, Phase, Result, ScopeToken, ScopeViolation
+from harness.contracts import (
+    AuditLog,
+    Guard,
+    Harness,
+    KillSwitch,
+    Phase,
+    Result,
+    ScopeToken,
+    ScopeViolation,
+)
 from harness.policy_loader import phase_allowlist
 from harness.roe import RoEValidationError, parse
 from harness.tokens import TokenIssuanceError, issue
@@ -122,15 +130,17 @@ def test_ventana_invertida_solo_al_comparar_en_utc_se_rechaza():
 
 def test_exclusion_que_anula_todo_el_alcance_se_rechaza():
     with pytest.raises(RoEValidationError, match="exclusi"):
-        parse(roe_dict(exclusions={"cidrs": ["10.99.0.0/24"], "domains": []}))
+        parse(roe_dict(scope={"cidrs": ["10.99.0.0/24"], "domains": []},
+                       exclusions={"cidrs": ["10.99.0.0/24"], "domains": []}))
 
 
 def test_exclusion_de_host_prevalece_sobre_el_alcance():
-    token = issue(valid_roe(), Phase.RECON, now=ts("2026-11-11T10:00:00-03:00"))
+    roe = parse(roe_dict(exclusions={"cidrs": ["10.99.0.10/32"], "domains": []}))
+    token = issue(roe, Phase.RECON, now=ts("2026-11-11T10:00:00-03:00"))
     guard = Guard(phase_allowlist())
     assert guard.is_allowed(act("httpx.probe", Phase.RECON), "10.99.0.11", token)
     assert not guard.is_allowed(act("httpx.probe", Phase.RECON), "10.99.0.10", token)
-    assert not token.allowed_cidrs == ("10.99.0.0/24",)  # se restó el /32
+    assert token.allowed_cidrs != ("10.99.0.0/24",)  # se restó el /32
 
 
 def test_exclusion_de_dominio_cubre_subdominios():
@@ -154,12 +164,14 @@ def test_roe_valido_emite_token_solo_de_la_fase_pedida():
 
 
 def test_token_vencido_no_se_renueva_solo():
+    roe = valid_roe()
     now = ts("2026-11-11T10:00:00-03:00")
-    token = issue(valid_roe(), Phase.RECON, now=now)
+    token = issue(roe, Phase.RECON, now=now)
+    assert token.window_end <= roe.window_end
     assert token.is_live(now + 1)
     assert not token.is_live(token.window_end + 1)
     with pytest.raises(TokenIssuanceError, match="ventana"):
-        issue(valid_roe(), Phase.RECON, now=token.window_end + 1)
+        issue(roe, Phase.RECON, now=roe.window_end + 1)
 
 
 def test_roe_revocado_no_emite():
