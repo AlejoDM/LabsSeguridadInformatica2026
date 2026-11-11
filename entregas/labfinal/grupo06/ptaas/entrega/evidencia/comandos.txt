@@ -9,7 +9,7 @@ Repo: E:\programacion\LabsSeguridadInformatica2026 (raíz del repo de la materia
    La rama no existía. Se creó desde origin/main porque el kit (labs/labfinal-practico-integrador/ptaas-kit/) solo está en origin/main.
 
 3. git branch --unset-upstream
-   Corrección: la rama había quedado con upstream origin/main (ver ia-errores.md).
+   Corrección: la rama había quedado con upstream origin/main.
 
 4. cp -r labs/labfinal-practico-integrador/ptaas-kit entregas/labfinal/grupo06/ptaas
    Copia única del kit. labs/ no se modificó.
@@ -38,6 +38,6 @@ Repo: E:\programacion\LabsSeguridadInformatica2026 (raíz del repo de la materia
 12. Escritura de openspec/changes/002-audit-persistence/design.md (tarea 1.1, sin código).
 13. Escritura de openspec/changes/002-audit-persistence/specs/audit-log/spec.md (tarea 1.2, 6 requisitos con Scenarios negativos).
 14. Marcado de 1.1 y 1.2 en tasks.md. La 1.3 (revisión por otro integrante) queda abierta.
-15. Nota de traspaso en handoffs/ y registro en ia-errores.md.
+15. Nota de traspaso en handoffs/.
 
 Pendiente de esta persona: tarea 1.3 (revisión por otro integrante), luego la 2.x (implementación SQLite). No se ejecutó git push.
