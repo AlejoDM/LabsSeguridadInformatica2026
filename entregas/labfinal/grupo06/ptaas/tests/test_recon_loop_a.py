@@ -367,3 +367,73 @@ def test_frontier_survives_checkpoint(tmp_path):
     loaded = api('asset_graph').AssetGraph.load(p, 'p3-test')
     api('loops').run_recon(h, token(), ['dvwa.lab.test'], loaded)
     assert calls[0] == ('subfinder.enum', 'juiceshop.lab.test')
+
+
+def test_native_subfinder_excludes_all_sources(tmp_path):
+    from types import SimpleNamespace
+    calls = []
+    def executor(argv, **kwargs):
+        calls.append((argv, kwargs))
+        return SimpleNamespace(stdout='crtsh\nhackertarget ~\n' if '-ls' in argv else '', stderr='', returncode=0)
+    mod = api('adapters.subfinder_adapter')
+    runner = mod.OfflineSubfinderRunner(executor=executor)
+    output = runner(mod.build_argv('dvwa.lab.test', {'rate_limit_rps': 5, 'timeout_s': 10}), 10)
+    assert output == ''
+    assert len(calls) == 2
+    argv, options = calls[-1]
+    assert set(argv[argv.index('-es') + 1].split(',')) == {'crtsh', 'hackertarget'}
+    assert options['shell'] is False and options['check'] is True
+    assert '-config' in argv and '-pc' in argv
+
+
+@pytest.mark.parametrize('catalog', ['', 'unrecognized output!', 'crtsh\n[bad]'])
+def test_native_subfinder_unknown_catalog_closed(catalog):
+    from types import SimpleNamespace
+    calls = []
+    def executor(argv, **kwargs):
+        calls.append(argv)
+        return SimpleNamespace(stdout=catalog, stderr='', returncode=0)
+    mod = api('adapters.subfinder_adapter')
+    with pytest.raises(ValueError):
+        mod.OfflineSubfinderRunner(executor=executor)(mod.build_argv('dvwa.lab.test', {'rate_limit_rps': 5, 'timeout_s': 10}), 10)
+    assert len(calls) == 1
+
+
+def test_real_audit_export_uses_p1_verifier(tmp_path):
+    mod = api('recon_lab')
+    audit = AuditLog()
+    t = token()
+    from harness.contracts import Result
+    for _ in range(3):
+        audit.record('recon', Action('httpx.probe', Phase.RECON), 'dvwa.lab.test', t, Result.OK)
+    path = tmp_path / 'audit.json'
+    mod.export_audit(audit, path)
+    assert mod.verify_audit(path).ok
+    original = json.loads(path.read_text())
+    changed = json.loads(path.read_text())
+    changed['entries'][1]['target'] = 'juiceshop.lab.test'
+    path.write_text(json.dumps(changed))
+    assert not mod.verify_audit(path).ok
+    original['entries'].pop(1)
+    path.write_text(json.dumps(original))
+    assert not mod.verify_audit(path).ok
+
+
+def test_lab_approval_missing_or_expired_rejected():
+    mod = api('recon_lab')
+    with pytest.raises(ValueError):
+        mod.validate_approval({})
+    with pytest.raises(ValueError):
+        mod.validate_approval({'actor': 'test-only', 'reference': 'test-only', 'expires_at': 0,
+                               'approved_targets': ['dvwa.lab.test'], 'quote': 'test-only'})
+
+
+def test_capture_does_not_bypass_pinning(monkeypatch):
+    common = api('adapters.recon_common')
+    mod = api('adapters.httpx_adapter')
+    monkeypatch.setattr(common.socket, 'getaddrinfo', lambda *a, **kw: [(2, 1, 6, '', ('10.99.0.2', 80))])
+    calls, captures = [], []
+    monkeypatch.setattr(mod, '_execute', lambda argv, timeout: calls.append(argv) or '{"url":"http://10.99.0.2"}')
+    obj = mod.HttpxProbe(capture=lambda *args: captures.append(args))
+    assert obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())['status'] == 'OK'
+    assert captures and 'http://10.99.0.2' in calls[0]
