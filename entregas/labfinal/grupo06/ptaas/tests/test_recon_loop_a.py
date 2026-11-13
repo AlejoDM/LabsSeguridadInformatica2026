@@ -326,3 +326,26 @@ def test_loop_tool_error_is_recorded():
     api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
     assert g.status == 'ERROR' and len(calls) == 1
     assert any(e['action'] == 'recon.error.timeout' and e['result'] == 'BLOCKED' for e in h.audit.entries)
+
+
+def test_schema_hitl_is_preserved_on_resume():
+    h, g, calls = setup_loop()
+    g.status, g.stop_reason, g.schema_failures = 'PENDING_HITL', 'dos salidas inválidas', 2
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert not calls and g.status == 'PENDING_HITL'
+
+
+def test_rate_lowered_between_calls():
+    now = [0.0]
+    limiter = api('adapters.recon_common').RateLimiter(clock=lambda: now[0], sleep=lambda dt: now.__setitem__(0, now[0] + dt))
+    limiter.wait('dvwa.lab.test', 5)
+    limiter.wait('dvwa.lab.test', 1)
+    assert now[0] >= 1
+
+
+def test_malformed_redirect_cannot_crash_loop(tmp_path):
+    h, g, calls = setup_loop()
+    h.tools['httpx.probe'].response = {'status': 'OK', 'assets': [asset()], 'blocked_redirects': ['http://[']}
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g, checkpoint=tmp_path / 'g.json')
+    assert g.status == 'STOPPED'
+    assert any(e['action'] == 'recon.redirect_blocked' and e['target'] == 'invalid' for e in h.audit.entries)
