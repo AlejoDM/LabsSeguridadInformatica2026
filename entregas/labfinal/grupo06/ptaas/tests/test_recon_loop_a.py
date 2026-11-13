@@ -437,3 +437,14 @@ def test_capture_does_not_bypass_pinning(monkeypatch):
     obj = mod.HttpxProbe(capture=lambda *args: captures.append(args))
     assert obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())['status'] == 'OK'
     assert captures and 'http://10.99.0.2' in calls[0]
+
+
+def test_juiceshop_uses_its_fixed_lab_port(monkeypatch):
+    common = api('adapters.recon_common')
+    mod = api('adapters.httpx_adapter')
+    monkeypatch.setattr(common.socket, 'getaddrinfo', lambda *a, **kw: [(2, 1, 6, '', ('10.99.0.3', 3000))])
+    calls = []
+    monkeypatch.setattr(mod, '_execute', lambda argv, timeout: calls.append(argv) or '{"url":"http://10.99.0.3:3000"}')
+    obj = mod.HttpxProbe()
+    assert obj.run(Action(obj.name, Phase.RECON), 'juiceshop.lab.test', token())['status'] == 'OK'
+    assert 'http://10.99.0.3:3000' in calls[0]
