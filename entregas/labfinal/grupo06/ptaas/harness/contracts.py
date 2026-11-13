@@ -49,7 +49,7 @@ class ScopeToken:
 
     def is_live(self, now: float | None = None) -> bool:
         now = time.time() if now is None else now
-        return self.window_start <= now <= self.window_end
+        return self.window_start <= now < self.window_end
 
 
 @dataclass(frozen=True)

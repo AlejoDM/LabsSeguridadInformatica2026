@@ -20,7 +20,7 @@
 - [x] 3.5 Tests adversariales A6, A7 y A8 de `docs/desafios-extension.md`
 - [x] 3.6 Archivar el delta en `openspec/specs/authorization/spec.md`
 
-**Evidencia:** `tests/test_roe_tokens.py` (23 tests), `tests/test_redteam_guard.py`
+**Evidencia:** `tests/test_roe_tokens.py` (31 tests), `tests/test_redteam_guard.py`
 (A1–A10), `entrega/red-team.md`, `entrega/mutaciones.md`, salidas en
 `entrega/evidencia/salidas/`. `1.3` sigue pendiente: la revisión cruzada la hace
 otra persona, no el agente.

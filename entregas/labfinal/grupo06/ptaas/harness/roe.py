@@ -19,11 +19,17 @@ from typing import Any
 import yaml
 
 from harness.contracts import Phase
+from harness.policy_loader import load_policy
 
 _DIR = Path(__file__).resolve().parent
 _PROFILES = _DIR / "profiles.yaml"
 _DOMAIN_RE = re.compile(r"^(?=.{1,253}$)([a-z0-9]([a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$")
 _MIN_PREFIX = {4: 24, 6: 64}
+Network = ipaddress.IPv4Network | ipaddress.IPv6Network
+
+
+def _network(value: str, *, strict: bool = True) -> Network:
+    return ipaddress.ip_network(value, strict=strict)
 
 
 class RoEValidationError(ValueError):
@@ -47,17 +53,17 @@ class RoE:
     revoked_at: float | None = None
     approval_hash: str = ""
 
-    def scope_networks(self) -> tuple[ipaddress._BaseNetwork, ...]:
-        return tuple(ipaddress.ip_network(c) for c in self.scope_cidrs)
+    def scope_networks(self) -> tuple[Network, ...]:
+        return tuple(_network(c) for c in self.scope_cidrs)
 
-    def excluded_networks(self) -> tuple[ipaddress._BaseNetwork, ...]:
-        return tuple(ipaddress.ip_network(c) for c in self.excluded_cidrs)
+    def excluded_networks(self) -> tuple[Network, ...]:
+        return tuple(_network(c) for c in self.excluded_cidrs)
 
 
-def _lab_limits() -> tuple[tuple[ipaddress._BaseNetwork, ...], tuple[str, ...]]:
+def _lab_limits() -> tuple[tuple[Network, ...], tuple[str, ...]]:
     perfiles = yaml.safe_load(_PROFILES.read_text(encoding="utf-8"))
     targets = perfiles["targets"]
-    return (tuple(ipaddress.ip_network(c) for c in targets["lab_only_cidrs"]),
+    return (tuple(_network(c) for c in targets["lab_only_cidrs"]),
             tuple(d.lower().rstrip(".") for d in targets["lab_only_domains"]))
 
 
@@ -89,19 +95,26 @@ def _dominio(valor: Any, campo: str) -> str:
     return dominio
 
 
-def _red(valor: Any, campo: str, lab_cidrs: Iterable[ipaddress._BaseNetwork]) -> str:
+def _red(valor: Any, campo: str, lab_cidrs: Iterable[Network]) -> str:
     if not isinstance(valor, str):
         raise RoEValidationError(f"CIDR inválido en {campo}: {valor!r}")
     try:
-        red = ipaddress.ip_network(valor.strip(), strict=False)
+        red = _network(valor.strip(), strict=False)
     except ValueError as exc:
         raise RoEValidationError(f"CIDR inválido en {campo}: {valor!r}") from exc
     minimo = _MIN_PREFIX[red.version]
     if red.prefixlen < minimo:
         raise RoEValidationError(
             f"CIDR demasiado amplio en {campo}: {red} (prefijo mínimo /{minimo})")
-    if not any(red.version == permitida.version and red.subnet_of(permitida)
-               for permitida in lab_cidrs):
+    pertenece_al_lab = False
+    for permitida in lab_cidrs:
+        if isinstance(red, ipaddress.IPv4Network) and isinstance(permitida, ipaddress.IPv4Network):  # noqa: SIM114
+            pertenece_al_lab = red.subnet_of(permitida)
+        elif isinstance(red, ipaddress.IPv6Network) and isinstance(permitida, ipaddress.IPv6Network):
+            pertenece_al_lab = red.subnet_of(permitida)
+        if pertenece_al_lab:
+            break
+    if not pertenece_al_lab:
         raise RoEValidationError(f"CIDR fuera del laboratorio autorizado: {red}")
     return str(red)
 
@@ -110,18 +123,28 @@ def _dominio_autorizado(dominio: str, lab_domains: Iterable[str]) -> bool:
     return any(dominio == lab or dominio.endswith("." + lab) for lab in lab_domains)
 
 
-def _restar_redes(redes: Iterable[ipaddress._BaseNetwork],
-                  exclusiones: Iterable[ipaddress._BaseNetwork]) -> list[ipaddress._BaseNetwork]:
+def _restar_redes(redes: Iterable[Network],
+                  exclusiones: Iterable[Network]) -> list[Network]:
     resultado = list(redes)
     for exclusion in exclusiones:
-        siguiente: list[ipaddress._BaseNetwork] = []
+        siguiente: list[Network] = []
         for red in resultado:
-            if red.version != exclusion.version or not red.overlaps(exclusion):
-                siguiente.append(red)
-            elif red.subnet_of(exclusion):
-                continue
+            if isinstance(red, ipaddress.IPv4Network) and isinstance(exclusion, ipaddress.IPv4Network):  # noqa: SIM114
+                if not red.overlaps(exclusion):
+                    siguiente.append(red)
+                elif red.subnet_of(exclusion):
+                    continue
+                else:
+                    siguiente.extend(red.address_exclude(exclusion))
+            elif isinstance(red, ipaddress.IPv6Network) and isinstance(exclusion, ipaddress.IPv6Network):
+                if not red.overlaps(exclusion):
+                    siguiente.append(red)
+                elif red.subnet_of(exclusion):
+                    continue
+                else:
+                    siguiente.extend(red.address_exclude(exclusion))
             else:
-                siguiente.extend(red.address_exclude(exclusion))
+                siguiente.append(red)
         resultado = siguiente
     return sorted(set(resultado), key=lambda r: (r.version, int(r.network_address), r.prefixlen))
 
@@ -142,7 +165,7 @@ def parse(data: Mapping[str, Any], *,
         raise RoEValidationError("el RoE debe ser un mapping YAML")
 
     limites_cidrs, limites_dominios = _lab_limits()
-    permitidas = (tuple(ipaddress.ip_network(c) for c in lab_cidrs)
+    permitidas = (tuple(_network(c) for c in lab_cidrs)
                   if lab_cidrs is not None else limites_cidrs)
     dominios_lab = (tuple(d.lower().rstrip(".") for d in lab_domains)
                     if lab_domains is not None else limites_dominios)
@@ -184,20 +207,32 @@ def parse(data: Mapping[str, Any], *,
     excluded_domains = tuple(_dominio(d, "exclusions.domains")
                              for d in (exclusions.get("domains") or []))
 
-    if scope_cidrs:
-        restantes = _restar_redes(tuple(ipaddress.ip_network(c) for c in scope_cidrs),
-                                  tuple(ipaddress.ip_network(c) for c in excluded_cidrs))
-        if not restantes and not scope_domains:
-            raise RoEValidationError("la exclusión deja el alcance vacío")
-    if scope_domains and not scope_cidrs and all(
-            _dominio_excluido(d, excluded_domains) for d in scope_domains):
-        raise RoEValidationError("la exclusión deja el alcance de dominios vacío")
+    restantes_cidrs = _restar_redes(
+        tuple(_network(c) for c in scope_cidrs),
+        tuple(_network(c) for c in excluded_cidrs),
+    )
+    restantes_dominios = tuple(
+        d for d in scope_domains if not _dominio_excluido(d, excluded_domains)
+    )
+    if not restantes_cidrs and not restantes_dominios:
+        raise RoEValidationError("la exclusión deja el alcance vacío")
 
     contactos = data.get("emergency_contacts")
-    if not isinstance(contactos, list) or not [c for c in contactos if isinstance(c, str) and c.strip()]:
-        raise RoEValidationError("falta emergency_contacts: se exige al menos un contacto")
+    if (not isinstance(contactos, list) or not contactos
+            or any(not isinstance(c, str) or not c.strip() for c in contactos)):
+        raise RoEValidationError(
+            "emergency_contacts debe contener al menos un contacto de texto no vacío"
+        )
 
-    fases_entrada = data.get("authorized_phases") or [p.value for p in Phase]
+    if "authorized_phases" in data:
+        fases_entrada = data["authorized_phases"]
+        if not isinstance(fases_entrada, list) or not fases_entrada:
+            raise RoEValidationError("authorized_phases debe ser una lista no vacía")
+    else:
+        try:
+            fases_entrada = list(load_policy()["phases"])
+        except (KeyError, TypeError) as exc:
+            raise RoEValidationError("policy.yaml no define fases autorizables") from exc
     try:
         authorized_phases = tuple(Phase(f) for f in fases_entrada)
     except (TypeError, ValueError) as exc:
@@ -211,6 +246,11 @@ def parse(data: Mapping[str, Any], *,
         "approval_ref": approval_ref, "signed_at": signed_at,
         "window_start": window_start, "window_end": window_end,
         "scope_cidrs": sorted(scope_cidrs), "scope_domains": sorted(scope_domains),
+        "excluded_cidrs": sorted(excluded_cidrs),
+        "excluded_domains": sorted(excluded_domains),
+        "emergency_contacts": sorted(c.strip() for c in contactos),
+        "authorized_phases": sorted(p.value for p in authorized_phases),
+        "revoked_at": revoked_at,
     }
     return RoE(
         engagement_id=engagement_id, approver=approver, approval_ref=approval_ref,

@@ -19,19 +19,20 @@ class TokenIssuanceError(ValueError):
     """La fase, la ventana o el estado del RoE no permiten emitir el token."""
 
 
-def _registrar(audit: Any, agent: str, phase: Phase, engagement_id: str,
+def _registrar(audit: Any, agent: str, phase: Phase | str, engagement_id: str,
                result: Result) -> None:
     if audit is None:
-        return
+        raise TypeError("audit es obligatorio para emitir o rechazar un token")
+    phase_name = phase.value if isinstance(phase, Phase) else str(phase)
     if hasattr(audit, "record_decision"):
         audit.record_decision(agent=agent, action_name=_ACCION_EMISION,
-                              target=phase.value, engagement_id=engagement_id,
-                              phase=phase.value, result=result)
+                              target=phase_name, engagement_id=engagement_id,
+                              phase=phase_name, result=result)
         return
     if hasattr(audit, "append"):
         audit.append({"engagement": engagement_id, "agent": agent,
-                      "action": _ACCION_EMISION, "target": phase.value,
-                      "phase": phase.value, "result": result.value})
+                      "action": _ACCION_EMISION, "target": phase_name,
+                      "phase": phase_name, "result": result.value})
         return
     raise TypeError("audit debe exponer record_decision(...) o append(...)")
 
@@ -46,11 +47,17 @@ def _dominios_restantes(roe: RoE) -> tuple[str, ...]:
     return tuple(d for d in roe.scope_domains if not _dominio_excluido(d, roe.excluded_domains))
 
 
-def issue(roe: RoE, phase: Phase | str, *, now: float | None = None,
-          audit: Any = None, agent: str = "scope-guard",
+def issue(roe: RoE, phase: Phase | str, *, audit: Any,
+          now: float | None = None, agent: str = "scope-guard",
           policy: dict[str, Any] | None = None) -> ScopeToken:
-    """Emite un token solo para ``phase``, dentro de la ventana y con TTL."""
-    phase = Phase(phase)
+    """Emite un token auditado solo para ``phase``, dentro de la ventana y con TTL."""
+    if audit is None:
+        raise TypeError("audit es obligatorio para emitir o rechazar un token")
+    try:
+        phase = Phase(phase)
+    except (TypeError, ValueError) as exc:
+        _registrar(audit, agent, str(phase), roe.engagement_id, Result.BLOCKED)
+        raise TokenIssuanceError(f"fase desconocida: {phase!r}") from exc
     now = time.time() if now is None else float(now)
 
     if phase not in roe.authorized_phases:
