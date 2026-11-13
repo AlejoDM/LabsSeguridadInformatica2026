@@ -13,7 +13,7 @@ docker exec ptaas-p3-runner-1 cat /proc/net/route
 
 La red verificada es internal=true, 10.99.0.0/24, sin gateway ni ruta por defecto. No se publican puertos. Los objetivos son DVWA:80 y JuiceShop:3000.
 
-La autorización consumida por el comando contiene actor, reference, quote, expires_at y approved_targets. La evidencia real conserva la instrucción del usuario que autorizó esta corrida. No se crea una autorización por defecto ni se presenta como revisión de P2. La ventana máxima aceptada es una hora; la usada fue 30 minutos. El archivo de autorización se suministra al contenedor y no se reutiliza tras vencer.
+La autorización consumida por el comando contiene actor, reference, quote, expires_at y approved_targets. La ventana máxima aceptada es una hora; la usada fue 30 minutos. El archivo de autorización se suministra al contenedor y no se reutiliza tras vencer.
 
 ```sh
 docker exec ptaas-p3-runner-1 python -m harness.recon_lab run --approval /tmp/approval.json --output entrega/evidencia/salidas/NUEVA-CORRIDA

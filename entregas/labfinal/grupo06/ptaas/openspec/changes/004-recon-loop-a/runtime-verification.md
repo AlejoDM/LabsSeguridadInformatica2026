@@ -1,7 +1,7 @@
 
 ## Verificación real P3 — ejecución aislada
 
-La instrucción del usuario de completar la corrida habilita preparar y ejecutar el laboratorio local. Se conserva el alcance DVWA/Juice Shop y no se habilitan proveedores públicos de enumeración.
+Se conserva el alcance DVWA/Juice Shop y no se habilitan proveedores públicos de enumeración.
 
 ### Scenario: enumeración nativa sin proveedores externos
 - GIVEN subfinder instalado en runner aislado y todos sus proveedores excluidos explícitamente

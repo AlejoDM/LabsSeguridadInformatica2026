@@ -14,7 +14,6 @@ from harness.adapters.recon_common import LIMITER, RateLimiter, checked_target, 
 from harness.asset_graph import normalize_asset
 from harness.contracts import Action, Phase, ScopeToken
 
-
 def build_argv(target: str, profile: dict[str, Any]) -> list[str]:
     p = profile_for('httpx', profile)
     target = validate_target(target)
@@ -22,9 +21,8 @@ def build_argv(target: str, profile: dict[str, Any]) -> list[str]:
             '-nfs', '-t', '1', '-retries', '0', '-rl', str(p['rate_limit_rps']),
             '-timeout', str(p['timeout_s']), '-location', '-tech-detect', '-rstr', '65536']
 
-
 def _execute(argv: list[str], timeout: int) -> str:
-    # Config vacía y entorno sin proxy: la configuración del usuario no puede ampliar argv.
+    # Config vacía y entorno sin proxy: la configuración externa no puede ampliar argv.
     env = {k: v for k, v in os.environ.items() if 'proxy' not in k.lower()}
     with tempfile.TemporaryDirectory(prefix='ptaas-httpx-') as directory:
         config = Path(directory) / 'httpx.yaml'
@@ -33,7 +31,6 @@ def _execute(argv: list[str], timeout: int) -> str:
                               capture_output=True, text=True, timeout=timeout,
                               stdin=subprocess.DEVNULL, env=env, cwd=directory)
         return proc.stdout
-
 
 class HttpxProbe:
     name = 'httpx.probe'

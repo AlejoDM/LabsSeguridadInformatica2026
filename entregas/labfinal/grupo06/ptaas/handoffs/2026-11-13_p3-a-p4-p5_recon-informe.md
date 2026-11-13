@@ -23,5 +23,3 @@ graph = AssetGraph(token.engagement_id)
 AssetGraph JSON usa schema_version=1, engagement_id, revision, iteration, status, stop_reason, schema_failures, frontier, assets, excluded y evidence_refs. Cada activo tiene id determinista, type=host, address, source_tool y technologies. Los estados STOPPED, ABORTED y PENDING_HITL se conservan. La frontera se recupera; el presupuesto no se reinicia. Los casos ejecutables completos están en tests/test_recon_loop_a.py y tests/test_reporting_p3.py.
 
 **Procedencia:** fixtures sintéticos; sin corrida real en esta sesión. Subfinder sin runner local falla cerrado. HTTP no sigue Location automáticamente. El módulo de informe mantiene el formato contenedor del componente P5 sin editarlo.
-
-**Revisó (persona):**

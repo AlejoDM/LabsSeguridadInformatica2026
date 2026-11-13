@@ -504,3 +504,79 @@ def test_recorded_real_httpx_output(name):
     assert result['status'] == 'OK'
     assert result['assets'][0]['address'] == host
     assert result['assets'][0]['source_tool'] == 'httpx.probe'
+
+
+@pytest.fixture
+def simulated_subfinder(monkeypatch):
+    """Parser y Guard reales; ejecución y resolución exclusivamente simuladas."""
+    import socket
+    import subprocess
+
+    def forbidden_io(*args, **kwargs):
+        pytest.fail('Los casos simulados no permiten red ni procesos externos')
+
+    monkeypatch.setattr(socket, 'getaddrinfo', forbidden_io)
+    monkeypatch.setattr(subprocess, 'run', forbidden_io)
+    h, graph, probes = setup_loop()
+    h.guard._approvals.update({'httpx.probe@api.dvwa.lab.test', 'httpx.probe@admin.dvwa.lab.test'})
+    resolved, enumerated = [], []
+    h.guard.resolver = lambda host: resolved.append(host) or ['10.99.0.2']
+    now = [0.0]
+    limiter = api('adapters.recon_common').RateLimiter(
+        clock=lambda: now[0], sleep=lambda dt: now.__setitem__(0, now[0] + dt))
+
+    def load_fixture(name):
+        raw = (Path(__file__).parent / 'fixtures/p3/simulated' / name).read_text(encoding='utf-8')
+        def runner(argv, timeout):
+            enumerated.append(argv[argv.index('-d') + 1])
+            return raw
+        h.tools['subfinder.enum'] = api('adapters.subfinder_adapter').SubfinderEnum(
+            runner=runner, limiter=limiter)
+        return h, graph, probes, resolved, enumerated
+
+    return load_fixture
+
+
+@pytest.mark.parametrize('fixture,excluded,expected,blocked', [
+    ('subfinder-authorized.jsonl', (), {'dvwa.lab.test', 'api.dvwa.lab.test', 'admin.dvwa.lab.test'}, set()),
+    ('subfinder-mixed.jsonl', ('admin.dvwa.lab.test',), {'dvwa.lab.test', 'api.dvwa.lab.test'},
+     {'admin.dvwa.lab.test', 'external.invalid', 'dvwa.lab.test.external.invalid'}),
+    ('subfinder-empty.jsonl', (), {'dvwa.lab.test'}, set()),
+])
+def test_subfinder_simulated_fixture_through_loop(simulated_subfinder, fixture, excluded, expected, blocked):
+    h, graph, probes, resolved, enumerated = simulated_subfinder(fixture)
+    scope = replace(token(), allowed_domains=('dvwa.lab.test',), excluded_domains=excluded)
+    api('loops').run_recon(h, scope, ['dvwa.lab.test'], graph)
+    assert graph.status == 'STOPPED' and graph.stop_reason == 'grafo estabilizado'
+    assert graph.iteration == 2
+    assert {a['address'] for a in graph.assets.values()} == expected
+    assert len(graph.assets) == len(expected)  # Normalización y deduplicación de JSONL.
+    assert {host for name, host in probes if name == 'httpx.probe'} == expected
+    assert set(graph.excluded) == blocked
+    assert blocked.isdisjoint(resolved)
+    assert blocked.isdisjoint(host for _, host in probes)
+    assert enumerated == ['dvwa.lab.test', 'dvwa.lab.test']
+    assert {e['target'] for e in h.audit.entries if e['action'] == 'recon.out_of_scope'
+            and e['result'] == 'BLOCKED'} == blocked
+    assert not any(e['action'] == 'recon.passive_unavailable' for e in h.audit.entries)
+
+
+@pytest.mark.parametrize('target', ['external.invalid', 'juiceshop.lab.test'])
+def test_subfinder_simulated_out_of_scope_input_never_runs(simulated_subfinder, target):
+    from harness.contracts import ScopeViolation
+    h, graph, probes, resolved, enumerated = simulated_subfinder('subfinder-authorized.jsonl')
+    scope = replace(token(), allowed_domains=('dvwa.lab.test',))
+    with pytest.raises(ScopeViolation):
+        h.invoke('recon', Action('subfinder.enum', Phase.RECON), target, scope)
+    assert not enumerated and not resolved and not probes
+    assert h.audit.entries[-1]['target'] == target
+    assert h.audit.entries[-1]['result'] == 'BLOCKED'
+
+
+def test_subfinder_simulated_empty_is_success_without_discoveries(simulated_subfinder):
+    h, graph, probes, resolved, enumerated = simulated_subfinder('subfinder-empty.jsonl')
+    result = h.invoke('recon', Action('subfinder.enum', Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'OK' and result['assets'] == []
+    assert 'reason' not in result and 'error' not in result
+    assert enumerated == ['dvwa.lab.test']
+    assert not probes  # La llamada pasiva aislada no ejecuta HTTP.

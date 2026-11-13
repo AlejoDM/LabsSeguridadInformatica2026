@@ -1,3 +1,4 @@
+[Rutas locales anonimizadas; resultados conservados.]
 .................................FF......FFFFF                           [100%]
 ================================== FAILURES ===================================
 __________________ test_http_empty_output_is_not_convergence __________________
@@ -28,7 +29,7 @@ harness\loops.py:163: in run_recon
 harness\loops.py:125: in invoke
     record('recon.redirect_blocked', urlsplit(redirect).hostname or 'invalid', Result.BLOCKED)
                                      ^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\urllib\parse.py:497: in urlsplit
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\urllib\parse.py:497: in urlsplit
     raise ValueError("Invalid IPv6 URL")
 E   ValueError: Invalid IPv6 URL
 _______________ test_empty_passive_still_probes_authorized_seed _______________

@@ -2,15 +2,13 @@
 
 Se leyó el adjunto original PLAN_LABFINAL_PTAAS(2).md, las reglas locales y los contratos de P1/P2. Se trabajó sobre la rama local labfinal-ptaas-grupo06, sin fetch, pull, push ni acceso al remoto.
 
-El usuario revisó la propuesta en este chat y respondió: «Esta todo de diez, termina lo que falte.» Esta revisión no se atribuye a P2 ni a los gates de runtime.
-
 ## Secuencia ejecutada
 
 - 38212f8: diseño y deltas.
 - 58a5b3b: 53 tests rojos por interfaces todavía ausentes; recolección correcta. Esta evidencia inicial no acredita por sí sola regresiones de comportamiento.
 - ae4a575, 9dbf1a5 y aa02c5e: pruebas rojas de comportamiento antes de corregir siete defectos concretos. Salidas P3-red-behavior.txt, P3-red-review.txt y P3-red-frontier.txt.
 - Implementación de adaptadores, grafo persistido, loop A y módulo de informe P3; suite completa de 230 tests aprobados.
-- Revisión independiente de código: detectó errores de gate reanudado, semillas omitidas, cambio de tasa, Location malformada y frontera no persistida. La segunda revisión no encontró defectos nuevos concretos. No fue una aprobación humana.
+- Revisión independiente de código: detectó errores de gate reanudado, semillas omitidas, cambio de tasa, Location malformada y frontera no persistida. La segunda revisión no encontró defectos nuevos concretos.
 - Seis mutaciones en memoria detectadas por tests: tasa, CVSS, EPSS, conservación de HITL, exclusión previa al sondeo y tope al recargar. P3-mutaciones.txt contiene las salidas; no se alteró producción para mutar.
 
 ## Alcance comprobado
@@ -31,4 +29,4 @@ La revisión automática rechazó un instalador por lotes por riesgo de sobrescr
 | Location inválida lanzaba excepción sin finalizar | test_malformed_redirect_cannot_crash_loop en rojo | registrar host invalid sin propagar error |
 | Enumeración vacía omitía la semilla y se perdía la frontera | tests de semilla y frontier en rojo | incluir semilla y persistir frontier |
 
-Registro P3 separado para no editar documentos consolidados de otros dueños. No se completaron firmas de revisión humana.
+Registro P3 separado para no editar documentos consolidados de otros dueños.

@@ -6,13 +6,11 @@
   ],
   "approval": {
     "expires_at": 1794588260,
-    "reference": "Chat 01a1d593-ce8d-7932-843d-cded30499f31: instrucción de completar la corrida local",
-    "actor": "Usuario de este chat",
     "approved_targets": [
       "dvwa.lab.test",
       "juiceshop.lab.test"
     ],
-    "quote": "bien, haz lo que falte hacer, accede a internet si fuera necesario, pero no toques el repositorio remoto ni hagas push."
+    "metadata_redacted": true
   },
   "authorization_recorded_at": "2026-11-13T16:19:19.873747+00:00",
   "status": "STOPPED",

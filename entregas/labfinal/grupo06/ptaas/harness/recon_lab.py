@@ -20,13 +20,11 @@ from harness.contracts import AuditLog, Guard, Harness, KillSwitch, Phase
 
 TARGETS = ('dvwa.lab.test', 'juiceshop.lab.test')
 
-
 def export_audit(audit: AuditLog, path: Path) -> None:
     entries = list(audit.entries)
     payload = {'count': len(entries), 'head': entries[-1]['hash'] if entries else 'GENESIS',
                'entries': entries}
     path.write_text(json.dumps(payload, indent=2, ensure_ascii=False), encoding='utf-8')
-
 
 def verify_audit(path: Path) -> VerifyResult:
     try:
@@ -41,7 +39,6 @@ def verify_audit(path: Path) -> VerifyResult:
     except (ValueError, KeyError, TypeError, OSError) as exc:
         return VerifyResult(False, type(exc).__name__)
 
-
 def validate_approval(approval: dict[str, Any]) -> None:
     if not isinstance(approval, dict):
         raise ValueError('autorización inválida')
@@ -53,7 +50,6 @@ def validate_approval(approval: dict[str, Any]) -> None:
     targets = approval.get('approved_targets')
     if not isinstance(targets, list) or not targets or set(targets) - set(TARGETS):
         raise ValueError('targets fuera del laboratorio')
-
 
 def run(approval_path: Path, output: Path) -> int:
     from harness.adapters.httpx_adapter import HttpxProbe
@@ -76,7 +72,7 @@ def run(approval_path: Path, output: Path) -> int:
                  'approver': approval['actor'], 'approval_ref': approval['reference'],
                  'signed_at': iso(now), 'window': {'start': iso(now - 1), 'end': iso(approval['expires_at'])},
                  'scope': {'cidrs': ['10.99.0.0/24'], 'domains': targets},
-                 'exclusions': {}, 'emergency_contacts': [approval['actor'] + ' — chat de ejecución'],
+                 'exclusions': {}, 'emergency_contacts': [approval['actor'] + ' — canal de coordinación'],
                  'authorized_phases': ['recon']})
     audit = AuditLog()
     token = issue(roe, Phase.RECON, audit=audit)
@@ -113,7 +109,6 @@ def run(approval_path: Path, output: Path) -> int:
                       'assets': len(graph.assets), 'audit_verified': verified.ok}, ensure_ascii=False))
     return 0 if graph.status == 'STOPPED' and verified.ok and len(graph.assets) >= len(targets) else 1
 
-
 def main() -> int:
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest='command', required=True)
@@ -129,7 +124,6 @@ def main() -> int:
     result = verify_audit(args.path)
     print(json.dumps({'ok': result.ok, 'reason': result.motivo}, ensure_ascii=False))
     return 0 if result.ok else 1
-
 
 if __name__ == '__main__':
     raise SystemExit(main())

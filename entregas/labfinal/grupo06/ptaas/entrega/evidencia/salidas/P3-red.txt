@@ -1,3 +1,4 @@
+[Rutas locales anonimizadas; resultados conservados.]
 FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFF                    [100%]
 ================================== FAILURES ===================================
 _________________________ test_order_and_fixed_point __________________________
@@ -10,7 +11,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -30,7 +31,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -50,7 +51,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -70,7 +71,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -90,7 +91,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -110,7 +111,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -130,7 +131,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -150,7 +151,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -167,7 +168,7 @@ tests\test_recon_loop_a.py:136: in test_graph_merge_and_atomic_rejection
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -184,7 +185,7 @@ tests\test_recon_loop_a.py:160: in test_adapter_argv_and_schema
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -201,7 +202,7 @@ tests\test_recon_loop_a.py:160: in test_adapter_argv_and_schema
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -218,7 +219,7 @@ tests\test_recon_loop_a.py:177: in test_reject_target_before_runner
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -235,7 +236,7 @@ tests\test_recon_loop_a.py:177: in test_reject_target_before_runner
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -252,7 +253,7 @@ tests\test_recon_loop_a.py:177: in test_reject_target_before_runner
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -269,7 +270,7 @@ tests\test_recon_loop_a.py:177: in test_reject_target_before_runner
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -286,7 +287,7 @@ tests\test_recon_loop_a.py:177: in test_reject_target_before_runner
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -303,7 +304,7 @@ tests\test_recon_loop_a.py:188: in test_partial_json_discarded
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -320,7 +321,7 @@ tests\test_recon_loop_a.py:188: in test_partial_json_discarded
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -337,7 +338,7 @@ tests\test_recon_loop_a.py:188: in test_partial_json_discarded
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -354,7 +355,7 @@ tests\test_recon_loop_a.py:204: in test_execution_error_is_not_empty_success
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -371,7 +372,7 @@ tests\test_recon_loop_a.py:204: in test_execution_error_is_not_empty_success
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -388,7 +389,7 @@ tests\test_recon_loop_a.py:204: in test_execution_error_is_not_empty_success
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -405,7 +406,7 @@ tests\test_recon_loop_a.py:212: in test_invalid_profile
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -422,7 +423,7 @@ tests\test_recon_loop_a.py:212: in test_invalid_profile
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -439,7 +440,7 @@ tests\test_recon_loop_a.py:212: in test_invalid_profile
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -456,7 +457,7 @@ tests\test_recon_loop_a.py:212: in test_invalid_profile
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -473,7 +474,7 @@ tests\test_recon_loop_a.py:212: in test_invalid_profile
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -490,7 +491,7 @@ tests\test_recon_loop_a.py:217: in test_shared_rate_limit
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -507,7 +508,7 @@ tests\test_recon_loop_a.py:228: in test_redirect_external_never_followed
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -524,7 +525,7 @@ tests\test_recon_loop_a.py:237: in test_real_passive_is_closed_without_local_sou
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -544,7 +545,7 @@ tests\test_recon_loop_a.py:51: in setup_loop
 tests\test_recon_loop_a.py:15: in api
     return importlib.import_module('harness.' + module)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -561,7 +562,7 @@ tests\test_reporting_p3.py:17: in test_valid_vectors
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -578,7 +579,7 @@ tests\test_reporting_p3.py:17: in test_valid_vectors
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -595,7 +596,7 @@ tests\test_reporting_p3.py:17: in test_valid_vectors
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -612,7 +613,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -629,7 +630,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -646,7 +647,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -663,7 +664,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -680,7 +681,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -697,7 +698,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -714,7 +715,7 @@ tests\test_reporting_p3.py:24: in test_invalid_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -731,7 +732,7 @@ tests\test_reporting_p3.py:28: in test_epss_alongside_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -748,7 +749,7 @@ tests\test_reporting_p3.py:28: in test_epss_alongside_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -765,7 +766,7 @@ tests\test_reporting_p3.py:28: in test_epss_alongside_vector
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -782,7 +783,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -799,7 +800,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -816,7 +817,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -833,7 +834,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -850,7 +851,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -867,7 +868,7 @@ tests\test_reporting_p3.py:35: in test_invalid_epss
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -884,7 +885,7 @@ tests\test_reporting_p3.py:38: in test_ptes_structure_and_evidence
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -901,7 +902,7 @@ tests\test_reporting_p3.py:47: in test_empty_report_does_not_claim_safety
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import
@@ -918,7 +919,7 @@ tests\test_reporting_p3.py:53: in test_existing_required_fields_preserved
 tests\test_reporting_p3.py:9: in module
     return importlib.import_module('harness.reporting_p3')
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-C:\Users\Muhammed\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
+<PERFIL_LOCAL>\AppData\Local\Programs\Python\Python312\Lib\importlib\__init__.py:90: in import_module
     return _bootstrap._gcd_import(name[level:], package, level)
            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 <frozen importlib._bootstrap>:1387: in _gcd_import

@@ -1,7 +1,5 @@
 # Delta propuesto — asset-discovery — P3 / 004
 
-Revisión del usuario en el chat: «Esta todo de diez, termina lo que falte.» No se atribuye revisión cruzada a P2.
-
 Tests: tests/test_recon_loop_a.py
 
 ## Requirement: Orden pasivo antes de activo

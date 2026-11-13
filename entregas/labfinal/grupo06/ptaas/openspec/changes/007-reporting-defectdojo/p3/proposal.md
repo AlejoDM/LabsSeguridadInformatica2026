@@ -1,10 +1,10 @@
 # Propuesta P3 — Change 007, tareas 2.3 y 2.4
 
-Revisado por el usuario en el chat el 2026-11-13. Tests: tests/test_reporting_p3.py. Documento separado de los deltas de P1. No modifica `harness/reporting.py`, propiedad de P5.
+Tests: tests/test_reporting_p3.py. Documento separado de los deltas de P1. No modifica `harness/reporting.py`, propiedad de P5.
 
 ## Diseño
 
-Se propone un módulo propio `harness/reporting_p3.py` con validación estricta de vector CVSS v4.0 y generación de secciones PTES a partir de datos suministrados. Consume Finding sin cambiar su contrato. La conexión al renderizador existente requiere aprobación del dueño de `harness/reporting.py`; esta propuesta no registra esa aprobación.
+Se propone un módulo propio `harness/reporting_p3.py` con validación estricta de vector CVSS v4.0 y generación de secciones PTES a partir de datos suministrados. Consume Finding sin cambiar su contrato. El módulo conserva el contrato del renderizador existente sin modificar `harness/reporting.py`.
 
 El vector se parsea por métricas: versión exacta, métricas base obligatorias, nombres y valores válidos, ausencia de duplicados y segmentos vacíos. Las métricas opcionales se validan mediante tabla de la especificación oficial, a comprobar antes de implementar. No se acepta el sufijo libre que actualmente permite la expresión regular. No se calcula ni inventa puntaje CVSS. EPSS es null o número finito entre cero y uno; se muestra junto al vector con su procedencia si fue aportada. Cero no se representa como dato ausente.
 

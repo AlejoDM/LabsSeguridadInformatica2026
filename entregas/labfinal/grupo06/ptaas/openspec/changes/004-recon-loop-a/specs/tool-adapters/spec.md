@@ -1,7 +1,5 @@
 # Delta propuesto — tool-adapters — P3 / 004
 
-Revisión del usuario en el chat: «Esta todo de diez, termina lo que falte.» No se atribuye revisión cruzada a P2.
-
 Tests: tests/test_recon_loop_a.py
 
 ## Requirement: Adaptadores RECON acotados
@@ -60,3 +58,26 @@ HTTP NO DEBE seguir redirecciones implícitas; cada salto requiere RedirectPolic
 - GIVEN proveedor no local o resolución fuera de los CIDR del laboratorio
 - WHEN se prepara la ejecución real
 - THEN se rechaza sin emitir consultas o sondeos a terceros
+
+
+## Verificación complementaria mediante fixtures simulados
+
+### Scenario: subdominios autorizados simulados
+- GIVEN JSONL simulado con subdominios de dvwa.lab.test y duplicados
+- WHEN el adaptador existente procesa la salida a través de Harness y loop A
+- THEN normaliza y deduplica el inventario, sondeando solo los activos autorizados mediante un adaptador simulado
+
+### Scenario: salida mixta simulada y exclusiones
+- GIVEN JSONL simulado con activos autorizados, un subdominio excluido y nombres fuera de alcance
+- WHEN el loop procesa los descubrimientos
+- THEN registra los rechazados sin pasarlos al resolver ni al adaptador activo
+
+### Scenario: enumeración simulada vacía
+- GIVEN una ejecución simulada exitosa con stdout vacío
+- WHEN se procesa el resultado
+- THEN devuelve OK con cero descubrimientos, distinto del UNAVAILABLE real; el loop conserva la semilla autorizada y se estabiliza
+
+### Scenario: target de enumeración fuera del token
+- GIVEN un target fuera del alcance del token, incluso otro host del laboratorio
+- WHEN se solicita subfinder.enum a Harness
+- THEN rechaza y registra BLOCKED antes de ejecutar el runner o resolver el target
