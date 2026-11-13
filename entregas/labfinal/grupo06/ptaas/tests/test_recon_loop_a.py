@@ -1,0 +1,248 @@
+"""Scenarios 004: fakes explícitos, sin red ni aprobaciones de runtime."""
+import importlib
+import json
+import time
+from dataclasses import replace
+from pathlib import Path
+
+import pytest
+
+from harness.contracts import Action, AuditLog, Guard, Harness, KillSwitch, Phase, ScopeToken
+from harness.policy_loader import phase_allowlist
+
+
+def api(module):
+    return importlib.import_module('harness.' + module)
+
+
+def token():
+    return ScopeToken('p3-test', ('10.99.0.0/24',), ('dvwa.lab.test', 'juiceshop.lab.test'),
+                      time.time() - 10, time.time() + 60, Phase.RECON)
+
+
+def asset(host='dvwa.lab.test', source='subfinder.enum', tech=()):
+    return {'type': 'host', 'address': host, 'source_tool': source, 'technologies': list(tech)}
+
+
+class FakeAdapter:
+    allowed_phases = (Phase.RECON,)
+    destructive = False
+
+    def __init__(self, name, calls, response=None):
+        self.name, self.calls, self.response = name, calls, response
+
+    def run(self, action, target, scope):
+        self.calls.append((self.name, target))
+        if callable(self.response):
+            return self.response(target)
+        return self.response or {'status': 'OK', 'assets': [asset(target, self.name)]}
+
+
+def setup_loop(passive=None, approved=True):
+    calls = []
+    # Precondición simulada del Scenario; no representa aprobación humana real.
+    approvals = {'httpx.probe@dvwa.lab.test', 'httpx.probe@juiceshop.lab.test'} if approved else set()
+    guard = Guard(phase_allowlist(), approvals=approvals, engagement_id='p3-test',
+                  resolver=lambda host: ['10.99.0.2'])
+    harness = Harness(guard, AuditLog(), {
+        'subfinder.enum': FakeAdapter('subfinder.enum', calls, passive),
+        'httpx.probe': FakeAdapter('httpx.probe', calls),
+    }, KillSwitch())
+    graph = api('asset_graph').AssetGraph('p3-test')
+    return harness, graph, calls
+
+
+def test_order_and_fixed_point(tmp_path):
+    h, g, calls = setup_loop()
+    result = api('loops').run_recon(h, token(), ['dvwa.lab.test', 'juiceshop.lab.test'], g,
+                                  checkpoint=tmp_path / 'graph.json')
+    assert [name for name, _ in calls[:4]] == ['subfinder.enum'] * 2 + ['httpx.probe'] * 2
+    assert result.stop_reason == 'grafo estabilizado'
+    assert result.iteration == 2
+    assert len(result.assets) == 2
+    assert all(e['engagement'] == 'p3-test' for e in h.audit.entries)
+
+
+def test_excluded_never_reaches_adapter_or_dns():
+    h, g, calls = setup_loop({'status': 'OK', 'assets': [asset(), asset('external.invalid')]})
+    resolved = []
+    h.guard.resolver = lambda host: resolved.append(host) or ['10.99.0.2']
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert 'external.invalid' not in resolved
+    assert all(host != 'external.invalid' for _, host in calls)
+    assert any(e['target'] == 'external.invalid' and e['result'] == 'BLOCKED' for e in h.audit.entries)
+    assert 'external.invalid' in g.excluded
+
+
+def test_gate_does_not_self_approve():
+    h, g, calls = setup_loop(approved=False)
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.status == 'PENDING_HITL'
+    assert all(name == 'subfinder.enum' for name, _ in calls)
+    assert not h.guard._approvals
+
+
+@pytest.mark.parametrize('stop', ['expired', 'kill'])
+def test_stop_between_actions(stop):
+    h, g, calls = setup_loop()
+    t = token()
+    def passive(host):
+        if stop == 'kill':
+            h.killswitch.engaged = True
+        else:
+            object.__setattr__(t, 'window_end', 0)
+        return {'status': 'OK', 'assets': [asset(host)]}
+    h.tools['subfinder.enum'].response = passive
+    api('loops').run_recon(h, t, ['dvwa.lab.test'], g)
+    assert len(calls) == 1
+    assert g.status == ('ABORTED' if stop == 'kill' else 'BLOCKED')
+
+
+def test_cap_survives_reload(tmp_path):
+    h, g, calls = setup_loop()
+    g.iteration = 5
+    p = tmp_path / 'g.json'
+    g.save(p)
+    loaded = api('asset_graph').AssetGraph.load(p, 'p3-test')
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], loaded)
+    assert calls == []
+    assert loaded.stop_reason == 'tope de iteraciones alcanzado'
+
+
+def test_five_iterations_with_new_assets():
+    n = 0
+    def passive(host):
+        nonlocal n
+        n += 1
+        return {'status': 'OK', 'assets': [asset(f'host{n}.dvwa.lab.test')]}
+    h, g, calls = setup_loop(passive)
+    h.guard._approvals.update(f'httpx.probe@host{i}.dvwa.lab.test' for i in range(1, 6))
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.iteration == 5
+    assert g.stop_reason == 'tope de iteraciones alcanzado'
+    assert sum(name == 'subfinder.enum' for name, _ in calls) == 5
+
+
+def test_invalid_passive_twice_escalates():
+    h, g, calls = setup_loop({'status': 'ERROR', 'error': 'schema', 'assets': []})
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.status == 'PENDING_HITL'
+    assert len(calls) == 2
+    assert all(name == 'subfinder.enum' for name, _ in calls)
+    assert g.stop_reason != 'grafo estabilizado'
+
+
+def test_graph_merge_and_atomic_rejection(tmp_path):
+    cls = api('asset_graph').AssetGraph
+    g = cls('p3-test')
+    assert g.add(asset('DVWA.LAB.TEST.', tech=['PHP']))
+    assert not g.add(asset(tech=['Apache']))
+    assert len(g.assets) == 1
+    assert next(iter(g.assets.values()))['technologies'] == ['Apache', 'PHP']
+    p = tmp_path / 'g.json'
+    g.save(p)
+    original = p.read_bytes()
+    with pytest.raises(ValueError):
+        g.add({'address': 'dvwa.lab.test', 'type': 'host'})
+    assert p.read_bytes() == original
+    assert cls.load(p, 'p3-test').assets == g.assets
+    with pytest.raises(ValueError):
+        cls.load(p, 'other')
+    raw = json.loads(original)
+    raw['schema_version'] = 99
+    p.write_text(json.dumps(raw))
+    with pytest.raises(ValueError):
+        cls.load(p, 'p3-test')
+
+
+@pytest.mark.parametrize('module,name', [('subfinder_adapter', 'SubfinderEnum'), ('httpx_adapter', 'HttpxProbe')])
+def test_adapter_argv_and_schema(module, name):
+    mod = api('adapters.' + module)
+    seen = []
+    fixture = Path(__file__).parent / 'fixtures' / 'p3' / (module + '.jsonl')
+    adapter = getattr(mod, name)(runner=lambda argv, timeout: seen.append((argv, timeout)) or fixture.read_text(),
+                                 profile={'rate_limit_rps': 2, 'timeout_s': 10})
+    result = adapter.run(Action(adapter.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'OK'
+    assert result['assets'][0]['source_tool'] == adapter.name
+    argv, timeout = seen[0]
+    assert argv[0] in {'subfinder', 'httpx'}
+    assert '-rl' in argv and argv[argv.index('-rl') + 1] == '2'
+    assert timeout == 10
+    assert not {'-fr', '-fhr', '-proxy', '-all', '-up'}.intersection(argv)
+
+
+@pytest.mark.parametrize('target', ['; rm -rf /', '10.99.0.2 -A', 'evil.invalid', '-proxy', 'http://user:pass@dvwa.lab.test'])
+def test_reject_target_before_runner(target):
+    cls = api('adapters.httpx_adapter').HttpxProbe
+    calls = []
+    obj = cls(runner=lambda *args: calls.append(args), profile={'rate_limit_rps': 1, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), target, token())
+    assert result['status'] == 'ERROR'
+    assert not calls
+
+
+@pytest.mark.parametrize('raw', ['{broken', '{"url":"http://dvwa.lab.test","tech":"PHP"}',
+                                  '{"url":"http://dvwa.lab.test"}\n{broken'])
+def test_partial_json_discarded(raw):
+    cls = api('adapters.httpx_adapter').HttpxProbe
+    obj = cls(runner=lambda *args: raw, profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'ERROR' and result['error'] == 'schema'
+    assert result['assets'] == []
+
+
+@pytest.mark.parametrize('failure', ['missing', 'timeout', 'exit'])
+def test_execution_error_is_not_empty_success(failure):
+    import subprocess
+    def runner(*args):
+        if failure == 'missing':
+            raise FileNotFoundError()
+        if failure == 'timeout':
+            raise subprocess.TimeoutExpired('httpx', 10)
+        raise subprocess.CalledProcessError(1, 'httpx')
+    obj = api('adapters.httpx_adapter').HttpxProbe(runner=runner, profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'ERROR' and result['error'] == failure
+
+
+@pytest.mark.parametrize('rate', [0, -1, float('nan'), float('inf'), True])
+def test_invalid_profile(rate):
+    with pytest.raises(ValueError):
+        api('adapters.httpx_adapter').HttpxProbe(profile={'rate_limit_rps': rate, 'timeout_s': 10})
+
+
+def test_shared_rate_limit():
+    now = [0.0]
+    limiter = api('adapters.recon_common').RateLimiter(clock=lambda: now[0], sleep=lambda dt: now.__setitem__(0, now[0] + dt))
+    emitted = []
+    for _ in range(7):
+        limiter.wait('DVWA.LAB.TEST.', 5)
+        emitted.append(now[0])
+    assert all(b - a >= 0.199999 for a, b in zip(emitted, emitted[1:]))
+    assert emitted[-1] >= 1.19
+
+
+def test_redirect_external_never_followed():
+    calls = []
+    obj = api('adapters.httpx_adapter').HttpxProbe(
+        runner=lambda *args: calls.append(args) or json.dumps({'url': 'http://dvwa.lab.test', 'location': 'https://external.invalid/'}),
+        profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert len(calls) == 1
+    assert result['blocked_redirects'] == ['https://external.invalid/']
+
+
+def test_real_passive_is_closed_without_local_source():
+    obj = api('adapters.subfinder_adapter').SubfinderEnum(profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'ERROR'
+    assert result['error'] == 'local_source_required'
+
+
+def test_wrong_phase_never_runs():
+    h, g, calls = setup_loop()
+    from harness.contracts import ScopeViolation
+    with pytest.raises(ScopeViolation):
+        h.invoke('recon', Action('httpx.probe', Phase.RECON), 'dvwa.lab.test', replace(token(), phase=Phase.ANALYZE))
+    assert not calls
