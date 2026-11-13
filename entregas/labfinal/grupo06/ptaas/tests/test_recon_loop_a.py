@@ -246,3 +246,83 @@ def test_wrong_phase_never_runs():
     with pytest.raises(ScopeViolation):
         h.invoke('recon', Action('httpx.probe', Phase.RECON), 'dvwa.lab.test', replace(token(), phase=Phase.ANALYZE))
     assert not calls
+
+
+def test_shared_budget_across_adapter_instances():
+    now, emitted = [0.0], []
+    limiter = api('adapters.recon_common').RateLimiter(clock=lambda: now[0], sleep=lambda dt: now.__setitem__(0, now[0] + dt))
+    def runner(*args):
+        emitted.append(now[0])
+        return '{"url":"http://dvwa.lab.test"}'
+    cls = api('adapters.httpx_adapter').HttpxProbe
+    for _ in range(7):
+        obj = cls(runner=runner, profile={'rate_limit_rps': 50, 'timeout_s': 10}, limiter=limiter)
+        assert obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())['status'] == 'OK'
+    assert emitted[-1] >= 1.19  # policy=5 limita incluso un perfil más rápido
+
+
+def test_real_http_pins_dns_and_drops_external_address(monkeypatch):
+    common = api('adapters.recon_common')
+    http = api('adapters.httpx_adapter')
+    monkeypatch.setattr(common.socket, 'getaddrinfo', lambda *a, **kw: [(2, 1, 6, '', ('10.99.0.2', 80))])
+    calls = []
+    monkeypatch.setattr(http, '_execute', lambda argv, timeout: calls.append(argv) or '{"url":"http://10.99.0.2"}')
+    obj = http.HttpxProbe(profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    assert obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())['status'] == 'OK'
+    assert 'http://10.99.0.2' in calls[0] and 'Host: dvwa.lab.test' in calls[0]
+    monkeypatch.setattr(common.socket, 'getaddrinfo', lambda *a, **kw: [(2, 1, 6, '', ('192.0.2.1', 80))])
+    assert obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())['status'] == 'ERROR'
+    assert len(calls) == 1
+
+
+def test_http_empty_output_is_not_convergence():
+    obj = api('adapters.httpx_adapter').HttpxProbe(runner=lambda *a: '', profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'ERROR' and result['error'] == 'empty_output'
+
+
+def test_stopped_checkpoint_is_terminal():
+    h, g, calls = setup_loop()
+    g.status, g.stop_reason, g.iteration = 'STOPPED', 'grafo estabilizado', 2
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert not calls and g.iteration == 2
+
+
+def test_local_redirect_is_inspected_without_following():
+    calls = []
+    obj = api('adapters.httpx_adapter').HttpxProbe(
+        runner=lambda *a: calls.append(a) or '{"url":"http://dvwa.lab.test","location":"/login.php"}',
+        profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['redirects'] == ['http://dvwa.lab.test/login.php']
+    assert len(calls) == 1
+
+
+def test_external_redirect_recorded_by_loop():
+    h, g, calls = setup_loop()
+    h.tools['httpx.probe'].response = {'status': 'OK', 'assets': [asset()],
+                                      'blocked_redirects': ['https://external.invalid/private?secret=omitted']}
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    entries = [e for e in h.audit.entries if e['action'] == 'recon.redirect_blocked']
+    assert entries and all(e['target'] == 'external.invalid' for e in entries)
+
+
+@pytest.mark.parametrize('profile', [{'rate_limit_rps': 5, 'timeout_s': 0},
+                                   {'rate_limit_rps': 5, 'timeout_s': 10, 'fixed_args': ['-fr']}])
+def test_invalid_timeout_or_unapproved_flags(profile):
+    with pytest.raises(ValueError):
+        api('adapters.httpx_adapter').HttpxProbe(profile=profile)
+
+
+def test_subfinder_partial_json_rejected():
+    obj = api('adapters.subfinder_adapter').SubfinderEnum(
+        runner=lambda *a: '{"host":"dvwa.lab.test"}\n{broken', profile={'rate_limit_rps': 5, 'timeout_s': 10})
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'ERROR' and result['assets'] == []
+
+
+def test_loop_tool_error_is_recorded():
+    h, g, calls = setup_loop({'status': 'ERROR', 'error': 'timeout', 'assets': []})
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.status == 'ERROR' and len(calls) == 1
+    assert any(e['action'] == 'recon.error.timeout' and e['result'] == 'BLOCKED' for e in h.audit.entries)
