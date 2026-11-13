@@ -1,0 +1,29 @@
+
+## Verificación real P3 — ejecución aislada
+
+La instrucción del usuario de completar la corrida habilita preparar y ejecutar el laboratorio local. Se conserva el alcance DVWA/Juice Shop y no se habilitan proveedores públicos de enumeración.
+
+### Scenario: enumeración nativa sin proveedores externos
+- GIVEN subfinder instalado en runner aislado y todos sus proveedores excluidos explícitamente
+- WHEN Harness invoca subfinder.enum
+- THEN se captura su salida real (que puede ser vacía), sin fabricar subdominios; las semillas autorizadas continúan al sondeo HTTP
+
+### Scenario: catálogo de proveedores no interpretable
+- GIVEN una salida de catálogo desconocida o vacía
+- WHEN se prepara el runner nativo
+- THEN falla cerrado antes de enumerar
+
+### Scenario: evidencia verificable de corrida
+- GIVEN acciones reales registradas por AuditLog
+- WHEN se exporta la evidencia y se ejecuta el verificador de P3 que delega en verificar_cadena de P1
+- THEN se valida el hash encadenado; alterar una fila o borrar una intermedia produce fallo
+
+### Scenario: acción real sin autorización registrada
+- GIVEN ausencia de una referencia de autorización humana o ventana vencida
+- WHEN se solicita la corrida real
+- THEN no se inicia reconocimiento
+
+### Scenario: captura HTTP no altera la autorización
+- GIVEN un observador de salida cruda configurado
+- WHEN se ejecuta httpx
+- THEN conserva la resolución a IP autorizada y argv acotado; el observador recibe la salida después de ejecutar, sin sustituir el runner
