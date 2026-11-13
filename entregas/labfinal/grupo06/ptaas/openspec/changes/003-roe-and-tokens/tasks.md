@@ -22,5 +22,5 @@
 
 **Evidencia:** `tests/test_roe_tokens.py` (31 tests), `tests/test_redteam_guard.py`
 (A1–A10), `entrega/red-team.md`, `entrega/mutaciones.md`, salidas en
-`entrega/evidencia/salidas/`. `1.3` sigue pendiente: la revisión cruzada la hace
-otra persona, no el agente.
+`entrega/evidencia/salidas/`. `1.3` sigue pendiente de revisión cruzada por otra
+persona integrante del grupo.

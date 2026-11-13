@@ -1,8 +1,8 @@
-# Informe de mutaciones — controles tocados por P2
+# Informe de mutaciones — controles evaluados
 
 Cada mutación se aplicó sobre el código real, se ejecutó el test que debía
-detectarla y se restauró el archivo con `git checkout --`. La salida completa
-quedó en `entrega/evidencia/salidas/mutacion-M*.txt`.
+detectarla y se restauró el archivo original. Las salidas completas quedaron en
+`entrega/evidencia/salidas/mutacion-M*.txt`.
 
 | # | Control mutado | Mutación aplicada | Test que la detectó | Resultado |
 |---|---|---|---|---|
@@ -18,7 +18,7 @@ quedó en `entrega/evidencia/salidas/mutacion-M*.txt`.
 
 ## Detalle de las mutaciones más relevantes
 
-### M1 — El control que mira el profe: `_in_scope` en `True`
+### M1 — El control de alcance (`_in_scope` en `True`)
 
 Salida (resumen):
 

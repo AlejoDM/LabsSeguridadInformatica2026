@@ -10,7 +10,7 @@ corrida roja inicial agrupada tuvo errores de recolección, documentados en
 `entrega/red-team.md`; los casos de revisión posteriores sí fallaron por las
 causas de comportamiento esperadas.
 
-## Qué entrego
+## Elementos entregados
 
 - `harness/roe.py`: `load(path) -> RoE` y `parse(mapping) -> RoE`.
 - `harness/tokens.py`: `issue(roe, phase, *, audit, now=None) -> ScopeToken`;
@@ -60,4 +60,5 @@ token = issue(roe, Phase.RECON, audit=audit) # sink entregado por el runtime
 - Que el laboratorio siga usando `10.99.0.0/24` y los dominios de
   `profiles.yaml`; el parser rechaza cualquier otro alcance.
 
-**Revisó (persona):** pendiente — no lo completa el agente.
+**Revisión:** pendiente; la persona que reciba el traspaso debe anotar su nombre,
+la fecha y qué comprobó.

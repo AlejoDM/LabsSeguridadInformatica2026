@@ -61,10 +61,9 @@ Para el MVP se eligen **7 herramientas/fuentes**, todas con salida parseable y c
 
 ## Revisión P2 — change 003 y red team (2026-11-11)
 
-Revisión pedida por el plan (P2 revisa `docs/tool-selection.md`). Resultado:
-**no cambia el conjunto de herramientas del MVP**. Los hallazgos A1–A10 se
-resuelven en el harness o en el contrato de adaptador, no comprando otra
-herramienta.
+La revisión de la selección de herramientas concluyó que **no hace falta cambiar
+el conjunto de herramientas del MVP**: los hallazgos A1–A10 se resuelven en el
+harness o en el contrato de adaptador, sin incorporar otra herramienta.
 
 | Hallazgo | Impacto en la selección | Decisión |
 |---|---|---|
