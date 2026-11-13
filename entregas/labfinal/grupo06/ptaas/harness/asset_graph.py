@@ -51,7 +51,8 @@ class AssetGraph:
         previous = self.assets.get(key)
         if previous:
             item['technologies'] = sorted(set(previous['technologies']) | set(item['technologies']))
-            item['source_tool'] = previous['source_tool']
+            if previous['source_tool'] != 'scope.seed':
+                item['source_tool'] = previous['source_tool']
         if item != previous:
             self.assets[key] = item
             self.revision += 1

@@ -18,6 +18,10 @@ def build_argv(target: str, profile: dict[str, Any]) -> list[str]:
             '-rl', str(p['rate_limit_rps']), '-timeout', str(p['timeout_s'])]
 
 
+class NoPassiveSources(Exception):
+    """El binario confirmó que no hay proveedores habilitados."""
+
+
 class SubfinderEnum:
     name = 'subfinder.enum'
     allowed_phases = (Phase.RECON,)
@@ -53,6 +57,8 @@ class SubfinderEnum:
                 assets.append(normalize_asset({'type': 'host', 'address': item['host'],
                                                'source_tool': self.name, 'technologies': []}))
             return {'status': 'OK', 'assets': assets, 'capability': self.name, 'target': target}
+        except NoPassiveSources:
+            return {'status': 'UNAVAILABLE', 'reason': 'no_local_sources', 'assets': [], 'capability': self.name}
         except subprocess.TimeoutExpired:
             return error('timeout')
         except FileNotFoundError:
@@ -63,3 +69,55 @@ class SubfinderEnum:
             return error('schema')
         except OSError:
             return error('io')
+
+
+class OfflineSubfinderRunner:
+    """Ejecuta el binario real con TODOS los proveedores deshabilitados.
+
+    .test no tiene fuentes públicas autorizadas. La enumeración nativa vacía
+    se conserva como evidencia; no se fingen descubrimientos pasivos.
+    Usar dentro del runner Docker aislado, desde SubfinderEnum/Harness.
+    """
+
+    def __init__(self, executor=None, capture=None):
+        self.executor = executor or subprocess.run
+        self.last_error = ''
+        self.capture = capture
+
+    def __call__(self, argv: list[str], timeout: int) -> str:
+        import os
+        import re
+        import tempfile
+        from pathlib import Path
+
+        env = {key: value for key, value in os.environ.items() if 'proxy' not in key.lower()}
+        with tempfile.TemporaryDirectory(prefix='ptaas-subfinder-') as directory:
+            config = Path(directory) / 'config.yaml'
+            providers = Path(directory) / 'providers.yaml'
+            config.write_text('{}\n', encoding='utf-8')
+            providers.write_text('{}\n', encoding='utf-8')
+            extra = ['-config', str(config), '-pc', str(providers)]
+            options = dict(shell=False, check=True, capture_output=True, text=True,
+                           timeout=timeout, stdin=subprocess.DEVNULL, env=env, cwd=directory)
+            catalog = self.executor(['subfinder', '-ls', '-silent', '-duc', *extra], **options)
+            sources = []
+            for line in catalog.stdout.splitlines():
+                if not re.fullmatch(r'[a-z0-9]+(?: [*~])?', line.strip()):
+                    raise ValueError('catálogo de fuentes no interpretable')
+                sources.append(line.split()[0])
+            if not sources:
+                raise ValueError('catálogo vacío: no se puede excluir todas las fuentes')
+            command = [*argv, '-es', ','.join(sorted(set(sources))), *extra]
+            try:
+                result = self.executor(command, **options)
+            except subprocess.CalledProcessError as exc:
+                self.last_error = exc.stderr or ''
+                clean = re.sub(r'\x1b\[[0-9;]*m', '', self.last_error).strip()
+                if exc.returncode == 1 and clean == '[FTL] No sources selected for this search':
+                    if self.capture:
+                        self.capture(command, exc.stdout or '')
+                    raise NoPassiveSources() from exc
+                raise
+            if self.capture:
+                self.capture(command, result.stdout)
+            return result.stdout

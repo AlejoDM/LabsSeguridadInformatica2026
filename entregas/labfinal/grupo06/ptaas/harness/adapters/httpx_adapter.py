@@ -41,8 +41,9 @@ class HttpxProbe:
     destructive = False
 
     def __init__(self, runner: Runner | None = None, profile: dict[str, Any] | None = None,
-                 limiter: RateLimiter = LIMITER):
+                 limiter: RateLimiter = LIMITER, capture=None):
         self.runner = runner
+        self.capture = capture
         self.profile = profile_for('httpx', profile)
         self.limiter = limiter
 
@@ -55,12 +56,16 @@ class HttpxProbe:
                 return error('authorization')
             pinned = pinned_ip(target, token) if self.runner is None else target
             argv = build_argv(pinned, self.profile)
+            if target == 'juiceshop.lab.test':
+                argv[argv.index('-u') + 1] += ':3000'
             if pinned != target:
                 argv.extend(['-H', 'Host: ' + target])
             self.limiter.wait(target, self.profile['rate_limit_rps'])
             if not token.is_live():
                 return error('authorization')
             raw = (self.runner or _execute)(argv, self.profile['timeout_s'])
+            if self.capture:
+                self.capture(argv, raw)
             if not raw.strip():
                 return error('empty_output')
             assets, blocked, redirects = [], [], []
@@ -80,7 +85,8 @@ class HttpxProbe:
                     if not isinstance(location, str):
                         raise ValueError('Location inválida')
                     try:
-                        destination = RedirectPolicy(token.allowed_domains).check('http://' + target, location)
+                        destination = RedirectPolicy(token.allowed_domains).check(
+                            'http://' + target + (':3000' if target == 'juiceshop.lab.test' else ''), location)
                         checked_target(urlsplit(destination).hostname or '', token)
                     except ValueError:
                         blocked.append(location)

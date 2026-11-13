@@ -98,6 +98,9 @@ def run_recon(harness, token, seeds, graph, *, checkpoint=None, correlate=None):
         if result.get('status') == 'PENDING_HITL':
             finish('PENDING_HITL', 'aprobación humana requerida')
             return None
+        if name == 'subfinder.enum' and result.get('status') == 'UNAVAILABLE' and result.get('reason') == 'no_local_sources':
+            record('recon.passive_unavailable', target, Result.BLOCKED)
+            return {'status': 'UNAVAILABLE', 'assets': []}
         if result.get('status') == 'ERROR':
             record('recon.error.' + result.get('error', 'unknown'), target, Result.BLOCKED)
             if result.get('error') == 'schema':

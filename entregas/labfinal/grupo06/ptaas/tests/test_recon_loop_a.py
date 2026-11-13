@@ -491,3 +491,16 @@ def test_active_evidence_replaces_seed_provenance():
     graph.add(asset(source='httpx.probe', tech=['PHP']))
     observed = next(iter(graph.assets.values()))
     assert observed['source_tool'] == 'httpx.probe'
+
+
+@pytest.mark.parametrize('name', ['httpx-dvwa.jsonl', 'httpx-juiceshop.jsonl'])
+def test_recorded_real_httpx_output(name):
+    from urllib.parse import urlsplit
+    raw = (Path(__file__).parent / 'fixtures/p3/real' / name).read_text()
+    host = urlsplit(json.loads(raw)['url']).hostname
+    cls = api('adapters.httpx_adapter').HttpxProbe
+    obj = cls(runner=lambda *args: raw)
+    result = obj.run(Action(obj.name, Phase.RECON), host, token())
+    assert result['status'] == 'OK'
+    assert result['assets'][0]['address'] == host
+    assert result['assets'][0]['source_tool'] == 'httpx.probe'

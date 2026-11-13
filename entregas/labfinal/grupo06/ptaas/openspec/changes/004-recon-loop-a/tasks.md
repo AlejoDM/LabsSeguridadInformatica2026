@@ -18,5 +18,13 @@
 - [x] 3.2 Test: loop A termina por tope
 - [x] 3.3 Test: un activo fuera de alcance nunca llega a un adaptador
 - [x] 3.4 Test: el adaptador respeta el rate limit
-- [ ] 3.5 Corrida real contra el lab y bitácora verificada con `audit verify`
+- [x] 3.5 Corrida real contra el lab y bitácora verificada con `audit verify`
 - [ ] 3.6 Archivar deltas en `openspec/specs/`
+
+
+Evidencia 3.5: `entrega/evidencia/salidas/P3-real-04/` y `P3-real-verificacion.txt`.
+Loop A real: 2 activos, 2 iteraciones, grafo estabilizado. Subfinder nativo
+registra UNAVAILABLE por ausencia de fuentes locales; httpx sondea las semillas
+autorizadas. `python -m harness.recon_lab audit verify` delega la verificación
+del snapshot exportado en `harness.audit.verificar_cadena` de P1; no implementa
+ni modifica su almacenamiento SQLite.

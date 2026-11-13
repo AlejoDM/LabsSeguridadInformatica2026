@@ -1,0 +1,61 @@
+{
+  "count": 5,
+  "head": "96d622226014ae263a445bbc0c8f0c9f1ba1f9804aa8705677019868861f319c",
+  "entries": [
+    {
+      "ts": 1794586596.3045058,
+      "engagement": "p3-real-20261113T161636Z",
+      "agent": "scope-guard",
+      "action": "scope.issue_token",
+      "target": "recon",
+      "phase": "recon",
+      "result": "OK",
+      "prev": "GENESIS",
+      "hash": "0f8fe82014405d1971482673aad581ad95ae76afdfb02b96a111ab30745ab9d2"
+    },
+    {
+      "ts": 1794586596.5090857,
+      "engagement": "p3-real-20261113T161636Z",
+      "agent": "recon",
+      "action": "recon.iteration",
+      "target": "1",
+      "phase": "recon",
+      "result": "OK",
+      "prev": "0f8fe82014405d1971482673aad581ad95ae76afdfb02b96a111ab30745ab9d2",
+      "hash": "c1f664f78fa3a1331790b00b0aef8e1ac64c337f56d18464e4aa575ddf73def4"
+    },
+    {
+      "ts": 1794586596.841957,
+      "engagement": "p3-real-20261113T161636Z",
+      "agent": "recon",
+      "action": "subfinder.enum",
+      "target": "dvwa.lab.test",
+      "phase": "recon",
+      "result": "OK",
+      "prev": "c1f664f78fa3a1331790b00b0aef8e1ac64c337f56d18464e4aa575ddf73def4",
+      "hash": "ba25dce5c7143d05455a8b051f5e5f018cf2ce119e47cba67edf0f280967e5c5"
+    },
+    {
+      "ts": 1794586596.8420537,
+      "engagement": "p3-real-20261113T161636Z",
+      "agent": "recon",
+      "action": "recon.error.exit",
+      "target": "dvwa.lab.test",
+      "phase": "recon",
+      "result": "BLOCKED",
+      "prev": "ba25dce5c7143d05455a8b051f5e5f018cf2ce119e47cba67edf0f280967e5c5",
+      "hash": "15f10cbea0bd5026d62df41f5b7811ad77e1db55d5cad33dc7730980c056d8bb"
+    },
+    {
+      "ts": 1794586596.842096,
+      "engagement": "p3-real-20261113T161636Z",
+      "agent": "recon",
+      "action": "recon.loop.error de herramienta",
+      "target": "1",
+      "phase": "recon",
+      "result": "BLOCKED",
+      "prev": "15f10cbea0bd5026d62df41f5b7811ad77e1db55d5cad33dc7730980c056d8bb",
+      "hash": "96d622226014ae263a445bbc0c8f0c9f1ba1f9804aa8705677019868861f319c"
+    }
+  ]
+}
