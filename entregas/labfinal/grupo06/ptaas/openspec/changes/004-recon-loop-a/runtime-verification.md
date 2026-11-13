@@ -27,3 +27,5 @@ La instrucción del usuario de completar la corrida habilita preparar y ejecutar
 - GIVEN un observador de salida cruda configurado
 - WHEN se ejecuta httpx
 - THEN conserva la resolución a IP autorizada y argv acotado; el observador recibe la salida después de ejecutar, sin sustituir el runner
+
+La versión instalada devuelve 'No sources selected for this search' con código 1 al excluir todas las fuentes. Solo ese resultado exacto se clasifica UNAVAILABLE y queda registrado; se sondean las semillas autorizadas sin afirmar descubrimiento pasivo. Otros errores abortan. Los puertos fijos son DVWA:80 y JuiceShop:3000, también al resolver Location relativa.

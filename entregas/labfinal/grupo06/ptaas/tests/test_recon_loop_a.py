@@ -448,3 +448,38 @@ def test_juiceshop_uses_its_fixed_lab_port(monkeypatch):
     obj = mod.HttpxProbe()
     assert obj.run(Action(obj.name, Phase.RECON), 'juiceshop.lab.test', token())['status'] == 'OK'
     assert 'http://10.99.0.3:3000' in calls[0]
+
+
+def test_juiceshop_relative_redirect_preserves_port():
+    mod = api('adapters.httpx_adapter')
+    obj = mod.HttpxProbe(runner=lambda *a: '{"url":"http://juiceshop.lab.test:3000","location":"/login"}')
+    result = obj.run(Action(obj.name, Phase.RECON), 'juiceshop.lab.test', token())
+    assert result['redirects'] == ['http://juiceshop.lab.test:3000/login']
+
+
+def test_passive_unavailable_is_audited_and_seeds_probed():
+    h, g, calls = setup_loop({'status': 'UNAVAILABLE', 'reason': 'no_local_sources', 'assets': []})
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.status == 'STOPPED'
+    assert ('httpx.probe', 'dvwa.lab.test') in calls
+    assert any(e['action'] == 'recon.passive_unavailable' for e in h.audit.entries)
+
+
+def test_no_sources_is_unavailable_not_success():
+    import subprocess
+    from types import SimpleNamespace
+    def executor(argv, **kwargs):
+        if '-ls' in argv:
+            return SimpleNamespace(stdout='crtsh\n', stderr='', returncode=0)
+        raise subprocess.CalledProcessError(1, argv, output='', stderr='[\x1b[1;31mFTL\x1b[0m] No sources selected for this search\n')
+    mod = api('adapters.subfinder_adapter')
+    obj = mod.SubfinderEnum(runner=mod.OfflineSubfinderRunner(executor=executor))
+    result = obj.run(Action(obj.name, Phase.RECON), 'dvwa.lab.test', token())
+    assert result['status'] == 'UNAVAILABLE' and result['reason'] == 'no_local_sources'
+
+
+def test_unexpected_passive_exit_still_aborts():
+    h, g, calls = setup_loop({'status': 'ERROR', 'error': 'exit', 'assets': []})
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert g.status == 'ERROR'
+    assert all(name != 'httpx.probe' for name, _ in calls)
