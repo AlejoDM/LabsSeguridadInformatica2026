@@ -349,3 +349,21 @@ def test_malformed_redirect_cannot_crash_loop(tmp_path):
     api('loops').run_recon(h, token(), ['dvwa.lab.test'], g, checkpoint=tmp_path / 'g.json')
     assert g.status == 'STOPPED'
     assert any(e['action'] == 'recon.redirect_blocked' and e['target'] == 'invalid' for e in h.audit.entries)
+
+
+def test_empty_passive_still_probes_authorized_seed():
+    h, g, calls = setup_loop({'status': 'OK', 'assets': []})
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
+    assert ('httpx.probe', 'dvwa.lab.test') in calls
+    assert len(g.assets) == 1
+
+
+def test_frontier_survives_checkpoint(tmp_path):
+    h, g, calls = setup_loop()
+    g.frontier = ['juiceshop.lab.test']
+    g.iteration = 1
+    p = tmp_path / 'g.json'
+    g.save(p)
+    loaded = api('asset_graph').AssetGraph.load(p, 'p3-test')
+    api('loops').run_recon(h, token(), ['dvwa.lab.test'], loaded)
+    assert calls[0] == ('subfinder.enum', 'juiceshop.lab.test')
