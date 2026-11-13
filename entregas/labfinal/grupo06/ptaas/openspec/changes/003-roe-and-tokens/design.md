@@ -30,6 +30,8 @@ authorized_phases: ["recon", "correlate", "analyze"]
 
 `authorized_phases` es opcional: si falta, el RoE autoriza las fases de
 `policy.yaml`. No se admiten comodines (`*`) ni rangos.
+Si se declara explícitamente como una lista vacía, el RoE se rechaza para evitar
+que una configuración vacía se interprete como autorización general.
 
 ## Validaciones (todas deterministas, sin LLM)
 
@@ -46,24 +48,30 @@ authorized_phases: ["recon", "correlate", "analyze"]
 | exclusiones | se restan del alcance; si dejan el alcance vacío, el RoE se rechaza | la exclusión anula todo el alcance |
 
 La aprobación se representa con **aprobador + referencia + hash del contenido
-canónico** (`approval_hash`). Es trazabilidad, no una firma criptográfica: el
-diseño no pretende reemplazar la firma legal del contrato.
+canónico** (`approval_hash`). El hash incluye alcance, exclusiones, fases,
+contactos, ventana y revocación; un cambio de cualquiera de esos datos cambia
+el hash. Es trazabilidad, no una firma criptográfica: el diseño no pretende
+reemplazar la firma legal del contrato.
 
 ## Emisión de tokens
 
-`tokens.issue(roe, phase, *, now=None, audit=None, agent="scope-guard")`:
+`tokens.issue(roe, phase, *, audit, now=None, agent="scope-guard")`:
 
 1. Rechaza si la fase no está en `authorized_phases`.
 2. Rechaza si `now` está fuera de `window` o si el RoE está revocado.
 3. Calcula `ttl` desde `policy.yaml` (`phases.<fase>.token_ttl_minutes`).
 4. `window_start = now`, `window_end = min(now + ttl, roe.window.end)`.
 5. Resta las exclusiones de CIDR con `address_exclude` y filtra los dominios
-   excluidos (el dominio excluido cubre a sus subdominios).
-6. Construye el `ScopeToken` con el `engagement_id` del RoE.
+   excluidos (el dominio excluido cubre a sus subdominios); si las exclusiones
+   combinadas dejan vacíos todos los CIDR y dominios, rechaza el RoE.
+6. Construye el `ScopeToken` con el `engagement_id` del RoE y registra la
+   emisión antes de devolverlo. `audit` es obligatorio; sin un sink no se emite
+   ningún token.
 
-El token **no se renueva solo**: cuando vence, `is_live()` da falso y el Guard
-bloquea. Emitir otro token exige una llamada explícita al emisor, que vuelve a
-validar la ventana del RoE y deja un registro.
+El token **no se renueva solo**: su intervalo de vigencia es `[window_start,
+window_end)`, por lo que en el instante exacto `window_end` ya venció;
+`is_live()` da falso y el Guard bloquea. Emitir otro token exige una llamada
+explícita al emisor, que vuelve a validar la ventana del RoE y deja un registro.
 
 ## Vinculación a engagement y fase
 
