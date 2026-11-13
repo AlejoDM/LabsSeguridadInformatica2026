@@ -1,6 +1,6 @@
 # Delta — asset-discovery
 
-Tests: tests/test_engagement_and_loops.py
+Tests: tests/test_engagement_and_loops.py, tests/test_recon_loop_a.py
 
 ## Requirement: Relevamiento solo dentro de alcance
 El sistema DEBE descubrir únicamente activos cubiertos por el scope token vigente; todo descubrimiento fuera de alcance DEBE registrarse como "fuera de alcance" sin ser tocado.

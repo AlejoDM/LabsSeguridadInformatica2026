@@ -1,6 +1,8 @@
 # Delta propuesto — tool-adapters — P3 / 004
 
-Estado: para revisión humana. Tests previstos: `tests/test_recon_loop_a.py`.
+Revisión del usuario en el chat: «Esta todo de diez, termina lo que falte.» No se atribuye revisión cruzada a P2.
+
+Tests: tests/test_recon_loop_a.py
 
 ## Requirement: Adaptadores RECON acotados
 subfinder.enum y httpx.probe DEBEN declarar fase RECON y destructive=False; la ejecución DEBE ocurrir vía Harness.invoke.

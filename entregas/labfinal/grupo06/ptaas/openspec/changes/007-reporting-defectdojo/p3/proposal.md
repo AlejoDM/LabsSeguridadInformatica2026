@@ -1,6 +1,6 @@
 # Propuesta P3 — Change 007, tareas 2.3 y 2.4
 
-Estado: para revisión humana. Documento separado de los deltas de P1. No modifica `harness/reporting.py`, propiedad de P5.
+Revisado por el usuario en el chat el 2026-11-13. Tests: tests/test_reporting_p3.py. Documento separado de los deltas de P1. No modifica `harness/reporting.py`, propiedad de P5.
 
 ## Diseño
 
@@ -47,3 +47,5 @@ El componente DEBE producir las cinco secciones previstas, con afirmaciones deri
 - GIVEN un documento generado sin aprobación del Reviewer
 - WHEN se solicita entregar mediante el mecanismo existente
 - THEN se conserva el rechazo del gate sin introducir aprobación automática
+
+Implementación verificada: `harness/reporting_p3.py`. Su `render_report` conserva el contenedor del renderizador existente y usa el mismo `deliver`; no modifica `harness/reporting.py`.

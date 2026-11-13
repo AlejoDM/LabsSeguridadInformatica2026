@@ -36,3 +36,11 @@ targets:
   # En desarrollo solo se permiten estos hosts de laboratorio (red aislada).
   lab_only_domains: ["dvwa.lab.test", "juiceshop.lab.test"]
   lab_only_cidrs: ["10.99.0.0/24"]
+
+# P3: límite existente de policy; timeout acotado, sin flags configurables.
+subfinder:
+  rate_limit_rps: 5
+  timeout_s: 10
+httpx:
+  rate_limit_rps: 5
+  timeout_s: 10

@@ -1,6 +1,6 @@
 # Spec — tool-adapters
 
-Tests: `tests/test_adapters.py`, `tests/test_audit_and_policy.py`
+Tests: `tests/test_adapters.py`, `tests/test_audit_and_policy.py`, tests/test_recon_loop_a.py
 Configuración: `harness/profiles.yaml`, `harness/tools.yaml`, `harness/policy.yaml`
 
 ## Requirement: Declaración de capability

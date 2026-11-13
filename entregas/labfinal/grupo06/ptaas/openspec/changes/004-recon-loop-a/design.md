@@ -1,6 +1,6 @@
 # Diseño P3 — Change 004
 
-Estado: propuesta para revisión humana; no acredita aprobación ni implementación.
+Delta revisado por el usuario en el chat el 2026-11-13. Implementación P3 verificada mediante tests locales. No acredita revisión cruzada de P2 ni aprobación de acciones reales.
 
 ## Contratos y límites
 
@@ -33,3 +33,14 @@ La enumeración pasiva no habilita consultas a terceros: el runner real debe est
 ## Verificación propuesta
 
 Tests nuevos en `tests/test_recon_loop_a.py`, sin editar tests ajenos. Cada Scenario del delta tiene un test de comportamiento y de bloqueo. La secuencia es delta revisado, test fallido por comportamiento, commit local de prueba, implementación, test verde y mutación del control. El archivo de evidencia de P3 registra exclusivamente comandos y resultados ejecutados. Las specs estables se actualizan al archivar con revisión; no se marca revisión, corrida real ni archivo sin evidencia.
+
+
+## Decisiones implementadas y verificadas
+
+- La frontera de semillas se persiste junto al contador; una vuelta interrumpida consume su presupuesto y se repite desde su frontera, sin afirmar recuperación exacta de cada llamada.
+- STOPPED, ABORTED y PENDING_HITL se preservan al recargar. La orquestación no resuelve por sí misma la revisión humana.
+- Una enumeración vacía conserva la semilla de RoE para el sondeo activo autorizado.
+- HTTP inspecciona Location con RedirectPolicy y devuelve referencias; no decide seguir saltos, ni siquiera locales. Cualquier consumidor que decida seguirlos debe emitir una acción nueva por Harness.
+- Los perfiles aplican el límite existente de policy (5 rps) y timeout de 10 segundos. Estos son valores de implementación probados con fakes, no una aprobación humana de riesgo para una corrida real.
+- La ejecución HTTP fija una IP verificada del lab y el Host original; usa configuración vacía, sin proxy, con un GET sin fallback, sin reintentos ni seguimiento de redirects.
+- El adaptador subfinder valida argv y JSONL con runner inyectado. Sin una fuente local inyectada retorna local_source_required, sin activar los proveedores públicos predeterminados.

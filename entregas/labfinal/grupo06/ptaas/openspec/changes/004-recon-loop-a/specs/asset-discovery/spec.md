@@ -1,6 +1,8 @@
 # Delta propuesto — asset-discovery — P3 / 004
 
-Estado: para revisión humana. Tests previstos: `tests/test_recon_loop_a.py`.
+Revisión del usuario en el chat: «Esta todo de diez, termina lo que falte.» No se atribuye revisión cruzada a P2.
+
+Tests: tests/test_recon_loop_a.py
 
 ## Requirement: Orden pasivo antes de activo
 El loop DEBE completar la enumeración pasiva del lote antes del primer sondeo activo.
