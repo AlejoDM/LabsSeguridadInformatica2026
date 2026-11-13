@@ -483,3 +483,11 @@ def test_unexpected_passive_exit_still_aborts():
     api('loops').run_recon(h, token(), ['dvwa.lab.test'], g)
     assert g.status == 'ERROR'
     assert all(name != 'httpx.probe' for name, _ in calls)
+
+
+def test_active_evidence_replaces_seed_provenance():
+    graph = api('asset_graph').AssetGraph('p3-test')
+    graph.add(asset(source='scope.seed'))
+    graph.add(asset(source='httpx.probe', tech=['PHP']))
+    observed = next(iter(graph.assets.values()))
+    assert observed['source_tool'] == 'httpx.probe'
