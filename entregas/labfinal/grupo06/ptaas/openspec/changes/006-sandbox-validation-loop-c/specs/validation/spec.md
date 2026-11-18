@@ -83,7 +83,7 @@ harness.
 
 - GIVEN un hallazgo aprobado, un token vivo de fase `VALIDATE` y el kill switch activado
 - WHEN se intenta validar
-- THEN el resultado es `BLOCKED` y no se crea ningún contenedor
+- THEN se registra `ABORTED` en la bitácora, se lanza `KillSwitchEngaged` y no se crea ningún contenedor
 
 ## Requirement: Límites de la verificación
 
