@@ -2,7 +2,7 @@
 
 ## Spec y diseño
 - [x] 1.1 `design.md`: estructura del informe, versionado, qué sale hacia DefectDojo
-- [ ] 1.2 Delta de `reporting` con ≥ 4 Requirements nuevos
+- [x] 1.2 Delta de `reporting` con ≥ 4 Requirements nuevos
 - [ ] 1.3 Revisión cruzada
 
 ## Implementación
