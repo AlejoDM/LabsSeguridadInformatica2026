@@ -24,11 +24,11 @@ from typing import Any
 
 import yaml
 
-from harness.contracts import (Harness, KillSwitchEngaged, Result, ScopeToken, ScopeViolation)
+from harness.contracts import Harness, KillSwitchEngaged, Result, ScopeToken, ScopeViolation
 from harness.loops import decide_validation
-from harness.policy_loader import load_policy
 from harness.poc import catalog as catalog_mod
 from harness.poc.catalog import ParameterError, run_parametrized, validate_entries
+from harness.policy_loader import load_policy
 from harness.sandbox import CAPABILITY, SandboxAborted, SandboxSender, SandboxTimeout
 
 PENDING = "PENDING_HITL"
@@ -48,7 +48,7 @@ def params_hash(params: Mapping[str, Any]) -> str:
 class ValidationRequest:
     finding_id: str
     poc_id: str
-    params: dict = field(default_factory=dict)
+    params: dict[str, Any] = field(default_factory=dict)
 
 
 @dataclass(frozen=True)
@@ -262,7 +262,8 @@ def _validate_one(harness: Harness, token: ScopeToken, req: ValidationRequest,
         sender.annotate(finding_id=req.finding_id, poc_version=entry["version"],
                         catalog_version=catalog.version, attempt=len(statuses) + 1)
         try:
-            ev = run_parametrized(dict(catalog.entries), req.poc_id, dict(req.params),
+            ev = run_parametrized({k: dict(v) for k, v in catalog.entries.items()}, req.poc_id,
+                                  dict(req.params),
                                   True, sender)
         except (SandboxAborted, KillSwitchEngaged):
             raise
@@ -272,7 +273,10 @@ def _validate_one(harness: Harness, token: ScopeToken, req: ValidationRequest,
             return Outcome("not_validated", "bloqueado por el harness", len(statuses) + 1)
         except ParameterError:
             return Outcome("not_validated", "parámetros inválidos", len(statuses) + 1)
-        except Exception as exc:  # fallo del runtime o del evaluador: falla cerrado
+        # Captura amplia a propósito: cualquier fallo del runtime o del evaluador deja el
+        # hallazgo "no validado" (falla cerrado). SandboxAborted y el kill switch ya se
+        # re-lanzaron arriba.
+        except Exception as exc:  # noqa: BLE001
             return Outcome("not_validated", f"error: {type(exc).__name__}", len(statuses) + 1)
         statuses.append(ev.status)
 

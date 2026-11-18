@@ -217,8 +217,8 @@ def _markdown(engagement_id: str, version: int, report_hash: str, audit_head: st
     lines = [f"# Informe de pentest — {_text(engagement_id)}", ""]
     if demo:
         simuladas = ", ".join(k for k, v in sorted(stages.items()) if v == "fixture")
-        lines += [f"> **DEMO** — contiene etapas simuladas ({simuladas}). "
-                  "No es un resultado de pentest y no se puede entregar ni exportar.", ""]
+        lines += [(f"> **DEMO** — contiene etapas simuladas ({simuladas}). "
+                   "No es un resultado de pentest y no se puede entregar ni exportar."), ""]
     lines += [f"- Versión: {version}", f"- Hash del informe: {report_hash}",
               f"- Cabeza de la bitácora: {audit_head}",
               "- Procedencia de las etapas: " + ", ".join(
@@ -227,10 +227,10 @@ def _markdown(engagement_id: str, version: int, report_hash: str, audit_head: st
     validated = sum(f.status == "validated" for f in findings)
     pendientes = [f for f in findings if f.status != "validated" and f.high_impact]
     lines += ["## Resumen ejecutivo",
-              f"Se documentan {len(findings)} hallazgos: {validated} validados en sandbox y "
-              f"{len(findings) - validated} no validados, según la bitácora del engagement.",
-              "Este inventario no demuestra ausencia de vulnerabilidades fuera de la evidencia "
-              "registrada."]
+              (f"Se documentan {len(findings)} hallazgos: {validated} validados en sandbox y "
+               f"{len(findings) - validated} no validados, según la bitácora del engagement."),
+              ("Este inventario no demuestra ausencia de vulnerabilidades fuera de la evidencia "
+               "registrada.")]
     if pendientes:
         lines.append("Impacto alto, requiere validación: "
                      + ", ".join(_text(f.id) for f in pendientes) + ".")
@@ -241,9 +241,9 @@ def _markdown(engagement_id: str, version: int, report_hash: str, audit_head: st
                        ("exclusions", "Exclusiones"), ("roe_ref", "Referencia RoE")]:
         lines.append(f"- {label}: {_text(scope.get(key, 'unknown'))}")
     lines += ["", "## Metodología",
-              "Estructura de presentación PTES §7. El estado de validación de cada hallazgo "
-              "se toma de la bitácora del loop C; la estructura no acredita por sí sola "
-              "ejecución completa de PTES, NIST SP 800-115 u OWASP WSTG.", "",
+              ("Estructura de presentación PTES §7. El estado de validación de cada hallazgo "
+               "se toma de la bitácora del loop C; la estructura no acredita por sí sola "
+               "ejecución completa de PTES, NIST SP 800-115 u OWASP WSTG."), "",
               "## Hallazgos priorizados",
               "Orden: EPSS conocido descendente; unknown al final. No se infiere puntaje CVSS.", ""]
     for f in sorted(findings, key=lambda x: (x.epss is None, -(x.epss or 0), x.id)):

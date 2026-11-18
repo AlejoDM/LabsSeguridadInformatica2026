@@ -21,10 +21,23 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 import pytest
 
 from harness.audit import InMemoryAuditStore
-from harness.contracts import (AuditLog, Guard, Harness, KillSwitch, KillSwitchEngaged, Phase,
-                               ScopeToken, ScopeViolation)
-from harness.poc.catalog import (InvalidCatalog, ParameterError, load_catalog, run_parametrized,
-                                 validate_entries)
+from harness.contracts import (
+    AuditLog,
+    Guard,
+    Harness,
+    KillSwitch,
+    KillSwitchEngaged,
+    Phase,
+    ScopeToken,
+    ScopeViolation,
+)
+from harness.poc.catalog import (
+    InvalidCatalog,
+    ParameterError,
+    load_catalog,
+    run_parametrized,
+    validate_entries,
+)
 from harness.policy_loader import phase_allowlist
 
 ENG = "p5-test"
@@ -225,7 +238,7 @@ def test_esquema_o_url_no_permitidos(base_url):
 
 
 def test_objetivo_del_lab_devuelve_respuesta():
-    sb, _, _, sender, rt, _ = setup(FakeRuntime(ok_response(status=200)))
+    _, _, _, sender, rt, _ = setup(FakeRuntime(ok_response(status=200)))
     resp = sender("POC-HDR-001", {"base_url": "http://dvwa.lab.test", "path": "/login.php"})
     assert resp.status == 200
     assert rt.created[0].url == "http://dvwa.lab.test/login.php"
@@ -290,7 +303,7 @@ def test_no_sigue_redirecciones_en_la_especificacion():
 
 
 class _Handler(BaseHTTPRequestHandler):
-    def do_GET(self):  # noqa: N802
+    def do_GET(self):
         if self.path == "/redir":
             self.send_response(302)
             self.send_header("Location", "http://example.com/")
@@ -466,7 +479,7 @@ def test_decision_del_reviewer_queda_en_bitacora(tmp_path):
     store.request(req.finding_id, req.poc_id, req.params)
     store.approve(req.finding_id, req.poc_id, val.params_hash(req.params),
                   reviewer="Ana Revisora", reason="alcance confirmado")
-    d = [dict(e.data) for e in ev.entries() if dict(e.data).get("decision") == "approved"][0]
+    d = next(dict(e.data) for e in ev.entries() if dict(e.data).get("decision") == "approved")
     assert d["reviewer"] == "Ana Revisora"
     assert d["reason"] == "alcance confirmado"
     assert d["params_hash"] == val.params_hash(req.params)

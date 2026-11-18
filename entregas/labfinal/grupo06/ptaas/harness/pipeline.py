@@ -27,9 +27,9 @@ import sys
 import time
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import yaml
 
@@ -39,7 +39,7 @@ from harness.adapters.httpx_adapter import HttpxProbe
 from harness.adapters.subfinder_adapter import NoPassiveSources, SubfinderEnum
 from harness.asset_graph import AssetGraph
 from harness.audit import Entry, InMemoryAuditStore, VerifyResult, verificar_cadena
-from harness.contracts import AuditLog, Guard, Harness, KillSwitch, Phase, Result
+from harness.contracts import AuditLog, Guard, Harness, KillSwitch, Phase, Result, ToolAdapter
 from harness.defectdojo_export import export as export_defectdojo
 from harness.loops import run_recon
 from harness.poc.catalog import ParameterError
@@ -47,10 +47,23 @@ from harness.policy_loader import phase_allowlist
 from harness.recon_lab import export_audit, verify_audit
 from harness.report_builder import DemoReport, Report, build_report, deliver_report
 from harness.reporting import DeliveryNotApproved, Finding
-from harness.sandbox import (CAPABILITY, DEFAULT_IMAGE, DEFAULT_NETWORK, DockerRuntime,
-                             SandboxAborted, SandboxAdapter, SandboxSender, load_limits)
-from harness.validation import (PENDING, ApprovalStore, FrozenCatalog, ValidationRequest,
-                                run_validation_loop)
+from harness.sandbox import (
+    CAPABILITY,
+    DEFAULT_IMAGE,
+    DEFAULT_NETWORK,
+    DockerRuntime,
+    SandboxAborted,
+    SandboxAdapter,
+    SandboxSender,
+    load_limits,
+)
+from harness.validation import (
+    PENDING,
+    ApprovalStore,
+    FrozenCatalog,
+    ValidationRequest,
+    run_validation_loop,
+)
 
 DEFAULT_RUNNER = "ptaas-p3-runner-1"
 _PROFILES = Path(__file__).resolve().parent / "profiles.yaml"
@@ -181,7 +194,7 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
     harness_audit = AuditLog()
     evidence = InMemoryAuditStore()
     result = PipelineResult("ABORTED", 2, output=out, stages=stages)
-    started = datetime.now(timezone.utc).isoformat()
+    started = datetime.now(UTC).isoformat()
 
     def store() -> ApprovalStore:
         # Se relee en cada consulta: las decisiones las escribe una persona desde otra terminal.
@@ -206,7 +219,7 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
         seeds = list(roe.scope_domains)
 
         # 1. Gate antes de la primera acción activa.
-        log(f"[gate] esperando aprobación humana de la primera acción activa:\n  "
+        log("[gate] esperando aprobación humana de la primera acción activa:\n  "
             + cli_hint(f"approve-gate {eng} first_active_action"))
         if not wait_for(lambda: store().gate_approved(eng, "first_active_action")):
             harness_audit.record_decision("orchestrator", "recon.first_active_action",
@@ -227,11 +240,13 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
         guard = Guard(phase_allowlist(), approvals={f"httpx.probe@{h}" for h in seeds},
                       engagement_id=eng, resolver=bridges.resolver)
         recon_harness = Harness(guard, harness_audit, {
-            "subfinder.enum": SubfinderEnum(runner=bridges.subfinder),
-            "httpx.probe": HttpxProbe(runner=bridges.httpx),
+            "subfinder.enum": cast(ToolAdapter, SubfinderEnum(runner=bridges.subfinder)),
+            "httpx.probe": cast(ToolAdapter, HttpxProbe(runner=bridges.httpx)),
         }, KillSwitch())
         graph = AssetGraph(eng)
-        run_recon(recon_harness, recon_token, seeds, graph, checkpoint=out / "graph.json")
+        # run_recon (loop A de P3) no tiene anotaciones de tipos; no se modifica.
+        run_recon(recon_harness, recon_token, seeds, graph,  # type: ignore[no-untyped-call]
+                  checkpoint=out / "graph.json")
         assets = {str(a["address"]) for a in graph.assets.values()}
         evidence.append({"event": "stage.recon", "engagement": eng, "status": graph.status,
                          "reason": graph.stop_reason, "assets": sorted(assets)})
@@ -345,7 +360,7 @@ def _lab_domains() -> tuple[str, ...]:
 
 
 def _iso(ts: float) -> str:
-    return datetime.fromtimestamp(ts, timezone.utc).isoformat()
+    return datetime.fromtimestamp(ts, UTC).isoformat()
 
 
 def _scope(roe: Any, assets: set[str]) -> dict[str, Any]:
@@ -402,7 +417,7 @@ def _write_manifest(out: Path, eng: str, stages: Mapping[str, str], result: Pipe
             files[p.name] = hashlib.sha256(p.read_bytes()).hexdigest()
     manifest = {"engagement_id": eng, "status": result.status, "message": result.message,
                 "stages": dict(stages), "started_at": started,
-                "finished_at": datetime.now(timezone.utc).isoformat(),
+                "finished_at": datetime.now(UTC).isoformat(),
                 "report_hash": result.report.report_hash if result.report else None,
                 "files_sha256": files}
     (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
@@ -440,8 +455,8 @@ def main(argv: list[str] | None = None) -> int:
     cfg = PipelineConfig(roe_path=args.roe, approvals_path=args.approvals,
                          output_dir=args.output, analysis=FixtureAnalysis(args.analysis_fixture),
                          wait_s=args.wait, sandbox_network=args.network)
-    res = run(cfg, bridges=real_bridges(args.runner))
-    return res.exit_code
+    outcome = run(cfg, bridges=real_bridges(args.runner))
+    return outcome.exit_code
 
 
 if __name__ == "__main__":

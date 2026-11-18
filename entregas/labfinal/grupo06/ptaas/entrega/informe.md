@@ -79,7 +79,11 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
 
 **Límites de la verificación:**
 
-- No se corrieron `ruff` ni `mypy` sobre los módulos nuevos.
+- `ruff check` y `mypy --strict` pasan en los seis módulos y los dos archivos de
+  tests de P5 (`P5-lint.txt`). `mypy` se corrió con `--follow-imports=silent`: no
+  cubre los módulos de otros integrantes que P5 importa. Para los adaptadores y
+  el loop A de P3, que no declaran tipos, se usó `cast` y un `type: ignore`
+  explícito en lugar de modificarlos.
 - Los changes 006 y 007 se archivaron sin la revisión cruzada (1.3) de otro
   integrante.
 - La exportación a DefectDojo no se importó en una instancia real.

@@ -416,8 +416,14 @@ def test_divulgacion_sin_datos_en_el_roe():
 
 
 def test_informe_desde_una_corrida_real_del_loop_c(tmp_path):
-    from tests.test_sandbox_loop_c import (FakeRuntime, approved_store, ok_response, request,
-                                           run_loop, setup)
+    from tests.test_sandbox_loop_c import (
+        FakeRuntime,
+        approved_store,
+        ok_response,
+        request,
+        run_loop,
+        setup,
+    )
     _, h, tok, sender, _, ev = setup(FakeRuntime(ok_response(headers={})))
     req = request("F1", "POC-HDR-001")
     run_loop(h, tok, sender, [req], approved_store(tmp_path, req, evidence=ev), ev)
@@ -437,16 +443,17 @@ def test_informe_desde_una_corrida_real_del_loop_c(tmp_path):
 # FakeRuntime del change 006. `Humano` simula a la persona que, en otra terminal,
 # usa la CLI: el recorrido nunca aprueba nada por su cuenta.
 
-from pathlib import Path as _Path  # noqa: E402
+from datetime import UTC
+from pathlib import Path as _Path
 
-from harness.adapters.subfinder_adapter import NoPassiveSources  # noqa: E402
+from harness.adapters.subfinder_adapter import NoPassiveSources
 
 FIX = _Path(__file__).parent / "fixtures" / "p3" / "real"
 
 
 def roe_yaml(path, *, approver="Integrante del grupo (Reviewer)"):
-    from datetime import datetime, timedelta, timezone
-    now = datetime.now(timezone.utc)
+    from datetime import datetime, timedelta
+    now = datetime.now(UTC)
     lines = ["engagement_id: p5-e2e",
              f'approver: "{approver}"' if approver else "",
              'approval_ref: "acta-lab-001"',

@@ -29,8 +29,7 @@ from urllib.parse import quote, urlsplit
 
 import yaml
 
-from harness.contracts import (Action, AuditLog, Harness, Phase, Result, ScopeToken,
-                               ScopeViolation)
+from harness.contracts import Action, AuditLog, Harness, Phase, Result, ScopeToken, ScopeViolation
 from harness.poc.catalog import ResponseRecord
 
 CAPABILITY = "poc_catalog.run_parametrized"
@@ -78,16 +77,15 @@ def load_sandbox_profile(path: Path = _PROFILES) -> dict[str, Any]:
 # ---- Lo que corre adentro del contenedor ---------------------------------------
 
 
-def _fetch_raw(url: str, timeout_s: float, max_body_bytes: int) -> dict:
+def _fetch_raw(url: str, timeout_s: float, max_body_bytes: int) -> dict[str, object]:
     """Una solicitud GET, sin redirecciones. Solo stdlib: se copia al contenedor."""
     import http.client
-    import socket
     from urllib.parse import urlsplit as _split
 
     parts = _split(url)
     target = (parts.path or "/") + (f"?{parts.query}" if parts.query else "")
     conn_cls = http.client.HTTPSConnection if parts.scheme == "https" else http.client.HTTPConnection
-    conn = conn_cls(parts.hostname, parts.port, timeout=timeout_s)
+    conn = conn_cls(parts.hostname or "", parts.port, timeout=timeout_s)
     try:
         conn.request("GET", target, headers={"User-Agent": "ptaas-sandbox/006"})
         resp = conn.getresponse()
@@ -99,7 +97,7 @@ def _fetch_raw(url: str, timeout_s: float, max_body_bytes: int) -> dict:
         return {"status": resp.status, "headers": headers,
                 "body": raw.decode("utf-8", errors="replace"),
                 "set_cookies": list(cookies), "truncated": truncated}
-    except (socket.timeout, TimeoutError):
+    except TimeoutError:
         return {"error": "timeout"}
     except OSError as exc:
         return {"error": f"connection: {type(exc).__name__}"}
@@ -107,7 +105,7 @@ def _fetch_raw(url: str, timeout_s: float, max_body_bytes: int) -> dict:
         conn.close()
 
 
-def fetch(url: str, *, timeout_s: float, max_body_bytes: int) -> dict:
+def fetch(url: str, *, timeout_s: float, max_body_bytes: int) -> dict[str, object]:
     out = _fetch_raw(url, timeout_s, max_body_bytes)
     if out.get("error") == "timeout":
         raise SandboxTimeout(url)
@@ -163,7 +161,7 @@ def docker_argv(spec: ContainerSpec) -> list[str]:
 
 
 class ContainerRuntime(Protocol):
-    def run(self, spec: ContainerSpec) -> dict: ...
+    def run(self, spec: ContainerSpec) -> dict[str, Any]: ...
     def remove(self, name: str) -> None: ...
     def list_labeled(self, key: str, value: str) -> list[str]: ...
 
@@ -171,7 +169,7 @@ class ContainerRuntime(Protocol):
 class DockerRuntime:
     """Runtime real. Solo lo usa `SandboxAdapter`, que se invoca por `Harness.invoke`."""
 
-    def run(self, spec: ContainerSpec) -> dict:
+    def run(self, spec: ContainerSpec) -> dict[str, Any]:
         try:
             proc = subprocess.run(docker_argv(spec), capture_output=True, text=True,
                                   timeout=spec.limits.container_timeout_s, check=False)
@@ -220,9 +218,9 @@ class DockerRuntime:
 class SandboxAdapter:
     """Crea un contenedor por verificación y lo destruye en `finally`."""
 
-    name = CAPABILITY
-    allowed_phases = (Phase.VALIDATE,)
-    destructive = False
+    name: str = CAPABILITY
+    allowed_phases: tuple[Phase, ...] = (Phase.VALIDATE,)
+    destructive: bool = False
 
     def __init__(self, *, runtime: ContainerRuntime, network: str, engagement_id: str,
                  limits: SandboxLimits, audit: AuditLog, image: str = DEFAULT_IMAGE):
@@ -233,7 +231,7 @@ class SandboxAdapter:
     def prepare(self, url: str) -> None:
         self._pending_url = url
 
-    def run(self, action: Action, target: str, token: ScopeToken) -> dict:
+    def run(self, action: Action, target: str, token: ScopeToken) -> dict[str, Any]:
         url, self._pending_url = self._pending_url, None
         if url is None:
             raise ScopeViolation("solicitud de sandbox sin preparar")
@@ -259,7 +257,7 @@ class SandboxAdapter:
             self.audit.record("sandbox", action, target, token, Result.ABORTED)
             raise SandboxAborted(f"no se pudo destruir {name}") from exc
 
-    def _bounded(self, raw: dict) -> dict:
+    def _bounded(self, raw: dict[str, Any]) -> dict[str, Any]:
         body = str(raw.get("body", ""))
         data = body.encode("utf-8")
         truncated = bool(raw.get("truncated", False))
@@ -288,7 +286,7 @@ class SandboxSender:
         """Contexto que el loop C agrega a la evidencia (hallazgo, versiones, intento)."""
         self._context = dict(fields)
 
-    def __call__(self, poc_id: str, params: dict) -> ResponseRecord:
+    def __call__(self, poc_id: str, params: dict[str, Any]) -> ResponseRecord:
         host = self._lab_host(str(params.get("base_url", "")))
         url = self._url(params)
         self.adapter.prepare(url)
@@ -319,7 +317,7 @@ class SandboxSender:
         return host
 
     @staticmethod
-    def _url(params: dict) -> str:
+    def _url(params: dict[str, Any]) -> str:
         url = str(params["base_url"]).rstrip("/") + str(params.get("path", "/"))
         if "param_name" in params and "canary" in params:
             url += f"?{params['param_name']}={quote(str(params['canary']), safe='')}"
