@@ -23,6 +23,13 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M15 (P5) | Gate HITL por hallazgo (`ApprovalStore.is_approved`, `harness/validation.py`) | Devolver siempre `True` | `test_sin_aprobacion_queda_pendiente_y_no_envia`, `test_parametros_cambiados_...`, `test_otra_verificacion_...`, `test_token_vencido_...` | 4 tests fallaron |
 | M16 (P5) | Ligadura de la aprobación a los parámetros (`is_approved`) | No comparar `approved_hash` | `test_parametros_cambiados_despues_de_aprobar` | 1 test falló |
 | M17 (P5) | Consistencia entre intentos (`_validate_one`) | No detectar resultados distintos | `test_intentos_contradictorios_no_validan` | 1 test falló |
+| M18 (P5) | Estado respaldado por la bitácora (`_from_log`, `harness/report_builder.py`) | Aceptar `validated` declarado sin registro del loop C | `test_validado_declarado_sin_respaldo_falla`, `test_validado_declarado_con_resultado_negativo_...` | 2 tests fallaron |
+| M19 (P5) | Verificación de la cadena (`_verified_entries`) | No rechazar una bitácora alterada | `test_bitacora_alterada_no_genera_informe` | 1 test falló |
+| M20 (P5) | Referencias de evidencia (`_from_log`) | Aceptar hashes que no están en la bitácora | `test_referencia_inexistente_falla` | 1 test falló |
+| M21 (P5) | Aprobación de entrega ligada al hash (`deliver_report`) | Usar cualquier aprobación registrada | `test_aprobacion_de_otra_version_se_rechaza` | 1 test falló |
+| M22 (P5) | Bloqueo de informes DEMO (`deliver_report`, `export`) | Desactivar el chequeo de `demo` | `test_informe_demo_no_se_entrega_ni_exporta` | 1 test falló |
+| M23 (P5) | Datos sensibles (`_check_sensitive`) | No buscar patrones | `test_dato_sensible_falla_indicando_patron_y_hallazgo` (6 casos) | 6 tests fallaron |
+| M24 (P5) | Exportar solo entregados (`harness/defectdojo_export.py`) | Desactivar el chequeo de `delivered` | `test_exportar_un_informe_no_entregado_se_rechaza` | 1 test falló |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -75,6 +82,13 @@ con un token que lo incluye a propósito, `gopher://` y `ftp://`): `file://`,
 `http://` sin host y la URL sin esquema los bloquea también el Guard. Es la
 defensa en profundidad prevista en `design.md` (decisión 2).
 Evidencia: `mutacion-P5-sandbox-loopc.txt`.
+
+### M18 a M24 — Informe, entrega y exportación (P5, change 007)
+
+Se mutaron `harness/report_builder.py` y `harness/defectdojo_export.py` y se
+corrió `tests/test_reporting_e2e.py`. Línea base: `38 passed`. Cada mutación
+rompió al menos un test; los archivos se restauraron y se compararon con `cmp`.
+Evidencia: `mutacion-P5-007.txt`.
 
 ## Lo que no se mutó y por qué
 
