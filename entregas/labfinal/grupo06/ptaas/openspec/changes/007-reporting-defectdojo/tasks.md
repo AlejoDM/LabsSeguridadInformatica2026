@@ -19,7 +19,7 @@
 - [x] 3.3 Test: entrega sin aprobación → rechazada
 - [x] 3.4 Test: el informe no contiene datos sensibles del lab (lista de patrones)
 - [x] 3.5 Recorrido end-to-end con un solo comando contra el lab
-- [ ] 3.6 Archivar el delta en `openspec/specs/reporting/spec.md`
+- [x] 3.6 Archivar el delta en `openspec/specs/reporting/spec.md`
 
 **Evidencia de P2 (3.1 y 3.3):** `tests/test_reporting_gates.py` (8 tests),
 `entrega/evidencia/salidas/red-007-gates.txt`. No se modificó
