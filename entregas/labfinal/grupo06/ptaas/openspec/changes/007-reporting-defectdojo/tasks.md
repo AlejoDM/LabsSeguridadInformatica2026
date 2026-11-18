@@ -15,9 +15,9 @@
 
 ## Verificación
 - [x] 3.1 Test: hallazgo sin CWE/CVSS/remediación → falla indicando el campo
-- [ ] 3.2 Test: estado "validado" vs "no validado" visible en el informe
+- [x] 3.2 Test: estado "validado" vs "no validado" visible en el informe
 - [x] 3.3 Test: entrega sin aprobación → rechazada
-- [ ] 3.4 Test: el informe no contiene datos sensibles del lab (lista de patrones)
+- [x] 3.4 Test: el informe no contiene datos sensibles del lab (lista de patrones)
 - [ ] 3.5 Recorrido end-to-end con un solo comando contra el lab
 - [ ] 3.6 Archivar el delta en `openspec/specs/reporting/spec.md`
 
