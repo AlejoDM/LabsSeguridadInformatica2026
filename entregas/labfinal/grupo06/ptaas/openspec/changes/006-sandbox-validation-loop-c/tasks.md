@@ -7,16 +7,16 @@
 
 ## Implementación
 - [x] 2.1 Tests que fallan para el `Sender` aislado (sin red externa, sin estado)
-- [ ] 2.2 Sandbox efímero: contenedor en red interna que implementa `Sender`
-- [ ] 2.3 Límites de tiempo, tamaño y cantidad de solicitudes
-- [ ] 2.4 Orquestación del loop C con `decide_validation`
-- [ ] 2.5 CLI de aprobación: listar hallazgos pendientes, aprobar o rechazar con motivo
-- [ ] 2.6 Registrar aprobación, verificación elegida y resultado en bitácora
+- [x] 2.2 Sandbox efímero: contenedor en red interna que implementa `Sender`
+- [x] 2.3 Límites de tiempo, tamaño y cantidad de solicitudes
+- [x] 2.4 Orquestación del loop C con `decide_validation`
+- [x] 2.5 CLI de aprobación: listar hallazgos pendientes, aprobar o rechazar con motivo
+- [x] 2.6 Registrar aprobación, verificación elegida y resultado en bitácora
 
 ## Verificación
-- [ ] 3.1 Test: sin aprobación no se invoca el `Sender`
-- [ ] 3.2 Test: verificación inexistente en catálogo → "no validado"
+- [x] 3.1 Test: sin aprobación no se invoca el `Sender`
+- [x] 3.2 Test: verificación inexistente en catálogo → "no validado"
 - [ ] 3.3 Test: el sandbox no alcanza hosts fuera del lab
-- [ ] 3.4 Test: el sandbox se destruye aunque falle la verificación
+- [x] 3.4 Test: el sandbox se destruye aunque falle la verificación
 - [ ] 3.5 Evals de validación ampliadas con casos donde la respuesta correcta es no actuar
 - [ ] 3.6 Archivar deltas en `openspec/specs/`
