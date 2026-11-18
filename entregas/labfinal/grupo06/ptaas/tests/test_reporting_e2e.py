@@ -426,3 +426,255 @@ def test_informe_desde_una_corrida_real_del_loop_c(tmp_path):
     assert f.status == "validated"
     respuestas = [e.hash for e in ev.entries() if dict(e.data).get("event") == "sandbox.response"]
     assert respuestas and set(respuestas) <= set(f.evidence_refs)
+
+
+# ==== 3.5 · Recorrido de un comando con gates humanos ==========================
+#
+# Puentes falsos: httpx devuelve las capturas reales de P3 (tests/fixtures/p3/real)
+# con `url`/`input`/`host` reescritos al nombre de host, porque el recorrido corre
+# httpx dentro del runner por nombre y no fija la IP. Subfinder reproduce el
+# resultado real registrado por P3: sin fuentes (UNAVAILABLE). El sandbox usa el
+# FakeRuntime del change 006. `Humano` simula a la persona que, en otra terminal,
+# usa la CLI: el recorrido nunca aprueba nada por su cuenta.
+
+from pathlib import Path as _Path  # noqa: E402
+
+from harness.adapters.subfinder_adapter import NoPassiveSources  # noqa: E402
+
+FIX = _Path(__file__).parent / "fixtures" / "p3" / "real"
+
+
+def roe_yaml(path, *, approver="Integrante del grupo (Reviewer)"):
+    from datetime import datetime, timedelta, timezone
+    now = datetime.now(timezone.utc)
+    lines = ["engagement_id: p5-e2e",
+             f'approver: "{approver}"' if approver else "",
+             'approval_ref: "acta-lab-001"',
+             f'signed_at: "{(now - timedelta(minutes=5)).isoformat()}"',
+             "window:",
+             f'  start: "{(now - timedelta(minutes=1)).isoformat()}"',
+             f'  end: "{(now + timedelta(hours=2)).isoformat()}"',
+             "scope:",
+             '  cidrs: ["10.99.0.0/24"]',
+             '  domains: ["dvwa.lab.test", "juiceshop.lab.test"]',
+             "exclusions: {}",
+             'emergency_contacts: ["responsable-lab@example.test"]',
+             'authorized_phases: ["recon", "validate"]']
+    path.write_text("\n".join(line for line in lines if line) + "\n", encoding="utf-8")
+    return path
+
+
+def analysis_fixture(path, extra=()):
+    candidates = [
+        {"id": "F-HDR", "title": "Falta de protección contra clickjacking", "asset": "dvwa.lab.test",
+         "cwe": "CWE-1021", "cvss_v4_vector": LOW, "remediation": "Enviar X-Frame-Options: DENY",
+         "poc_id": "POC-HDR-001", "path": "/login.php"},
+        {"id": "F-CSP", "title": "Ausencia de Content-Security-Policy", "asset": "dvwa.lab.test",
+         "cwe": "CWE-693", "cvss_v4_vector": LOW, "remediation": "Definir una CSP restrictiva",
+         "poc_id": "POC-CSP-001", "path": "/login.php"},
+        *extra]
+    path.write_text(json.dumps({"fixture": True, "candidates": candidates}), encoding="utf-8")
+    return path
+
+
+class Bridges:
+    def __init__(self, runtime=None):
+        from tests.test_sandbox_loop_c import FakeRuntime, ok_response
+        self.httpx_calls, self.subfinder_calls = [], []
+        self.runtime = runtime or FakeRuntime(ok_response(headers={}))
+
+    def httpx(self, argv, timeout):
+        self.httpx_calls.append(argv)
+        url = argv[argv.index("-u") + 1]
+        host = url.split("//", 1)[1].split(":")[0]
+        name = "httpx-juiceshop.jsonl" if host.startswith("juiceshop") else "httpx-dvwa.jsonl"
+        item = json.loads((FIX / name).read_text(encoding="utf-8").splitlines()[0])
+        item.update({"url": url, "input": url, "host": host})
+        return json.dumps(item) + "\n"
+
+    def subfinder(self, argv, timeout):
+        self.subfinder_calls.append(argv)
+        raise NoPassiveSources()
+
+    @staticmethod
+    def resolver(host):
+        return ["10.99.0.3"] if host.startswith("juiceshop") else ["10.99.0.4"]
+
+
+class Humano:
+    """Persona en otra terminal: aprueba con la CLI lo que el test le indica."""
+
+    def __init__(self, approvals_path, output, *, gate=True, findings=("*",), delivery=True):
+        self.approvals_path, self.output = approvals_path, output
+        self.gate, self.findings, self.delivery = gate, findings, delivery
+        self.t = 0.0
+
+    def clock(self):
+        return self.t
+
+    def sleep(self, seconds):
+        self.t += seconds
+        base = ["--store", str(self.approvals_path)]
+        if self.gate:
+            cli(base + ["approve-gate", "p5-e2e", "first_active_action",
+                        "--reviewer", "Ana Revisora", "--reason", "RoE firmado"],
+                audit=InMemoryAuditStore())
+        store = api("validation").ApprovalStore(self.approvals_path, audit=InMemoryAuditStore())
+        for fid, _ in store.pending():
+            if "*" in self.findings or fid in self.findings:
+                cli(base + ["approve", fid, "--reviewer", "Ana Revisora", "--reason", "en alcance"],
+                    audit=InMemoryAuditStore())
+        report_json = self.output / "report.json"
+        if self.delivery and report_json.exists():
+            h = json.loads(report_json.read_text(encoding="utf-8"))["report_hash"]
+            cli(base + ["approve-delivery", "p5-e2e", "--report-hash", h,
+                        "--reviewer", "Ana Revisora", "--reason", "informe revisado"],
+                audit=InMemoryAuditStore())
+
+
+class RealAnalysisStub:
+    """Doble de prueba del análisis del change 005 (todavía no existe): se declara `real`
+    solo para ejercitar el camino de entrega; nunca se usa fuera de los tests."""
+
+    provenance = "real"
+
+    def __init__(self, path):
+        self.inner = api("pipeline").FixtureAnalysis(path)
+
+    def propose(self, assets):
+        return self.inner.propose(assets)
+
+
+def run_pipeline(tmp_path, *, roe=None, analysis=None, humano=None, bridges=None, wait_s=30,
+                 output=None):
+    pl = api("pipeline")
+    output = output or tmp_path / "corrida"
+    approvals_path = tmp_path / "approvals.json"
+    bridges = bridges or Bridges()
+    humano = humano if humano is not None else Humano(approvals_path, output)
+    cfg = pl.PipelineConfig(roe_path=roe or roe_yaml(tmp_path / "roe.yaml"),
+                            approvals_path=approvals_path, output_dir=output,
+                            analysis=analysis or pl.FixtureAnalysis(
+                                analysis_fixture(tmp_path / "analysis.json")),
+                            wait_s=wait_s, poll_s=1, sandbox_network="ptaas-p3_lab")
+    result = pl.run(cfg, bridges=pl.Bridges(httpx=bridges.httpx, subfinder=bridges.subfinder,
+                                            resolver=bridges.resolver,
+                                            sandbox_runtime=bridges.runtime),
+                    sleep=humano.sleep, clock=humano.clock)
+    return result, bridges, output
+
+
+def test_recorrido_roe_invalido_no_hace_nada(tmp_path):
+    roe = roe_yaml(tmp_path / "roe.yaml", approver="")
+    result, br, _ = run_pipeline(tmp_path, roe=roe)
+    assert result.exit_code != 0 and result.status == "ABORTED"
+    assert br.httpx_calls == [] and br.subfinder_calls == [] and br.runtime.created == []
+
+
+def test_recorrido_sin_aprobacion_de_primera_accion(tmp_path):
+    output = tmp_path / "corrida"
+    humano = Humano(tmp_path / "approvals.json", output, gate=False, findings=(), delivery=False)
+    result, br, output = run_pipeline(tmp_path, humano=humano)
+    assert result.exit_code != 0 and result.status == "PENDING_HITL"
+    assert br.httpx_calls == [] and br.subfinder_calls == [] and br.runtime.created == []
+    auditoria = json.loads((output / "harness-audit.json").read_text(encoding="utf-8"))
+    assert any(e["result"] == "PENDING_HITL" for e in auditoria["entries"])
+    path = tmp_path / "approvals.json"
+    store = json.loads(path.read_text(encoding="utf-8")) if path.exists() else {}
+    assert all(v.get("status") != "approved" for v in store.get("findings", {}).values())
+    assert not store.get("gates") and not store.get("deliveries")
+
+
+def test_recorrido_no_sobrescribe_salida_existente(tmp_path):
+    output = tmp_path / "corrida"
+    output.mkdir()
+    (output / "previo.txt").write_text("evidencia anterior", encoding="utf-8")
+    result, br, _ = run_pipeline(tmp_path, output=output)
+    assert result.exit_code != 0
+    assert sorted(p.name for p in output.iterdir()) == ["previo.txt"]
+    assert br.httpx_calls == []
+
+
+def test_recorrido_descarta_candidatos_fuera_de_lo_relevado(tmp_path):
+    extra = [{"id": "F-OTRO", "title": "Sin CSP en un host no relevado",
+              "asset": "otro.dvwa.lab.test", "cwe": "CWE-693", "cvss_v4_vector": LOW,
+              "remediation": "Definir CSP", "poc_id": "POC-CSP-001", "path": "/"}]
+    pl = api("pipeline")
+    analysis = pl.FixtureAnalysis(analysis_fixture(tmp_path / "analysis.json", extra))
+    result, br, output = run_pipeline(tmp_path, analysis=analysis)
+    assert all("otro.dvwa.lab.test" not in s.url for s in br.runtime.created)
+    evidencia = json.loads((output / "evidence.json").read_text(encoding="utf-8"))
+    assert any(e["data"].get("event") == "analysis.discarded"
+               and e["data"].get("finding_id") == "F-OTRO" for e in evidencia["entries"])
+    assert all(f.id != "F-OTRO" for f in result.report.findings)
+
+
+def test_recorrido_hallazgo_sin_decision_no_se_envia(tmp_path):
+    output = tmp_path / "corrida"
+    humano = Humano(tmp_path / "approvals.json", output, findings=("F-HDR",), delivery=False)
+    result, br, _ = run_pipeline(tmp_path, humano=humano, wait_s=5)
+    assert br.runtime.created, "el hallazgo aprobado debe validarse"
+    assert len(br.runtime.created) <= 2       # solo los intentos de F-HDR
+    assert by_id(result.report, "F-CSP").status_label == "no validado (sin aprobación)"
+    assert by_id(result.report, "F-HDR").status == "validated"
+
+
+def test_recorrido_con_analisis_simulado_sale_demo(tmp_path):
+    result, br, output = run_pipeline(tmp_path)
+    assert result.status == "DEMO" and result.exit_code == 0
+    assert result.report.demo is True
+    assert br.httpx_calls and br.runtime.created
+    assert (output / "report.md").exists() and (output / "report.json").exists()
+    assert not (output / "defectdojo.json").exists()
+    assert "DEMO" in (output / "report.md").read_text(encoding="utf-8")
+    verificacion = api("pipeline").verify_outputs(output)
+    assert verificacion["harness-audit.json"].ok and verificacion["evidence.json"].ok
+
+
+def test_recorrido_completo_con_etapas_reales_entrega_y_exporta(tmp_path):
+    analysis = RealAnalysisStub(analysis_fixture(tmp_path / "analysis.json"))
+    result, _, output = run_pipeline(tmp_path, analysis=analysis)
+    assert result.status == "DELIVERED" and result.exit_code == 0
+    assert result.report.delivered is True
+    dd = json.loads((output / "defectdojo.json").read_text(encoding="utf-8"))
+    assert {f["unique_id_from_tool"] for f in dd["findings"]} == {
+        f.stable_id for f in result.report.findings}
+    verificacion = api("pipeline").verify_outputs(output)
+    assert all(v.ok for v in verificacion.values())
+
+
+def test_verificacion_detecta_bitacora_exportada_alterada(tmp_path):
+    _, _, output = run_pipeline(tmp_path)
+    path = output / "evidence.json"
+    data = json.loads(path.read_text(encoding="utf-8"))
+    data["entries"][0]["data"]["event"] = "alterado"
+    path.write_text(json.dumps(data), encoding="utf-8")
+    assert not api("pipeline").verify_outputs(output)["evidence.json"].ok
+
+
+def gate_approved(path):
+    return api("validation").ApprovalStore(path, audit=InMemoryAuditStore()).gate_approved(
+        "p5-e2e", "first_active_action")
+
+
+def test_cli_approve_gate_registra_la_aprobacion(tmp_path):
+    path = tmp_path / "a.json"
+    rc = cli(["--store", str(path), "approve-gate", "p5-e2e", "first_active_action",
+              "--reviewer", "Ana", "--reason", "RoE firmado"], audit=InMemoryAuditStore())
+    assert rc == 0 and gate_approved(path)
+
+
+def test_cli_approve_gate_sin_motivo_falla(tmp_path):
+    path = tmp_path / "a.json"
+    rc = cli(["--store", str(path), "approve-gate", "p5-e2e",
+              "first_active_action", "--reviewer", "Ana"], audit=InMemoryAuditStore())
+    assert rc != 0 and not gate_approved(path)
+
+
+def test_cli_approve_gate_solo_admite_gates_conocidos(tmp_path):
+    path = tmp_path / "a.json"
+    rc = cli(["--store", str(path), "approve-gate", "p5-e2e", "cualquier_cosa",
+              "--reviewer", "Ana", "--reason", "x"], audit=InMemoryAuditStore())
+    assert rc != 0
+    store = api("validation").ApprovalStore(path, audit=InMemoryAuditStore())
+    assert not store.gate_approved("p5-e2e", "cualquier_cosa")
