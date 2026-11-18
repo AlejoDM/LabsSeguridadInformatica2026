@@ -20,8 +20,8 @@ conservaron. El directorio del change queda como historial.
 - Evals golden: 17/17; los 7 casos nuevos de validación rechazan la respuesta
   incorrecta correspondiente (`P5-006-evals-validacion.txt`).
 - Sandbox sin salida a internet: `probe_egress(..., ('1.1.1.1', 80))` devolvió
-  `False` (`P5-006-sandbox-sin-salida.txt`). Falta registrar el control positivo
-  contra un host del laboratorio.
+  `False`, y el control positivo contra `dvwa.lab.test:80` devolvió `True`
+  (`P5-006-sandbox-sin-salida.txt`).
 - Mutaciones M10 a M17: todas detectadas (`entrega/mutaciones.md`).
 
 ## Commits

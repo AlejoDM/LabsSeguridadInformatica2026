@@ -7,4 +7,7 @@
 PS C:\...\ptaas> python -c "from harness.sandbox import DockerRuntime; print(DockerRuntime().probe_egress('ptaas-p3_lab', ('1.1.1.1', 80)))"
 False
 
-# Control positivo (mismo método, host del laboratorio): pendiente de registrar.
+# Control positivo: mismo método contra un host del laboratorio. Demuestra que
+# el False anterior se debe al aislamiento y no a una falla de Docker.
+PS C:\...\ptaas> python -c "from harness.sandbox import DockerRuntime; print(DockerRuntime().probe_egress('ptaas-p3_lab', ('dvwa.lab.test', 80)))"
+True
