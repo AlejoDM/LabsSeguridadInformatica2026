@@ -18,6 +18,11 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M10 (P5) | Parámetros que cambian el objetivo (`run_parametrized`, `harness/poc/catalog.py`) | No llamar a `_check_target_params` | `test_path_que_cambia_el_objetivo_se_rechaza` (6 casos), `test_param_name_con_caracteres_especiales_se_rechaza` (6 casos) | 12 tests fallaron |
 | M11 (P5) | Aprobación humana del catálogo (`validate_entries`) | Desactivar el chequeo de `AGENT_APPROVERS` | `test_entrada_aprobada_por_un_agente_se_rechaza` (7 casos) | 7 tests fallaron |
 | M12 (P5) | Recorrido de rutas (`_check_target_params`) | Quitar el rechazo de segmentos `..` | `test_path_que_cambia_el_objetivo_se_rechaza[/../../etc/passwd]` y `[/a/../../b]` | 2 tests fallaron |
+| M13 (P5) | Segunda barrera de host (`SandboxSender._lab_host`, `harness/sandbox.py`) | `if not ok:` → `if False:` | `test_objetivo_fuera_del_lab_se_rechaza_antes_del_contenedor`, `test_esquema_o_url_no_permitidos` (gopher, ftp) | 3 tests fallaron |
+| M14 (P5) | Destrucción del contenedor (`SandboxAdapter.run`) | `finally:` → `except ZeroDivisionError:` | `test_verificacion_finalizada_destruye_el_contenedor`, `test_fallo_del_runtime_destruye_igual_y_no_valida`, `test_evaluador_que_falla_...`, `test_si_la_destruccion_falla_...`, `test_timeout_...` | 5 tests fallaron |
+| M15 (P5) | Gate HITL por hallazgo (`ApprovalStore.is_approved`, `harness/validation.py`) | Devolver siempre `True` | `test_sin_aprobacion_queda_pendiente_y_no_envia`, `test_parametros_cambiados_...`, `test_otra_verificacion_...`, `test_token_vencido_...` | 4 tests fallaron |
+| M16 (P5) | Ligadura de la aprobación a los parámetros (`is_approved`) | No comparar `approved_hash` | `test_parametros_cambiados_despues_de_aprobar` | 1 test falló |
+| M17 (P5) | Consistencia entre intentos (`_validate_one`) | No detectar resultados distintos | `test_intentos_contradictorios_no_validan` | 1 test falló |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -57,6 +62,19 @@ La línea base tiene 1 fallo esperado
 `harness.validation`, todavía no implementado); cada mutación suma los fallos de
 la tabla. El archivo se restauró y se comprobó con `cmp` que quedó idéntico.
 Evidencia: `mutacion-P5-catalogo.txt`.
+
+### M13 a M17 — Sandbox y loop C (P5, change 006)
+
+Se mutaron `harness/sandbox.py` y `harness/validation.py` y se corrió
+`tests/test_sandbox_loop_c.py` completo. Línea base: `62 passed, 1 skipped`
+(el salteado es la prueba con Docker real). Cada mutación rompió al menos un
+test y los dos archivos se restauraron y se compararon con `cmp`.
+
+En M13 fallan solo los casos que el Guard no frena por su cuenta (`example.com`
+con un token que lo incluye a propósito, `gopher://` y `ftp://`): `file://`,
+`http://` sin host y la URL sin esquema los bloquea también el Guard. Es la
+defensa en profundidad prevista en `design.md` (decisión 2).
+Evidencia: `mutacion-P5-sandbox-loopc.txt`.
 
 ## Lo que no se mutó y por qué
 
