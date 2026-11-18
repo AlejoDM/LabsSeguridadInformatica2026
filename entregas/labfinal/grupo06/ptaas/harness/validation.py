@@ -14,6 +14,7 @@ from __future__ import annotations
 import copy
 import hashlib
 import json
+import re
 import time
 from collections.abc import Mapping
 from dataclasses import dataclass, field
@@ -83,12 +84,39 @@ class ApprovalStore:
     def __init__(self, path: Path, *, audit: Any):
         self.path, self.audit = Path(path), audit
         self._data: dict[str, dict[str, Any]] = {}
+        self._deliveries: dict[str, dict[str, Any]] = {}
         if self.path.exists():
-            self._data = json.loads(self.path.read_text(encoding="utf-8")).get("findings", {})
+            raw = json.loads(self.path.read_text(encoding="utf-8"))
+            self._data = raw.get("findings", {})
+            self._deliveries = raw.get("deliveries", {})
 
     def _save(self) -> None:
-        self.path.write_text(json.dumps({"findings": self._data}, indent=2, sort_keys=True),
-                             encoding="utf-8")
+        self.path.write_text(json.dumps({"findings": self._data, "deliveries": self._deliveries},
+                                        indent=2, sort_keys=True), encoding="utf-8")
+
+    # ---- Entrega del informe (change 007 · 2.6) ----
+
+    def approve_delivery(self, engagement_id: str, report_hash: str, *,
+                         reviewer: str, reason: str) -> None:
+        """Aprobación de entrega ligada al hash exacto del informe."""
+        if not reviewer or not reviewer.strip():
+            raise ValueError("falta el Reviewer")
+        if not reason or not reason.strip():
+            raise ValueError("falta el motivo")
+        if not re.fullmatch(r"[0-9a-f]{64}", report_hash or ""):
+            raise ValueError("report_hash inválido")
+        ts = time.time()
+        record = {"engagement_id": engagement_id, "report_hash": report_hash,
+                  "reviewer": reviewer.strip(), "reason": reason.strip(), "ts": ts}
+        self._deliveries[f"{engagement_id}:{report_hash}"] = record
+        self._save()
+        self.audit.append({"event": "hitl.decision", "decision": "delivery_approved", **record})
+
+    def delivery_record(self, engagement_id: str, report_hash: str) -> dict[str, Any] | None:
+        return self._deliveries.get(f"{engagement_id}:{report_hash}")
+
+    def delivery_approved(self, engagement_id: str, report_hash: str) -> bool:
+        return self.delivery_record(engagement_id, report_hash) is not None
 
     def request(self, finding_id: str, poc_id: str, params: Mapping[str, Any]) -> None:
         """Registra una propuesta. Si cambia la verificación o los parámetros, vuelve a pendiente."""

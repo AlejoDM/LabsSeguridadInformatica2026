@@ -3,6 +3,7 @@
     python -m harness.validation_cli --store <approvals.json> list
     python -m harness.validation_cli --store <approvals.json> approve <hallazgo> --reviewer "<nombre>" --reason "<motivo>"
     python -m harness.validation_cli --store <approvals.json> reject  <hallazgo> --reviewer "<nombre>" --reason "<motivo>"
+    python -m harness.validation_cli --store <approvals.json> approve-delivery <engagement> --report-hash <hash> --reviewer "<nombre>" --reason "<motivo>"
 
 `approve` aprueba exactamente la verificación y los parámetros que muestra `list`.
 Si el agente cambia algo después, la aprobación deja de valer.
@@ -30,6 +31,11 @@ def _parser() -> argparse.ArgumentParser:
         cmd.add_argument("finding_id")
         cmd.add_argument("--reviewer", required=True, help="nombre de la persona que decide")
         cmd.add_argument("--reason", required=True, help="motivo de la decisión")
+    dlv = sub.add_parser("approve-delivery", help="aprobar la entrega de un informe (007 · 2.6)")
+    dlv.add_argument("engagement_id")
+    dlv.add_argument("--report-hash", required=True, help="hash exacto del informe a entregar")
+    dlv.add_argument("--reviewer", required=True, help="nombre de la persona que decide")
+    dlv.add_argument("--reason", required=True, help="motivo de la decisión")
     return p
 
 
@@ -45,6 +51,16 @@ def main(argv: list[str] | None = None, *, audit: Any = None) -> int:
             print("No hay hallazgos pendientes.")
         for finding_id, rec in pendientes:
             print(f"{finding_id}\t{rec['poc_id']}\t{json.dumps(rec['params'], sort_keys=True)}")
+        return 0
+
+    if args.command == "approve-delivery":
+        try:
+            store.approve_delivery(args.engagement_id, args.report_hash,
+                                   reviewer=args.reviewer, reason=args.reason)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        print(f"{args.engagement_id}: entrega aprobada para {args.report_hash} por {args.reviewer}")
         return 0
 
     try:

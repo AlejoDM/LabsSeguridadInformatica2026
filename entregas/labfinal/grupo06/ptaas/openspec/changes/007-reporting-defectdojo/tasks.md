@@ -7,11 +7,11 @@
 
 ## Implementación
 - [x] 2.1 Tests que fallan para armado del informe desde hallazgos y bitácora
-- [ ] 2.2 Construcción del informe con referencias a evidencia en bitácora
+- [x] 2.2 Construcción del informe con referencias a evidencia en bitácora
 - [x] 2.3 Validación de vectores CVSS v4.0 y presentación junto a EPSS
 - [x] 2.4 Resumen ejecutivo y estructura PTES §7
-- [ ] 2.5 Exportación a DefectDojo o a su formato de importación
-- [ ] 2.6 Gate de entrega conectado a la CLI de aprobación
+- [x] 2.5 Exportación a DefectDojo o a su formato de importación
+- [x] 2.6 Gate de entrega conectado a la CLI de aprobación
 
 ## Verificación
 - [x] 3.1 Test: hallazgo sin CWE/CVSS/remediación → falla indicando el campo
