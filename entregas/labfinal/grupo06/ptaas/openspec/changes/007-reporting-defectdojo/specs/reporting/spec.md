@@ -193,3 +193,53 @@ figurar como `unknown`.
 - GIVEN un RoE sin plazo de remediación
 - WHEN se genera el informe
 - THEN la sección de divulgación muestra el plazo como `unknown` y no inventa una fecha
+
+## Requirement: Recorrido de un comando con gates humanos
+
+Un solo comando DEBE recorrer RoE → recon → análisis → validación → informe →
+entrega contra el laboratorio. En cada gate humano (primera acción activa,
+validación por hallazgo, entrega) el comando DEBE esperar una decisión
+registrada por una persona en la CLI y NO DEBE aprobar nada por su cuenta. Las
+bitácoras exportadas DEBEN pasar la verificación.
+
+### Scenario: RoE inválido
+
+- GIVEN un RoE sin aprobador
+- WHEN se ejecuta el comando
+- THEN termina con error, no se emite ningún token y no se ejecuta ninguna herramienta
+
+### Scenario: sin aprobación de la primera acción activa
+
+- GIVEN un RoE válido y ninguna aprobación del gate `first_active_action`
+- WHEN se ejecuta el comando y vence la espera
+- THEN ninguna herramienta se ejecuta, se registra `PENDING_HITL` y el comando termina con error
+
+### Scenario: directorio de salida existente
+
+- GIVEN un directorio de salida que ya existe
+- WHEN se ejecuta el comando
+- THEN termina con error sin sobrescribir nada
+
+### Scenario: candidato fuera de lo relevado
+
+- GIVEN un candidato del análisis sobre un activo que el recon no relevó
+- WHEN se ejecuta la validación
+- THEN el candidato se descarta, no llega al sandbox y el descarte queda en la bitácora
+
+### Scenario: hallazgo sin decisión al vencer la espera
+
+- GIVEN un hallazgo propuesto que ninguna persona aprobó ni rechazó
+- WHEN vence la espera de la validación
+- THEN el sandbox no se invoca para ese hallazgo y el informe lo muestra "no validado (sin aprobación)"
+
+### Scenario: análisis simulado
+
+- GIVEN el análisis en modo `fixture` y las aprobaciones de validación registradas
+- WHEN se ejecuta el comando
+- THEN la validación corre en el sandbox, el informe sale DEMO, no se entrega ni se exporta, y las dos bitácoras exportadas pasan la verificación
+
+### Scenario: recorrido completo con etapas reales
+
+- GIVEN todas las etapas reales y todas las aprobaciones registradas, incluida la de entrega para el hash del informe
+- WHEN se ejecuta el comando
+- THEN el informe se entrega, se escribe la exportación a DefectDojo y las bitácoras exportadas pasan la verificación
