@@ -2,7 +2,7 @@
 
 ## Spec y diseño
 - [x] 1.1 `design.md`: ciclo de vida del sandbox, límites, evidencia, timeout del Reviewer
-- [ ] 1.2 Deltas de `validation` y `poc-catalog`
+- [x] 1.2 Deltas de `validation` y `poc-catalog`
 - [ ] 1.3 Revisión cruzada
 
 ## Implementación
