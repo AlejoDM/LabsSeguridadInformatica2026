@@ -133,7 +133,9 @@ def test_verificacion_finalizada_destruye_el_contenedor(tmp_path):
     req = request()
     out = run_loop(h, tok, sender, [req], approved_store(tmp_path, req), ev)
     assert out["F1"].status == "validated"
-    assert len(rt.created) == 1
+    # Un "validated" se confirma con un segundo intento (design.md, decisión 5):
+    # lo que importa acá es que cada contenedor creado se destruyó.
+    assert rt.created and rt.removed == [s.name for s in rt.created]
     assert rt.list_labeled("ptaas.engagement", ENG) == []
 
 
