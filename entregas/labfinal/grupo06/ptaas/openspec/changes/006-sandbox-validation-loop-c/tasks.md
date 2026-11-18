@@ -1,7 +1,7 @@
 # Tasks — Change 006
 
 ## Spec y diseño
-- [ ] 1.1 `design.md`: ciclo de vida del sandbox, límites, evidencia, timeout del Reviewer
+- [x] 1.1 `design.md`: ciclo de vida del sandbox, límites, evidencia, timeout del Reviewer
 - [ ] 1.2 Deltas de `validation` y `poc-catalog`
 - [ ] 1.3 Revisión cruzada
 
