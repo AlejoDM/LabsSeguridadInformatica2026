@@ -19,6 +19,19 @@ _CATALOG = Path(__file__).resolve().parent / "catalog.yaml"
 _REQUIRED = {"id", "version", "title", "cwe", "kind", "method", "parameters",
              "evaluator", "lab_only", "approved_by", "approved_at"}
 
+# Change 006: ningún agente aprueba una entrada (I8 + gates humanos).
+# Subagentes del kit y herramientas de IA que usa el grupo.
+AGENT_APPROVERS = frozenset({
+    "spec-author", "harness-engineer", "tool-adapter-dev", "security-reviewer",
+    "orchestrator", "claude", "claude-code", "opencode", "agent", "agente",
+})
+
+# Change 006: los parámetros no pueden cambiar el objetivo.
+# path: ruta que empieza con una sola "/", sin esquema, host, query ni fragmento.
+_PATH_RE = re.compile(r"^/(?!/)[A-Za-z0-9._~%/-]*$")
+# param_name: identificador simple, sin separadores de query.
+_PARAM_NAME_RE = re.compile(r"^[A-Za-z_][A-Za-z0-9_-]{0,63}$")
+
 
 class NotInCatalog(Exception): ...
 class InvalidCatalog(Exception): ...
@@ -61,6 +74,8 @@ def validate_entries(entries: list[dict]) -> dict[str, dict]:
             raise InvalidCatalog(f"{e['id']}: debe ser lab_only")
         if not e["approved_by"] or not e["approved_at"]:
             raise InvalidCatalog(f"{e['id']}: sin aprobación registrada")
+        if str(e["approved_by"]).strip().lower() in AGENT_APPROVERS:
+            raise InvalidCatalog(f"{e['id']}: la aprobación debe ser humana, no de un agente")
         if e["id"] in out:
             raise InvalidCatalog(f"id duplicado: {e['id']}")
         out[e["id"]] = e
@@ -138,6 +153,16 @@ def new_canary() -> str:
 Sender = Callable[[str, dict], ResponseRecord]   # lo provee el sandbox (fuera del kit)
 
 
+def _check_target_params(params: dict) -> None:
+    """Rechaza parámetros que cambiarían el host o la ruta aprobados (change 006)."""
+    path = params.get("path")
+    if path is not None and (not _PATH_RE.match(path) or ".." in path.split("/")):
+        raise ParameterError("path debe empezar con una sola '/', sin host, query ni '..'")
+    name = params.get("param_name")
+    if name is not None and not _PARAM_NAME_RE.match(name):
+        raise ParameterError("param_name debe ser un identificador simple")
+
+
 def run_parametrized(catalog: dict[str, dict], poc_id: str, params: dict,
                      approved: bool, sender: Sender) -> Evidence:
     entry = catalog.get(poc_id)
@@ -151,6 +176,7 @@ def run_parametrized(catalog: dict[str, dict], poc_id: str, params: dict,
     for k, v in params.items():
         if not isinstance(v, str) or len(v) > 512 or re.search(r"[\r\n\x00]", v):
             raise ParameterError(f"valor inválido para {k}")
+    _check_target_params(params)
     send_params = dict(params)
     if entry["evaluator"] == "input_reflected_unencoded":
         send_params["canary"] = new_canary()

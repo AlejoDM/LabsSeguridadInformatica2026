@@ -44,3 +44,15 @@ subfinder:
 httpx:
   rate_limit_rps: 5
   timeout_s: 10
+
+# P5 · change 006: límites del sandbox de validación (design.md, decisión 3).
+# Una solicitud por verificación, sin seguir redirecciones.
+sandbox:
+  image: ptaas-p3-runner:20261113
+  network: ptaas-p3_lab
+  timeout_s: 10            # igual que httpx.timeout_s
+  container_timeout_s: 30  # arranque + solicitud + destrucción
+  max_body_bytes: 1048576  # 1 MB; lo que exceda se trunca y se marca
+  memory: 128m
+  cpus: "0.5"
+  pids_limit: 64
