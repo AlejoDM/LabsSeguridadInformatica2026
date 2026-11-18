@@ -6,7 +6,7 @@
 - [ ] 1.3 Revisión cruzada
 
 ## Implementación
-- [ ] 2.1 Tests que fallan para armado del informe desde hallazgos y bitácora
+- [x] 2.1 Tests que fallan para armado del informe desde hallazgos y bitácora
 - [ ] 2.2 Construcción del informe con referencias a evidencia en bitácora
 - [x] 2.3 Validación de vectores CVSS v4.0 y presentación junto a EPSS
 - [x] 2.4 Resumen ejecutivo y estructura PTES §7
