@@ -16,5 +16,4 @@
 004-recon-loop-a                           ████████████████████ 15/15 (100%)
 005-correlation-analysis-loop-b            ░░░░░░░░░░░░░░░░░░░░ 0/17 (0%)
 006-sandbox-validation-loop-c              ███████████████████░ 14/15 (93%)
-007-reporting-defectdojo                   █████████████████░░░ 13/15 (87%)
-
+007-reporting-defectdojo                   ███████████████████░ 14/15 (93%)
