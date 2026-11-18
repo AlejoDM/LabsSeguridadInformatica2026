@@ -51,6 +51,22 @@ en un worktree aislado. Ver `p2-review-tests-red.txt`.
   por scheduling; la mutación M8 (sin lock + pausa de 1 ms) reproduce la
   bifurcación de forma determinista.
 
+## Intentos adicionales sobre el catálogo de validación (P5, change 006)
+
+| # | Intento | ¿Bypass real? | Test | Corrección |
+|---|---|---|---|---|
+| B1 | Cambiar el host de la verificación por `path` (`//example.com/`, `http://example.com/`) | **Sí en el kit original**: `run_parametrized` solo controlaba largo y saltos de línea, así que un `path` así podía apuntar la solicitud a otro host | `test_path_que_cambia_el_objetivo_se_rechaza` | `_check_target_params`: `path` debe empezar con una sola `/`, sin esquema, host, query ni fragmento |
+| B2 | Recorrido de rutas por `path` (`/../../etc/passwd`) | Sí en el kit original | `test_path_que_cambia_el_objetivo_se_rechaza` | Se rechazan los segmentos `..` |
+| B3 | Inyectar parámetros de query por `param_name` (`q&admin=1`, `q=1`, `q#x`) | Sí en el kit original | `test_param_name_con_caracteres_especiales_se_rechaza` | `param_name` debe ser un identificador simple |
+| B4 | Registrar una entrada del catálogo aprobada por un agente (`approved_by: security-reviewer`) | Sí en el kit original: solo se exigía que el campo no estuviera vacío | `test_entrada_aprobada_por_un_agente_se_rechaza` | `validate_entries` rechaza los nombres de `AGENT_APPROVERS` |
+
+- Commit con los tests en rojo: `cfdd3a0` (`006 · 2.1: tests que fallan — sandbox, loop C, CLI y parámetros del catálogo`).
+- Commit con las correcciones: `77bc330` (`006 · 2.3: límites del sandbox en profiles.yaml y controles de parámetros y aprobadores del catálogo`).
+- Mutaciones M10 a M12 en `entrega/mutaciones.md`.
+- B4 es una barrera por nombre: no impide que alguien escriba un nombre de
+  persona falso. La aprobación real sigue dependiendo del proceso de revisión
+  del change.
+
 ## Lo que no se hizo
 
 - No se atacó ningún host fuera del laboratorio.

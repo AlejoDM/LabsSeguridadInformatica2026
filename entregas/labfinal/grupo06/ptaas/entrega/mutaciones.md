@@ -15,6 +15,9 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M7 | Validación de parámetros (`validate_parameters`) | Devolver los parámetros sin validar | A9 (`parameters`) | 5 tests fallaron |
 | M8 | Lock de la bitácora (`AuditLog.record_decision`) | Quitar el lock y agregar 1 ms entre leer `prev` y append | A10 concurrente | La cadena se bifurcó (`prev=GENESIS` duplicado) |
 | M9 | Fase autorizada (`tokens.issue`) | Desactivar el chequeo de `authorized_phases` | `test_roe_valido_emite_token_solo_de_la_fase_pedida` | 1 test falló |
+| M10 (P5) | Parámetros que cambian el objetivo (`run_parametrized`, `harness/poc/catalog.py`) | No llamar a `_check_target_params` | `test_path_que_cambia_el_objetivo_se_rechaza` (6 casos), `test_param_name_con_caracteres_especiales_se_rechaza` (6 casos) | 12 tests fallaron |
+| M11 (P5) | Aprobación humana del catálogo (`validate_entries`) | Desactivar el chequeo de `AGENT_APPROVERS` | `test_entrada_aprobada_por_un_agente_se_rechaza` (7 casos) | 7 tests fallaron |
+| M12 (P5) | Recorrido de rutas (`_check_target_params`) | Quitar el rechazo de segmentos `..` | `test_path_que_cambia_el_objetivo_se_rechaza[/../../etc/passwd]` y `[/a/../../b]` | 2 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -44,6 +47,16 @@ FAILED tests/test_redteam_guard.py::test_a10_escritura_concurrente_conserva_la_c
 ```
 
 Con el lock restaurado: `1 passed`. Evidencia: `mutacion-M8-concurrencia.txt`.
+
+### M10 a M12 — Controles del catálogo (P5, change 006)
+
+Se mutó `harness/poc/catalog.py` y se corrieron los tests del catálogo
+(`-k 'path or param_name or entrada or parametros_validos or test_poc_catalog'`).
+La línea base tiene 1 fallo esperado
+(`test_entrada_agregada_al_archivo_durante_el_loop_no_se_usa`, que depende de
+`harness.validation`, todavía no implementado); cada mutación suma los fallos de
+la tabla. El archivo se restauró y se comprobó con `cmp` que quedó idéntico.
+Evidencia: `mutacion-P5-catalogo.txt`.
 
 ## Lo que no se mutó y por qué
 
