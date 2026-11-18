@@ -16,7 +16,7 @@
 ## Verificación
 - [x] 3.1 Test: sin aprobación no se invoca el `Sender`
 - [x] 3.2 Test: verificación inexistente en catálogo → "no validado"
-- [ ] 3.3 Test: el sandbox no alcanza hosts fuera del lab
+- [x] 3.3 Test: el sandbox no alcanza hosts fuera del lab
 - [x] 3.4 Test: el sandbox se destruye aunque falle la verificación
-- [ ] 3.5 Evals de validación ampliadas con casos donde la respuesta correcta es no actuar
-- [ ] 3.6 Archivar deltas en `openspec/specs/`
+- [x] 3.5 Evals de validación ampliadas con casos donde la respuesta correcta es no actuar
+- [x] 3.6 Archivar deltas en `openspec/specs/`
