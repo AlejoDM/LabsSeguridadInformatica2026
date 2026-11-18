@@ -6,7 +6,7 @@
 - [ ] 1.3 Revisión cruzada
 
 ## Implementación
-- [ ] 2.1 Tests que fallan para el `Sender` aislado (sin red externa, sin estado)
+- [x] 2.1 Tests que fallan para el `Sender` aislado (sin red externa, sin estado)
 - [ ] 2.2 Sandbox efímero: contenedor en red interna que implementa `Sender`
 - [ ] 2.3 Límites de tiempo, tamaño y cantidad de solicitudes
 - [ ] 2.4 Orquestación del loop C con `decide_validation`
