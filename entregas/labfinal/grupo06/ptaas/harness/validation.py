@@ -32,6 +32,9 @@ from harness.poc.catalog import ParameterError, run_parametrized, validate_entri
 from harness.sandbox import CAPABILITY, SandboxAborted, SandboxSender, SandboxTimeout
 
 PENDING = "PENDING_HITL"
+# Gates de engagement que se aprueban por la CLI. La validación es por hallazgo y la
+# entrega por hash del informe: tienen sus propios comandos.
+KNOWN_GATES = frozenset({"first_active_action"})
 APPROVED = "approved"
 REJECTED = "rejected"
 
@@ -85,14 +88,39 @@ class ApprovalStore:
         self.path, self.audit = Path(path), audit
         self._data: dict[str, dict[str, Any]] = {}
         self._deliveries: dict[str, dict[str, Any]] = {}
+        self._gates: dict[str, dict[str, Any]] = {}
         if self.path.exists():
             raw = json.loads(self.path.read_text(encoding="utf-8"))
             self._data = raw.get("findings", {})
             self._deliveries = raw.get("deliveries", {})
+            self._gates = raw.get("gates", {})
 
     def _save(self) -> None:
-        self.path.write_text(json.dumps({"findings": self._data, "deliveries": self._deliveries},
-                                        indent=2, sort_keys=True), encoding="utf-8")
+        self.path.write_text(json.dumps({"findings": self._data, "deliveries": self._deliveries,
+                                         "gates": self._gates}, indent=2, sort_keys=True),
+                             encoding="utf-8")
+
+    # ---- Gates del engagement (change 007 · 3.5) ----
+
+    def approve_gate(self, engagement_id: str, gate: str, *, reviewer: str, reason: str) -> None:
+        if gate not in KNOWN_GATES:
+            raise ValueError(f"gate desconocido: {gate}")
+        if not reviewer or not reviewer.strip():
+            raise ValueError("falta el Reviewer")
+        if not reason or not reason.strip():
+            raise ValueError("falta el motivo")
+        ts = time.time()
+        record = {"engagement_id": engagement_id, "gate": gate, "reviewer": reviewer.strip(),
+                  "reason": reason.strip(), "ts": ts}
+        self._gates[f"{engagement_id}:{gate}"] = record
+        self._save()
+        self.audit.append({"event": "hitl.decision", "decision": "gate_approved", **record})
+
+    def gate_record(self, engagement_id: str, gate: str) -> dict[str, Any] | None:
+        return self._gates.get(f"{engagement_id}:{gate}")
+
+    def gate_approved(self, engagement_id: str, gate: str) -> bool:
+        return self.gate_record(engagement_id, gate) is not None
 
     # ---- Entrega del informe (change 007 · 2.6) ----
 

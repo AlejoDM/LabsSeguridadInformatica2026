@@ -17,7 +17,7 @@ from pathlib import Path
 from typing import Any
 
 from harness.audit import InMemoryAuditStore
-from harness.validation import ApprovalStore
+from harness.validation import KNOWN_GATES, ApprovalStore
 
 
 def _parser() -> argparse.ArgumentParser:
@@ -31,6 +31,11 @@ def _parser() -> argparse.ArgumentParser:
         cmd.add_argument("finding_id")
         cmd.add_argument("--reviewer", required=True, help="nombre de la persona que decide")
         cmd.add_argument("--reason", required=True, help="motivo de la decisión")
+    gate = sub.add_parser("approve-gate", help="aprobar un gate del engagement (007 · 3.5)")
+    gate.add_argument("engagement_id")
+    gate.add_argument("gate", choices=sorted(KNOWN_GATES))
+    gate.add_argument("--reviewer", required=True, help="nombre de la persona que decide")
+    gate.add_argument("--reason", required=True, help="motivo de la decisión")
     dlv = sub.add_parser("approve-delivery", help="aprobar la entrega de un informe (007 · 2.6)")
     dlv.add_argument("engagement_id")
     dlv.add_argument("--report-hash", required=True, help="hash exacto del informe a entregar")
@@ -51,6 +56,16 @@ def main(argv: list[str] | None = None, *, audit: Any = None) -> int:
             print("No hay hallazgos pendientes.")
         for finding_id, rec in pendientes:
             print(f"{finding_id}\t{rec['poc_id']}\t{json.dumps(rec['params'], sort_keys=True)}")
+        return 0
+
+    if args.command == "approve-gate":
+        try:
+            store.approve_gate(args.engagement_id, args.gate,
+                               reviewer=args.reviewer, reason=args.reason)
+        except ValueError as exc:
+            print(f"error: {exc}", file=sys.stderr)
+            return 2
+        print(f"{args.engagement_id}: gate {args.gate} aprobado por {args.reviewer}")
         return 0
 
     if args.command == "approve-delivery":
