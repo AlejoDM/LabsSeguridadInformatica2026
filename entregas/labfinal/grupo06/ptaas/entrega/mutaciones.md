@@ -30,6 +30,11 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M22 (P5) | Bloqueo de informes DEMO (`deliver_report`, `export`) | Desactivar el chequeo de `demo` | `test_informe_demo_no_se_entrega_ni_exporta` | 1 test falló |
 | M23 (P5) | Datos sensibles (`_check_sensitive`) | No buscar patrones | `test_dato_sensible_falla_indicando_patron_y_hallazgo` (6 casos) | 6 tests fallaron |
 | M24 (P5) | Exportar solo entregados (`harness/defectdojo_export.py`) | Desactivar el chequeo de `delivered` | `test_exportar_un_informe_no_entregado_se_rechaza` | 1 test falló |
+| M25 (P5) | Gate de primera acción activa (`harness/pipeline.py`) | No esperar la aprobación | `test_recorrido_sin_aprobacion_de_primera_accion` | 1 test falló |
+| M26 (P5) | Candidatos sobre activos no relevados (`pipeline.run`) | No descartarlos | `test_recorrido_descarta_candidatos_fuera_de_lo_relevado` | 1 test falló |
+| M27 (P5) | Evidencia previa (`pipeline.run`) | Aceptar un directorio de salida existente | `test_recorrido_no_sobrescribe_salida_existente` | 1 test falló |
+| M28 (P5) | Informe DEMO en el recorrido (`pipeline.run`) | Seguir el camino de entrega | `test_recorrido_con_analisis_simulado_sale_demo` | 1 test falló |
+| M29 (P5) | Verificación de la evidencia exportada (`verify_evidence`) | Devolver siempre válido | `test_verificacion_detecta_bitacora_exportada_alterada` | 1 test falló |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -89,6 +94,16 @@ Se mutaron `harness/report_builder.py` y `harness/defectdojo_export.py` y se
 corrió `tests/test_reporting_e2e.py`. Línea base: `38 passed`. Cada mutación
 rompió al menos un test; los archivos se restauraron y se compararon con `cmp`.
 Evidencia: `mutacion-P5-007.txt`.
+
+### M25 a M29 — Recorrido de un comando (P5, change 007 · 3.5)
+
+Se mutó `harness/pipeline.py` y se corrieron los tests del recorrido
+(`-k 'recorrido or verificacion'`). Línea base: `8 passed`. Cada mutación rompió
+el test de su control; el archivo se restauró y se comparó con `cmp`.
+En M26 no hay otra barrera: el Guard y el Sender aceptan `otro.dvwa.lab.test`
+porque es un subdominio autorizado del lab. El único control que impide validar
+un activo que el recon no relevó es el descarte del recorrido.
+Evidencia: `mutacion-P5-007-recorrido.txt`.
 
 ## Lo que no se mutó y por qué
 
