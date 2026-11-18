@@ -33,3 +33,7 @@ Mensaje: "No findings were added/updated/closed/reactivated as the report is emp
 or the findings in Defect Dojo are identical to those in the uploaded report."
 Resultado: Total 4 (sin duplicados). Reimportaciones: 2. La deduplicación usa
 unique_id_from_tool (identificador estable del informe, design.md decisión 6).
+
+## Captura
+P5-defectdojo-import.png: estado del test después de la re-importación
+("Reimportaciones: 2", "Importar historial (2)"): siguen 4 hallazgos, sin duplicados.
