@@ -86,7 +86,9 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
   explícito en lugar de modificarlos.
 - Los changes 006 y 007 se archivaron sin la revisión cruzada (1.3) de otro
   integrante.
-- La exportación a DefectDojo no se importó en una instancia real.
+- La importación en DefectDojo fue una prueba de formato con los hallazgos del
+  informe DEMO, en una instancia local; todavía no hay un informe entregado para
+  importar.
 
 ## Autorización, RoE, tokens y red team
 
@@ -186,6 +188,15 @@ del 18/11/2026 (`entrega/evidencia/salidas/P5-recorrido-02/`):
 Los vectores CVSS del análisis simulado son valores de ejemplo y no una
 evaluación; por eso el informe de esta corrida no es un resultado de pentest.
 
+**Prueba de formato en DefectDojo.** Como el informe es DEMO, el recorrido no lo
+exporta. Para verificar el formato, se reconstruyó ese mismo informe desde su
+bitácora exportada (mismo `report_hash`), se convirtieron sus hallazgos con el
+exportador del proyecto marcándolos `[DEMO]` y se importaron en una instancia
+local de DefectDojo con el parser *Generic Findings Import*. Se importaron los
+4 hallazgos con su CWE, 3 como verificados y las etiquetas `severity-unknown`.
+Al re-importar el mismo archivo no se creó ningún hallazgo: la deduplicación
+por identificador estable funciona (`P5-defectdojo-prueba-formato.txt`).
+
 **Mutaciones.** M10–M29 en `entrega/mutaciones.md`: cada control nuevo (barrera
 de host, destrucción del contenedor, gate por hallazgo, ligadura al hash,
 consistencia entre intentos, respaldo en bitácora, entrega, DEMO, datos
@@ -197,4 +208,5 @@ entonces ningún informe del recorrido se entrega ni se exporta. La bitácora de
 recorrido se exporta en JSON verificable; la persistencia SQLite depende del
 change 002 (P1). `deliver(report, reviewer_approved)` con booleano sigue
 existiendo por compatibilidad, aunque el recorrido no lo usa. Falta la revisión
-cruzada de 006 y 007, y la importación en una instancia real de DefectDojo.
+cruzada de 006 y 007, y la importación en DefectDojo de un informe entregado (hoy
+solo hay una prueba de formato con el informe DEMO).

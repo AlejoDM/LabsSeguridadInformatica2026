@@ -46,8 +46,11 @@ La línea `Tests:` suma `tests/test_reporting_p3.py` y `tests/test_reporting_e2e
 
 - El análisis es simulado hasta que exista el change 005 (P4). Hasta entonces
   ningún informe del recorrido se puede entregar ni exportar, por diseño.
-- La exportación a DefectDojo se probó con tests; no se importó en una instancia
-  real. Los campos usados están en la lista permitida del parser de DefectDojo.
+- La exportación a DefectDojo se probó con tests y con una **prueba de formato**
+  en una instancia local: los 4 hallazgos del informe DEMO, marcados `[DEMO]`, se
+  importaron con *Generic Findings Import* y al re-importar no se duplicaron
+  (`P5-defectdojo-prueba-formato.txt`). Todavía no se importó un informe
+  entregado, porque el recorrido solo entrega cuando el análisis es real.
 - `deliver(report, reviewer_approved)` con booleano sigue existiendo por
   compatibilidad; el recorrido usa solo la entrega con aprobación registrada.
 - La bitácora persistente (SQLite) depende del change 002 (P1). El recorrido
