@@ -4,7 +4,6 @@ Datos exclusivamente sinteticos; ninguna CVE incluida representa un hallazgo rea
 """
 
 from __future__ import annotations
-from harness.epss_snapshot import EPSSSnapshotError, load_epss_snapshot
 
 import hashlib
 import json
@@ -13,6 +12,7 @@ from pathlib import Path
 
 import pytest
 
+from harness.epss_snapshot import EPSSSnapshotError, load_epss_snapshot
 from harness.nvd_snapshot import SnapshotError, load_nvd_snapshot
 
 TEST_CVE = "CVE-2099-0001"  # Identificador FICTICIO de fixture; no es un hallazgo.
