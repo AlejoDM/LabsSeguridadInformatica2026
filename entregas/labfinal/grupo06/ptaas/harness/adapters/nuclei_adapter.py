@@ -1,8 +1,7 @@
 """Adaptador nuclei.safe_templates: solo templates curados y tags permitidos."""
 from __future__ import annotations
 
-from harness.adapters.common import (Runner, default_runner, load_profiles,
-                                     validate_url)
+from harness.adapters.common import Runner, default_runner, load_profiles, validate_url
 from harness.contracts import Action, Phase, ScopeToken
 
 
