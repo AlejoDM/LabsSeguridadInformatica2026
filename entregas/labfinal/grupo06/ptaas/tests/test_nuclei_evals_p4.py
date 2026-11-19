@@ -65,3 +65,51 @@ def test_rubrica_detecta_desviaciones_no_solo_golden() -> None:
     case = json.loads((ROOT / "evals" / "cases" / "vuln_analysis_p4.json").read_text(encoding="utf-8"))[0]
     assert score(case, case["golden_output"]) == []
     assert score(case, {"status": "confirmed", "rationale": "confirmado sin evidencia"})
+
+@pytest.mark.parametrize("directory", [
+    "templates/proposed_p4",
+    "templates/allowlist/../proposed_p4",
+])
+def test_nuclei_rechaza_directorio_fuera_allowlist(directory: str) -> None:
+    from harness.adapters.common import load_profiles
+    from harness.adapters.nuclei_adapter import build_argv
+
+    profile = dict(load_profiles()["nuclei"])
+    profile["templates_dir"] = directory
+
+    with pytest.raises(ValueError, match="allow-list"):
+        build_argv("http://dvwa.lab.test/", profile)
+
+
+def test_nuclei_bloquea_templates_extra_sin_ejecutar() -> None:
+    from harness.adapters.common import load_profiles
+    from harness.adapters.nuclei_adapter import NucleiSafeTemplates
+    from harness.contracts import Phase
+    from tests.conftest import act, make_token
+
+    profile = dict(load_profiles()["nuclei"])
+    profile["fixed_args"] = [
+        *profile["fixed_args"],
+        "-t",
+        "templates/proposed_p4",
+    ]
+
+    llamadas: list[list[str]] = []
+
+    def fake_runner(argv: list[str], timeout: int) -> str:
+        llamadas.append(argv)
+        return ""
+
+    adapter = NucleiSafeTemplates(
+        runner=fake_runner,
+        profile=profile,
+    )
+
+    with pytest.raises(ValueError, match="allow-list"):
+        adapter.run(
+            act("nuclei.safe_templates", Phase.ANALYZE),
+            "http://dvwa.lab.test/",
+            make_token(Phase.ANALYZE),
+        )
+
+    assert llamadas == []
