@@ -41,3 +41,14 @@ Los cinco templates fueron verificados estáticamente,
 pero no están aprobados para ejecución.
 
 Las evaluaciones golden no equivalen a evaluaciones live.
+
+## Evidencia ZAP baseline ? DVWA
+
+- Objetivo: dvwa.lab.test
+- Entorno: Docker, red interna lab_lab.
+- Resultado: OK.
+- Alertas: 11, todav?a no validadas.
+- Fallos ZAP: 0.
+- Reporte: evidencia/zap/zap-dvwa-baseline.json
+- Log: evidencia/zap/zap-dvwa-baseline.log
+- Auditor?a: evidencia/zap/zap-dvwa-audit.json
