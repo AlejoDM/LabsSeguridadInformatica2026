@@ -7,13 +7,12 @@ from __future__ import annotations
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from harness.nvd_snapshot import SnapshotError, load_nvd_snapshot
-
 
 TEST_CVE = "CVE-2099-0001"  # Identificador FICTICIO de fixture; no es un hallazgo.
 
@@ -57,7 +56,7 @@ def test_nvd_snapshot_valido_se_lee_sin_red(tmp_path: Path, monkeypatch: pytest.
     monkeypatch.setattr(socket.socket, "connect", network_forbidden)
 
     snapshot = load_nvd_snapshot(
-        path, now=datetime(2026, 11, 19, tzinfo=timezone.utc), max_age_days=30
+        path, now=datetime(2026, 11, 19, tzinfo=UTC), max_age_days=30
     )
     assert snapshot.status == "current"
     assert snapshot.lookup(TEST_CVE)["product"] == "fictional-app"
@@ -68,13 +67,13 @@ def test_nvd_snapshot_alterado_se_rechaza(tmp_path: Path) -> None:
     path = tmp_path / "nvd.json"
     write_synthetic_snapshot(path, tamper=True)
     with pytest.raises(SnapshotError, match="(?i)(hash|integridad|sha256)"):
-        load_nvd_snapshot(path, now=datetime(2026, 11, 19, tzinfo=timezone.utc))
+        load_nvd_snapshot(path, now=datetime(2026, 11, 19, tzinfo=UTC))
 
 
 def test_nvd_cve_ausente_no_se_inventa(tmp_path: Path) -> None:
     path = tmp_path / "nvd.json"
     write_synthetic_snapshot(path)
-    snapshot = load_nvd_snapshot(path, now=datetime(2026, 11, 19, tzinfo=timezone.utc))
+    snapshot = load_nvd_snapshot(path, now=datetime(2026, 11, 19, tzinfo=UTC))
     assert snapshot.lookup("CVE-2099-9999") is None
 
 
@@ -82,6 +81,6 @@ def test_nvd_snapshot_desactualizado_se_identifica(tmp_path: Path) -> None:
     path = tmp_path / "nvd.json"
     write_synthetic_snapshot(path, snapshot_date="2026-01-01")
     snapshot = load_nvd_snapshot(
-        path, now=datetime(2026, 11, 19, tzinfo=timezone.utc), max_age_days=30
+        path, now=datetime(2026, 11, 19, tzinfo=UTC), max_age_days=30
     )
     assert snapshot.status == "stale"
