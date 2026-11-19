@@ -1,0 +1,13 @@
+[
+  {
+    "ts": 1795052545.5868611,
+    "engagement": "labfinal-grupo06",
+    "agent": "persona4",
+    "action": "zap.baseline_scan",
+    "target": "dvwa.lab.test",
+    "phase": "analyze",
+    "result": "PENDING_HITL",
+    "prev": "GENESIS",
+    "hash": "1d10d20a04385c4b1a84350da971fc4daee96faf85e26af1ab1057e89e005357"
+  }
+]
