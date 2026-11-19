@@ -8,6 +8,18 @@ from harness.contracts import Action, Phase, ScopeToken
 
 def build_argv(url: str, profile: dict | None = None) -> list[str]:
     p = profile or load_profiles()["nuclei"]
+    if p.get("templates_dir") != "templates/allowlist":
+        raise ValueError("allow-list Nuclei: directorio no autorizado")
+    safe_args = (
+        "-jsonl",
+        "-silent",
+        "-ni",
+        "-duc",
+        "-disable-update-check",
+    )
+    fixed_args = p.get("fixed_args")
+    if not isinstance(fixed_args, list) or tuple(fixed_args) != safe_args:
+        raise ValueError("allow-list Nuclei: argumentos no autorizados")
     u = validate_url(url)
     argv = [
         p["binary"], "-u", u,
