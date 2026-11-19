@@ -67,7 +67,7 @@ def test_dos_rondas_vacias_inconclusas() -> None:
 
 
 def test_evidencia_zap_no_confirma_automaticamente() -> None:
-    harness, token, z, n = setup(approve=True, zap={"tool": "zap", "format": "json", "alerts": [{"alert": "CSP Header Not Set"}]})
+    harness, token, _z, n = setup(approve=True, zap={"tool": "zap", "format": "json", "alerts": [{"alert": "CSP Header Not Set"}]})
     out = run_detection_p4(harness, token, "dvwa.lab.test", candidate_count=1)
     assert (out.status, out.rounds, len(out.evidence)) == ("STOP_COMPLETE", 1, 1)
     assert n.calls == 0
@@ -98,7 +98,7 @@ def test_kill_switch_impide_ejecucion() -> None:
 
 
 def test_nuclei_jsonl_produce_observacion_sin_confirmacion() -> None:
-    harness, token, z, n = setup(approve=True, nuclei={"tool": "nuclei", "format": "jsonl", "lines": ['{"template-id":"lab-header"}']})
+    harness, token, _z, _n = setup(approve=True, nuclei={"tool": "nuclei", "format": "jsonl", "lines": ['{"template-id":"lab-header"}']})
     out = run_detection_p4(harness, token, "dvwa.lab.test", candidate_count=1)
     assert (out.status, out.rounds) == ("STOP_COMPLETE", 2)
     assert len(out.evidence) == 1

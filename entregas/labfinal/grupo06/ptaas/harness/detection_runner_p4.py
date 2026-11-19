@@ -44,7 +44,7 @@ def _evidence_from_output(capability: str, target: str, output: Any) -> list[dic
         for line in lines:
             item = json.loads(line)
             if not isinstance(item, dict) or not isinstance(item.get("template-id"), str):
-                raise ValueError("hallazgo Nuclei inválido")
+                raise TypeError("hallazgo Nuclei inválido")
             observations.append({"capability": capability, "target": target, "observation": item})
         return observations
     raise ValueError("capability desconocida")
