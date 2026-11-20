@@ -247,6 +247,28 @@ def test_objetivo_del_lab_devuelve_respuesta():
 
 @pytest.mark.skipif(os.environ.get("PTAAS_SANDBOX_DOCKER") != "1",
                     reason="requiere Docker y el lab levantado (PTAAS_SANDBOX_DOCKER=1)")
+def test_real_sandbox_se_destruye_aunque_docker_falle():
+    """Observación 2 de P1 (006 · 1.3): la destrucción tras un fallo se probaba solo con
+    FakeRuntime. Acá falla un `docker run` real (imagen inexistente, --pull never) y se
+    comprueba con Docker que no quedó ningún contenedor con la etiqueta del engagement."""
+    import uuid
+
+    from harness.contracts import Action
+    sb = api("sandbox")
+    runtime = sb.DockerRuntime()
+    eng = f"p5-real-{uuid.uuid4().hex[:8]}"
+    adapter = sb.SandboxAdapter(runtime=runtime, network=NETWORK, engagement_id=eng,
+                                limits=sb.SandboxLimits(), audit=AuditLog(),
+                                image="ptaas-imagen-que-no-existe:0")
+    adapter.prepare("http://dvwa.lab.test/")
+    with pytest.raises(RuntimeError):
+        adapter.run(Action(CAPABILITY, Phase.VALIDATE), "dvwa.lab.test",
+                    make_token())
+    assert runtime.list_labeled("ptaas.engagement", eng) == []
+
+
+@pytest.mark.skipif(os.environ.get("PTAAS_SANDBOX_DOCKER") != "1",
+                    reason="requiere Docker y el lab levantado (PTAAS_SANDBOX_DOCKER=1)")
 def test_real_sandbox_no_alcanza_internet():
     sb = api("sandbox")
     assert sb.DockerRuntime().probe_egress(NETWORK, ("1.1.1.1", 80)) is False
