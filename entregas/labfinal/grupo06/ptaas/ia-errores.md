@@ -22,5 +22,7 @@
 
 | 2026-11-19 | P4 | ChatGPT / GPT-6 | El runner de ZAP usaba la codificaci?n predeterminada de Windows para leer la salida de Docker; la primera correcci?n no cubri? todas las llamadas | Al ejecutar el escaneo apareci? UnicodeDecodeError con cp1252 y fall? el procesamiento del JSON | Se configur? UTF-8 con errors=replace en las llamadas necesarias y se repiti? ZAP hasta obtener el reporte | bd47ceb |
 | 2026-11-18 | P4 | ChatGPT / GPT-6 | El adaptador Nuclei generado con asistencia de IA ten?a imports que no cumpl?an las reglas de Ruff | Ruff detect? el orden incorrecto de imports | Se corrigieron los imports y se verific? nuevamente el c?digo | 038df86 |
+| 2026-11-11 | P1 | Claude Code / Haiku 5.5 | Commiteó el contrato de bitácora (tarea 5.4) sin mostrar antes la firma propuesta, aunque el método del plan (sección 7.2) pide mostrarla antes de commitear. | Al releer la sección 7.2 del plan, después del commit. | Se dejó explícita la firma en design.md y en la nota de traspaso, para que el grupo la revise. | a5170fe; e0634d9 |
+| 2026-11-20 | P1 | Claude Code / Haiku 5.5 | Le informé al usuario que mis commits habían quedado sin subir ("ahead 2") y que el push estaba bloqueado. El push sí había llegado: `origin` ya contenía esos commits. | Al hacer `git fetch`, `origin/labfinal-ptaas-grupo06` ya incluía `20942c5`. | Se corrigió el informe al usuario. No hubo cambios de código. | — (sin cambios de código) |
 Los commits de tests en rojo y correcciones se conservaron en esta rama local;
 todavía no se hizo push.
