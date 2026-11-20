@@ -33,3 +33,8 @@ FAILED tests/test_analisis_real.py::test_recorrido_con_analisis_real_entrega_y_e
 líneas mutadas: 1
 FAILED tests/test_analisis_real.py::test_alerta_informativa_no_genera_hallazgo
 1 failed, 13 passed in 5.04s
+
+## M35: el identificador vuelve a usar el poc_id aunque no esté en el catálogo
+FAILED tests/test_analisis_real.py::test_alertas_distintas_sin_verificacion_no_se_unifican
+FAILED tests/test_analisis_real.py::test_hallazgo_sin_verificacion_no_muestra_un_poc_inexistente
+2 failed, 14 passed in 4.65s

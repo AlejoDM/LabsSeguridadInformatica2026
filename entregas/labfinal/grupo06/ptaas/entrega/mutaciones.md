@@ -40,6 +40,7 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M32 (P5) | Reporte de ZAP acotado al objetivo (`check_report_scope`) | No controlar el host | `test_instancia_fuera_del_objetivo_se_rechaza`, `test_reporte_de_zap_fuera_del_objetivo_aborta` | 2 tests fallaron |
 | M33 (P5) | Exclusión de alertas informativas (`findings_from_alerts`) | No filtrar riesgo 0 | Primera corrida: **sobrevivió** (test débil). Con el test corregido: `test_alerta_informativa_no_genera_hallazgo` | 1 test falló tras corregir el test |
 | M34 (P5) | Descarte de alertas sin mapeo (`findings_from_alerts`) | Incluirlas con un vector inventado | `test_alerta_sin_mapeo_se_descarta_con_el_plugin`, `test_recorrido_con_analisis_real_entrega_y_exporta` | 2 tests fallaron |
+| M35 (P5) | Identidad de hallazgos sin verificación (`_from_log`, `report_builder.py`) | Volver a usar `poc_id` aunque no esté en el catálogo | `test_alertas_distintas_sin_verificacion_no_se_unifican`, `test_hallazgo_sin_verificacion_no_muestra_un_poc_inexistente` | 2 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 

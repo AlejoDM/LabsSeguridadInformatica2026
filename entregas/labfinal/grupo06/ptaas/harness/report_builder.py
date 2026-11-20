@@ -179,12 +179,16 @@ def _from_log(f: Finding, entries: Sequence[Any], hashes: set[str]) -> ReportFin
         status, label = "not_validated", LABEL_NOT_VALIDATED
 
     refs = list(dict.fromkeys([*f.evidence_refs, *(e.hash for e in own)]))
-    poc_id = last.get("poc_id") if last else None
+    # Una verificación solo cuenta si el loop C la encontró en el catálogo (tiene versión).
+    # Sin ella, el hallazgo se identifica por su título: dos alertas distintas sin
+    # verificación no se unifican (regresión de la corrida P5-recorrido-03).
+    poc_version = last.get("poc_version") if last else None
+    poc_id = last.get("poc_id") if last and poc_version else None
     key = f"{f.asset.strip().lower()}|{f.cwe}|{poc_id or ' '.join(f.title.lower().split())}"
     return ReportFinding(
         id=f.id, title=f.title, asset=f.asset, cwe=f.cwe, cvss_v4_vector=f.cvss_v4_vector,
         epss=f.epss, remediation=f.remediation, status=status, status_label=label,
-        reason=reason, poc_id=poc_id, poc_version=last.get("poc_version") if last else None,
+        reason=reason, poc_id=poc_id, poc_version=poc_version,
         evidence_refs=tuple(refs), stable_id=hashlib.sha256(key.encode("utf-8")).hexdigest(),
         high_impact=bool(re.search(r"/V[CIA]:H(/|$)", f.cvss_v4_vector)))
 

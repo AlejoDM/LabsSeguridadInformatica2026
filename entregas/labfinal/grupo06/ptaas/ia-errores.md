@@ -16,6 +16,7 @@
 | 2026-11-18 | P5 | Claude Code / Opus 5.5 | Interpretó que P5 tomaba toda la parte de P1, incluido el change 002, cuando el acuerdo era solo la parte del 007 | Lo corrigió P5 en la conversación | Se limitó el alcance a 007 · 1.1, 1.2, 3.2, 3.4 y 3.6 | — (sin cambios de código) |
 | 2026-11-18 | P5 | Claude Code / Opus 5.5 | Generó la evidencia final antes de marcar la 3.6: el progreso mostraba 007 en 13/15 | Al comparar el progreso con `tasks.md` | Se regeneró la sección de progreso de la evidencia | 7dc09d5 |
 | 2026-11-19 | P5 | Claude Code / Opus 5.5 | Escribió el test de alertas informativas con la 10111, que no trae CWE: la descartaba otra regla y el control de riesgo 0 quedaba sin probar | La mutación M33 (no filtrar riesgo 0) no rompió ningún test | Se cambió el test a la 10027 (riesgo 0 con CWE válido); M33 pasó a detectarse | ver commit del change 008 · 3.1 |
+| 2026-11-19 | P5 | Claude Code / Opus 5.5 | Usó el valor centinela `NINGUNA` como si fuera una verificación del catálogo: el informe unificó dos alertas distintas (10009 y 10036, ambas CWE-497) y mostró `NINGUNA vNone` | P5 revisó el informe antes de aprobar la entrega (gate humano) en la corrida P5-recorrido-03 | La identidad del hallazgo usa la verificación solo si tiene versión del catálogo; el informe no se entregó | de98ef2 (test rojo) |
 
 Los commits de tests en rojo y correcciones se conservaron en esta rama local;
 todavía no se hizo push.
