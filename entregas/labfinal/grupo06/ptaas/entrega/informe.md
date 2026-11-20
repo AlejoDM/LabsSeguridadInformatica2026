@@ -54,8 +54,38 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
   No se probó en 3.12 ni se ejecutaron escaneos contra DVWA o Juice Shop.
 
 ### P3
-**Pendiente de completar por P3:** herramienta y modelo usados, partes asistidas,
-verificación humana y límites (mismo formato que P1 y P2).
+
+**Herramienta:** Codex, basado en GPT-6.
+
+**Finalidad y partes asistidas (relevamiento y apoyo al informe):**
+
+- Asistencia en la redacción de specs, implementación y corrección del loop A,
+  los adaptadores subfinder/httpx y la persistencia del grafo de activos.
+- Elaboración de tests y fixtures, apoyo en la ejecución del laboratorio y en la
+  documentación de evidencias; validación de CVSS v4/EPSS y estructura PTES para
+  las tareas 007 · 2.3–2.4.
+
+**Verificación humana y comprobaciones realizadas:**
+
+- P3 ejecutó la comprobación local de tests, evals, progreso y auditoría; P2
+  revisó y aceptó el trabajo del change 004.
+- Al cierre de P3 (13/11): 251 tests aprobados, 10/10 evals golden y auditoría
+  correcta. Estos valores corresponden a esa etapa, no a la integración final.
+  Referencias: `openspec/changes/004-recon-loop-a/archive.md` y
+  `entrega/evidencia/salidas/P3-real-04/`.
+- Los errores detectados y sus correcciones se registran en `ia-errores.md`
+  y `entrega/retrospectiva.md`.
+
+**Límites de la verificación:**
+
+- Subfinder se ejecutó realmente, pero quedó `UNAVAILABLE` al no disponer de
+  fuentes locales: no descubrió subdominios. httpx sondeó las semillas autorizadas
+  de DVWA y Juice Shop dentro de la red aislada.
+- El procesamiento de subdominios, las exclusiones y la enumeración exitosa vacía
+  se comprobaron con fixtures simulados, identificados como tales.
+- La auditoría de P3 verificó el snapshot exportado mediante el verificador de P1;
+  esa comprobación no demuestra resistencia a una reescritura completa sin ancla
+  externa ni sustituye las pruebas de integración posteriores.
 
 ### P4
 **Pendiente de completar por P4:** herramienta y modelo usados, partes asistidas,
@@ -212,7 +242,7 @@ y `entrega/retrospectiva.md`. Casos representativos: tests que fallaban por un
 fixture y no por el control (P2, P5), un token válido en el instante exacto de
 expiración (P2), un test débil revelado por una mutación (P5, M33) y un informe con
 hallazgos unificados por error que frenó el gate de entrega (P5).
-**Pendiente:** filas de P1, P3 y P4.
+**Pendiente:** filas de P1 y P4.
 
 ## 9. Aporte por integrante
 

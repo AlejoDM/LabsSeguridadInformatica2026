@@ -78,6 +78,50 @@ Para los casos 4–6 también se conservó el par separado de test rojo y correc
 
 ---
 
+# Retrospectiva de IA — P3
+
+Herramienta: Codex (GPT-6). Change 004 y tareas 007 · 2.3–2.4.
+Los dos casos siguientes tienen su fila en `ia-errores.md` y fallos conservados en
+`entrega/evidencia/salidas/P3-red-review.txt`.
+
+## 1. Una salida HTTP vacía se interpretaba como éxito
+
+- **Error:** el adaptador httpx devolvía `OK` ante stdout vacío, aunque no había
+  una observación HTTP válida que justificara ese resultado.
+- **Detección:** `test_http_empty_output_is_not_convergence` esperaba `ERROR`
+  con `empty_output` y recibió `OK`.
+- **Corrección:** se rechazó la salida HTTP vacía explícitamente. Se mantuvo
+  separada de una enumeración pasiva exitosa sin descubrimientos y del estado
+  `UNAVAILABLE` observado al ejecutar Subfinder sin fuentes locales.
+- **Aprendizaje:** una salida vacía necesita interpretarse según la herramienta
+  y su estado de ejecución; no basta con que el parser no encuentre líneas.
+- **Referencia histórica:** `cf5b76f`; test y fallo en la evidencia citada.
+
+## 2. Reanudar un grafo detenido volvía a ejecutar herramientas
+
+- **Error:** el loop A iniciaba nuevas acciones al recibir un grafo `STOPPED`
+  y tampoco preservaba la espera `PENDING_HITL` por errores de schema.
+- **Detección:** `test_stopped_checkpoint_is_terminal` y
+  `test_schema_hitl_is_preserved_on_resume` mostraron llamadas a subfinder/httpx
+  cuando correspondía conservar el estado sin ejecutar herramientas.
+- **Corrección:** se comprobó el estado antes de iniciar otra vuelta y se
+  preservaron la parada y la espera de intervención al reanudar.
+- **Aprendizaje:** persistir datos no alcanza: los tests de reanudación también
+  deben comprobar qué acciones dejan de estar permitidas en cada estado.
+- **Referencia histórica:** `cf5b76f`; test y fallo en la evidencia citada.
+
+## Balance
+
+La IA ayudó a desarrollar código, pruebas y documentación, pero las primeras
+versiones necesitaron correcciones. Revisar el motivo de los fallos permitió
+detectar errores que una prueba del recorrido normal no mostraba. La ejecución
+real aportó otra comprobación: Subfinder sin fuentes disponibles no equivale a
+descubrimiento exitoso. Se conservaron esa limitación y las salidas reales,
+mientras que los subdominios y exclusiones se validaron por simulación. La
+revisión cruzada de P2 complementó las comprobaciones automáticas.
+
+---
+
 # Retrospectiva de IA — P5
 
 Herramienta: Claude Code (Opus 5.5). Changes 006, 007, 008 y 009, implementación del
