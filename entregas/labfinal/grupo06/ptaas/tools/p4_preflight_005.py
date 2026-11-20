@@ -85,13 +85,23 @@ def run_preflight(root: Path = ROOT) -> dict[str, Any]:
     _check(folder.is_dir(), "no existe carpeta de propuestas")
     found = {p.name for p in folder.iterdir() if p.suffix in {".yaml", ".yml"}}
     _check(found == set(EXPECTED), f"propuestas distintas a las cinco previstas: {sorted(found)}")
-    _check(not list((root / "templates/allowlist").glob("p4-*.yaml")), "propuesta copiada a allowlist antes de la aprobación")
+    # Actualizado por P5 (2026-11-19): una propuesta puede estar en la allow-list solo
+    # si su aprobación verifica contra MANIFEST.md (hash + segunda aprobación humana).
+    copied = list((root / "templates/allowlist").glob("p4-*.yaml"))
+    aprobacion = "PENDIENTE"
+    if copied:
+        from harness.nuclei_allowlist import AllowlistError, verify_allowlist
+        try:
+            verify_allowlist(root / "templates/allowlist")
+        except AllowlistError as exc:
+            raise PreflightError(f"propuesta copiada a allowlist sin aprobación válida: {exc}") from exc
+        aprobacion = "APROBADA"
     records = [review_one(folder / name) for name in sorted(EXPECTED)]
     return {
         "change": "005-correlation-analysis-loop-b",
         "evaluado_en_utc": datetime.now(UTC).isoformat(),
         "tipo": "revision_estatica_sin_red_sin_ejecucion",
-        "aprobacion_humana": "PENDIENTE",
+        "aprobacion_humana": aprobacion,
         "escaneo_real": "NO_REALIZADO",
         "templates": records,
         "cantidad": len(records),

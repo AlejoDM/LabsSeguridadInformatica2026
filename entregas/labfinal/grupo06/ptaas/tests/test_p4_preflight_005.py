@@ -14,7 +14,9 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_las_cinco_propuestas_pasan_preflight_sin_aprobarse() -> None:
     r = run_preflight(ROOT)
     assert r["cantidad"] == 5
-    assert r["aprobacion_humana"] == "PENDIENTE"
+    # Actualizado por P5 (2026-11-19): el estado sale de la allow-list verificada.
+    hay_copias = bool(list((ROOT / "templates/allowlist").glob("p4-*.yaml")))
+    assert r["aprobacion_humana"] == ("APROBADA" if hay_copias else "PENDIENTE")
     assert r["escaneo_real"] == "NO_REALIZADO"
     assert all(len(t["sha256"]) == 64 for t in r["templates"])
 
