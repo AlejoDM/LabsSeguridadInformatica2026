@@ -3,7 +3,7 @@
 ## Spec y diseño
 - [x] 1.1 Escribir `design.md` (esquema SQLite, política de integridad, concurrencia)
 - [x] 1.2 Delta de `audit-log` con ≥ 4 Requirements nuevos y Scenarios negativos
-- [ ] 1.3 Revisión del delta por otro integrante
+- [x] 1.3 Revisión del delta por otro integrante — Martin Beccereca (P5), 2026-11-19: de acuerdo con el delta de P1
 
 ## Implementación
 - [x] 2.1 Tests que fallan para persistencia y recuperación tras reinicio

@@ -6,7 +6,7 @@ Fecha: 2026-11-19.
 |---|---|
 | Contrato, fake en memoria, `design.md` y delta (1.1, 1.2) | P1 |
 | Tests, implementación SQLite, CLI, integración, mutaciones y archivado (2.1–3.6) | P5, a pedido de P1 |
-| Revisión del delta (1.3) | Pendiente: un integrante que no sea P1 |
+| Revisión del delta (1.3) | Martin Beccereca (P5), 2026-11-19: de acuerdo, sin cambios. P5 no es autor del delta (lo escribió P1) |
 
 El delta `specs/audit-log/spec.md` se incorporó al final de
 `openspec/specs/audit-log/spec.md`; la línea `Tests:` suma
