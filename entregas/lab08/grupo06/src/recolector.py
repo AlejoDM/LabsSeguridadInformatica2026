@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Fernando Boiero — CyberLab UTN FRVM
+# Modificado por el Grupo 06 (octubre 2026): implementación de buscar_flag()
+# y del flujo de enumeración de legajos. Se distribuye bajo la misma licencia.
 """
 recolector.py — entregable del Lab 08 (automatización), grupo 06.
 
