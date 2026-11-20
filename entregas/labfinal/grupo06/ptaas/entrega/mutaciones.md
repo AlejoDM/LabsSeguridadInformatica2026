@@ -41,6 +41,12 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M33 (P5) | Exclusión de alertas informativas (`findings_from_alerts`) | No filtrar riesgo 0 | Primera corrida: **sobrevivió** (test débil). Con el test corregido: `test_alerta_informativa_no_genera_hallazgo` | 1 test falló tras corregir el test |
 | M34 (P5) | Descarte de alertas sin mapeo (`findings_from_alerts`) | Incluirlas con un vector inventado | `test_alerta_sin_mapeo_se_descarta_con_el_plugin`, `test_recorrido_con_analisis_real_entrega_y_exporta` | 2 tests fallaron |
 | M35 (P5) | Identidad de hallazgos sin verificación (`_from_log`, `report_builder.py`) | Volver a usar `poc_id` aunque no esté en el catálogo | `test_alertas_distintas_sin_verificacion_no_se_unifican`, `test_hallazgo_sin_verificacion_no_muestra_un_poc_inexistente` | 2 tests fallaron |
+| M36 (P5, 002) | Triggers append-only (`harness/audit.py`) | Los triggers ya no abortan UPDATE/DELETE | `test_update_directo_es_rechazado_por_la_base`, `test_delete_directo_es_rechazado_por_la_base` | 2 tests fallaron |
+| M37 (P5, 002) | Verificación de la cadena en SQLite (`SQLiteAuditStore.verify`) | No recorrer la cadena | `test_cadena_corrupta_al_abrir_no_acepta_registros`, `test_cli_verify_detecta_alteracion` | 2 tests fallaron |
+| M38 (P5, 002) | Atomicidad del `append` | `BEGIN` diferido en lugar de `BEGIN IMMEDIATE` | `test_escrituras_concurrentes_no_bifurcan_la_cadena` | 1 test falló |
+| M39 (P5, 002) | Aislamiento por engagement | Aceptar eventos de otro engagement | `test_archivo_de_otro_engagement_rechaza_el_evento` | 1 test falló |
+| M40 (P5, 002) | Cadena corrupta al abrir | Seguir aceptando registros | `test_cadena_corrupta_al_abrir_no_acepta_registros` | 1 test falló |
+| M41 (P5, 002) | Ancla de cabeza | No comparar el ancla | `test_ancla_detecta_borrado_del_ultimo_registro`, `test_cli_verify_con_ancla` | 2 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -120,6 +126,14 @@ otra regla; el control de riesgo 0 no estaba probado. Se corrigió el test para
 usar la 10027 (riesgo 0 con CWE 615) y la mutación pasó a detectarse. Es el caso
 que la rúbrica describe: si una mutación no rompe nada, falta un test.
 Evidencia: `mutacion-P5-008.txt`.
+
+### M36 a M41 — Bitácora persistente (change 002, P5 a pedido de P1)
+
+Se mutó `harness/audit.py` y se corrió `tests/test_audit_persistence.py`. Línea
+base: `20 passed`. Cada mutación rompió al menos un test y el archivo se restauró
+y se comparó con `cmp`. En M38 solo se aplicó el cambio de `BEGIN IMMEDIATE`; la
+restricción `UNIQUE(prev)` quedó intacta (el reemplazo no coincidió con la
+sangría) y aun así la escritura concurrente falló. Evidencia: `mutacion-P5-002.txt`.
 
 ## Lo que no se mutó y por qué
 
