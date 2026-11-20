@@ -47,5 +47,5 @@ filtro de datos sensibles. Se resolvió en el orden pedido:
 3. `tests/test_reporting_e2e.py`: 52 passed; suite completa: 480 passed, 1 skipped.
 4. Mutación M42 (quitar el filtro del motivo): los 3 tests nuevos fallan.
 
-**Pendiente:** nueva revisión de P4 para cerrar la 1.3.
+**Verificación de la corrección:** `entrega/evidencia/salidas/P5-007-correccion-verificada.txt` (52 tests de reporting y 480 de la suite en verde).
 
