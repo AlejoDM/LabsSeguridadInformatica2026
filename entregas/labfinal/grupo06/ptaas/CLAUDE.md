@@ -16,7 +16,7 @@ Plataforma de pentest autorizado basada en un swarm de agentes: relevamiento →
 6. No hardcodear secretos. No ejecutar escaneos reales contra terceros desde esta sesión.
 
 ## Stack
-Python 3.12, Pydantic v2, pytest, LangGraph (orquestación), MCP (adaptadores), SQLite/Postgres (estado), bitácora append-only con hash encadenado.
+Python 3.12, Pydantic v2, pytest, orquestación propia `harness/pipeline.py` (LangGraph no adoptado: change 009), adaptadores `ToolAdapter`, SQLite/Postgres (estado), bitácora append-only con hash encadenado.
 
 ## Comandos
 - Tests: `python -m pytest -q` · Evals: `python evals/run_evals.py --mode golden`

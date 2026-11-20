@@ -23,7 +23,7 @@ Metodología PTES + NIST SP 800-115 + OWASP WSTG + CVSS v4 + CWE + ISO/IEC 29147
 6. No hardcodear secretos. No ejecutar escaneos reales contra terceros.
 
 ## Stack
-Python 3.12, Pydantic v2, pytest, LangGraph (orquestación), MCP (adaptadores),
+Python 3.12, Pydantic v2, pytest, orquestación propia `harness/pipeline.py` (LangGraph no adoptado: change 009), adaptadores `ToolAdapter`,
 SQLite/Postgres (estado), bitácora append-only con hash encadenado.
 
 ## Comandos

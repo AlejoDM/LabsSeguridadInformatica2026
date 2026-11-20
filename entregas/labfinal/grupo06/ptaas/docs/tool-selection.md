@@ -42,7 +42,7 @@ Para el MVP se eligen **7 herramientas/fuentes**, todas con salida parseable y c
 - **masscan descartada** por el ritmo de emisión que puede degradar servicios y por la licencia AGPL; nmap + naabu (post-MVP) cubren el caso con control de rate.
 - **Nikto descartada**: mucho ruido y poco aporte sobre ZAP + Nuclei.
 - **Validación sin herramienta de terceros**: usa un **catálogo interno versionado y aprobado** de PoCs, ejecutado en sandbox; el modelo solo parametriza.
-- **Orquestación:** LangGraph (estado persistente por fase) + MCP para exponer las capabilities.
+- **Orquestación:** orquestación determinista propia (`harness/pipeline.py`); LangGraph propuesto por el kit y no adoptado — ver change 009. Los adaptadores se exponen como `ToolAdapter` del harness (sin servidor MCP).
 
 ## Contrato de adaptador (recordatorio)
 `name`, `allowed_phases`, `destructive`, `run(action, target, token) -> dict`; `subprocess` con argv fijo, `shell=False`, timeout y rate limit; salida validada con Pydantic. Ver skill `mcp-tool-adapter`.
