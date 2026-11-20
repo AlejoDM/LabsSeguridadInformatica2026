@@ -1,9 +1,14 @@
 # Informe técnico — PTaaS · Grupo 06
 
-> Borrador de integración. La sección 0 corresponde a P1; el aporte P2 que sigue
-> queda pendiente de integración y revisión por P1.
+**Práctico final, variante PTaaS.** Laboratorio: DVWA y Juice Shop del kit, en red
+Docker interna sin salida. Fecha de integración: 19/11/2026. Integró: P5, a partir de
+la evidencia del repositorio y de los textos de cada integrante; las secciones de P1 y
+P2 se transcriben sin cambios.
 
 ## 0. Declaración de uso de IA
+
+### P1
+*Declaración original de P1 (11/11). El change 002 se completó después: ver §9.*
 
 **Herramienta:** Claude Code, modelo Haiku 5.5.
 
@@ -25,7 +30,7 @@
 - El diseño y el delta todavía no fueron revisados por otro integrante (tarea 1.3 abierta).
 - Los requisitos de `design.md` (triggers, ancla, concurrencia) son decisiones propuestas; no están implementadas ni probadas en SQLite todavía.
 
-### Declaración de uso de IA — P2
+### P2
 
 **Herramientas utilizadas:** opencode con DeepSeek V4.1 Flash en la
 implementación inicial y GPT-6 Luna en la revisión posterior.
@@ -48,49 +53,178 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
 - Las pruebas se corrieron con Python 3.13; el kit y el CI apuntan a Python 3.12.
   No se probó en 3.12 ni se ejecutaron escaneos contra DVWA o Juice Shop.
 
-### Declaración de uso de IA — P5
+### P3
+**Pendiente de completar por P3:** herramienta y modelo usados, partes asistidas,
+verificación humana y límites (mismo formato que P1 y P2).
+
+### P4
+**Pendiente de completar por P4:** herramienta y modelo usados, partes asistidas,
+verificación humana y límites (mismo formato que P1 y P2).
+
+### P5
 
 **Herramienta:** Claude Code, modelo Opus 5.5.
 
-**Finalidad y partes asistidas (validación, informe y recorrido):**
+**Finalidad y partes asistidas:** borradores de diseño y deltas (006, 007, 008, 009;
+007 · 1.1–1.2 en reemplazo de P1), tests en rojo y código del sandbox, el loop C, la
+CLI de aprobación, el informe, la exportación a DefectDojo, el recorrido de un comando,
+el análisis real con ZAP, la bitácora SQLite del 002 (sobre el diseño de P1) y el cierre
+técnico del 005 (adaptador de Nuclei por el harness, allow-list verificable);
+mutaciones M10–M41; redacción de este informe.
 
-- Borradores de `design.md` y de los deltas de los changes 006 y 007. Los de 007
-  (tasks 1.1 y 1.2) se hicieron en reemplazo de P1, con su acuerdo.
-- Tests en rojo y código de `harness/sandbox.py`, `harness/validation.py`,
-  `harness/validation_cli.py`, `harness/report_builder.py`,
-  `harness/defectdojo_export.py` y `harness/pipeline.py`; controles nuevos en
-  `harness/poc/catalog.py`; sección `sandbox` de `harness/profiles.yaml` (archivo
-  de P3, con aviso).
-- Mutaciones M10–M29, casos de evals de validación y redacción de esta sección.
+**Verificación humana:** P5 revisó y aprobó cada diseño y delta antes de los tests;
+firmó la tabla de vectores CVSS (`harness/zap_mapping.yaml`) y la segunda aprobación
+de los templates de Nuclei; ejecutó en persona las pruebas de aislamiento del sandbox y
+todas las corridas reales, aprobando cada gate con la CLI. En la corrida
+`P5-recorrido-03` detectó, al revisar el informe antes de aprobar la entrega, dos
+errores introducidos por la IA, y no lo entregó (§6). Los errores de la IA están en
+`ia-errores.md`.
 
-**Verificación humana y comprobaciones realizadas:**
+**Límites:** las revisiones cruzadas de 006 y 007 las tiene que hacer otro integrante;
+`mypy --strict` se corrió solo sobre los módulos de P5.
 
-- P5 revisó y aceptó cada decisión de diseño antes de implementarla (límites del
-  sandbox, alcance de la aprobación, política cuando el Reviewer no responde) y
-  cada delta antes de los tests.
-- P5 ejecutó en persona la prueba de aislamiento del sandbox (`False` hacia
-  `1.1.1.1:80` y control positivo `True` hacia `dvwa.lab.test:80`) y la corrida
-  real del recorrido, aprobando cada gate con la CLI después de revisar la lista
-  de hallazgos.
-- `pytest` en el runner del lab con Python 3.12: **362 passed, 1 skipped**.
-  Evals golden **17/17**. Las 20 mutaciones fueron detectadas. Salidas en
-  `entrega/evidencia/salidas/P5-*` y `mutacion-P5-*`.
-- Los errores de la IA detectados durante el trabajo están en `ia-errores.md`.
+## 1. Resumen ejecutivo
 
-**Límites de la verificación:**
+El grupo construyó una plataforma de pentest autorizado cuyo eje es el **control**:
+ninguna acción toca un activo sin token de alcance vigente, sin pasar por
+`Harness.invoke` y sin quedar en una bitácora verificable; las decisiones de riesgo
+las toma una persona en gates explícitos. Un comando
+(`python -m harness.pipeline run`) recorre RoE → recon → análisis → validación →
+informe → entrega contra el laboratorio.
 
-- `ruff check` y `mypy --strict` pasan en los seis módulos y los dos archivos de
-  tests de P5 (`P5-lint.txt`). `mypy` se corrió con `--follow-imports=silent`: no
-  cubre los módulos de otros integrantes que P5 importa. Para los adaptadores y
-  el loop A de P3, que no declaran tipos, se usó `cast` y un `type: ignore`
-  explícito en lugar de modificarlos.
-- Los changes 006 y 007 se archivaron sin la revisión cruzada (1.3) de otro
-  integrante.
-- La importación en DefectDojo fue una prueba de formato con los hallazgos del
-  informe DEMO, en una instancia local; todavía no hay un informe entregado para
-  importar.
+En la corrida entregada (`P5-recorrido-04`) el sistema relevó los dos objetivos,
+ejecutó ZAP baseline, validó en un sandbox efímero 5 de 8 hallazgos con verificaciones
+inertes del catálogo, generó el informe desde la bitácora y lo exportó a DefectDojo
+tras la aprobación registrada de su hash. Los hallazgos son debilidades de
+configuración (encabezados de seguridad y cookies), no vulnerabilidades explotadas.
 
-## Autorización, RoE, tokens y red team
+Estado verificable: 477 tests en verde (1 omitido, requiere Docker), 221 Scenarios en
+11 specs, los changes 001–005, 008 y 009 al 100 % (006 y 007 esperan solo su revisión
+cruzada), 41 mutaciones registradas, red team A1–A10 y B1–B4 con historia de commits.
+
+## 2. Arquitectura
+
+```
+RoE firmado --> tokens.issue (por fase, TTL) --> ScopeToken
+                                                    |
+ orquestador (harness/pipeline.py, determinista)    v
+  recon (loop A) ---------+                Harness.invoke --> Guard (sin LLM):
+  análisis (loop B, ZAP) -+- cada acción -->   kill switch, token vivo, fase,
+  validación (loop C) ----+                    alcance, DNS, gate humano
+                                                    |
+                       adaptador (argv fijo) / sandbox efímero
+                                                    |
+               bitácora SQLite append-only (hash encadenado + ancla)
+                                                    |
+         informe desde la bitácora --> gate de entrega (hash) --> DefectDojo
+```
+
+Gates humanos, todos por la CLI `harness.validation_cli`: primera acción activa,
+análisis activo, cada hallazgo antes de validarlo y entrega del informe (ligada a su
+hash). El orquestador espera la decisión; nunca aprueba.
+
+## 3. Decisiones de diseño
+
+| Decisión | Alternativa | Costo asumido | Dónde |
+|---|---|---|---|
+| Orquestación propia y determinista | LangGraph (propuesto por el kit, "a confirmar por cada equipo") | Sin pausa/reanudación de gates; sin agentes LLM en runtime | change 009 |
+| Validación solo con verificaciones inertes, un contenedor por verificación | Exploits o sandbox compartido | Confirma menos; ~1 s por contenedor | 006 |
+| Aprobación ligada a hallazgo + verificación + hash de parámetros | Aprobación por hallazgo | Reaprobar si cambia un parámetro | 006 |
+| Estado del informe tomado de la bitácora | Confiar en lo que declara el hallazgo | Ninguno relevante | 007 |
+| Vectores CVSS de hallazgos sin CVE asignados por el analista en una tabla firmada | Inventarlos o dejar el gate sin CVSS | Evaluación humana a mantener | 008 |
+| Datos sensibles: rechazar, no redactar | Redacción automática | Falla visible en vez de silenciosa | 002, 007 |
+| Bitácora SQLite por engagement con triggers, `UNIQUE(prev)` y ancla externa | Solo convención | Un `.db` por corrida | 002 |
+
+## 4. Controles y cómo se verificaron
+
+- **Harness e invariantes:** Guard determinista, token por fase con TTL, kill switch,
+  bitácora de toda decisión (incluidos bloqueos). Specs `authorization` (23 Scenarios)
+  y `audit-log` (14).
+- **Red team:** A1–A10 sobre el guard (P2) y B1–B4 sobre el catálogo de validación
+  (P5), cada uno con commit del test en rojo y commit de la corrección
+  (`entrega/red-team.md`).
+- **Mutaciones:** 41 controles rotos a propósito (M1–M41, `entrega/mutaciones.md`);
+  todos rompieron al menos un test. M33 sobrevivió en su primera corrida y obligó a
+  corregir un test débil.
+- **Bitácora verificable:** `python -m harness.audit verify` detecta una fila
+  alterada, una fila intermedia borrada y, con el ancla, el borrado de la última
+  (`P5-002-audit-verify-demo.txt`).
+- **Aislamiento del sandbox:** desde su red, `1.1.1.1:80` no es alcanzable y
+  `dvwa.lab.test:80` sí (`P5-006-sandbox-sin-salida.txt`).
+- **Herramientas reales contra el lab:** httpx/subfinder (P3), ZAP (P4 y recorrido),
+  Nuclei con 5 templates aprobados por dos personas (`templates/allowlist/MANIFEST.md`,
+  verificado por hash antes de cada corrida) y el sandbox (P5).
+
+## 5. Evals
+
+32 casos golden, todos aprobados: 10 de correlación y 10 de análisis (P4), 10 de
+validación (3 del kit y 7 de P5 donde la respuesta correcta es no actuar) y 2 del
+orquestador. Para los 7 casos de P5 se comprobó además que la rúbrica **rechaza** la
+respuesta incorrecta de cada uno (`P5-006-evals-validacion.txt`).
+
+**Análisis:** el modo golden verifica que la rúbrica acepta la salida esperada y
+rechaza las prohibidas; no mide la capacidad del modelo. El modo `--mode live` no se
+ejecutó, por lo que no hay datos para comparar prompts o modelos ni para justificar el
+ruteo de `harness/models.yaml`. Es coherente con la decisión del change 009: los
+agentes LLM no participan de las corridas.
+
+## 6. Resultados de la corrida entregada
+
+Corrida `P5-recorrido-04` (19/11/2026), informe v1 `f4ef94d4…`, entregado con
+aprobación registrada y exportado a DefectDojo. Recon, análisis (ZAP) y validación
+reales; vectores CVSS asignados por el analista; EPSS `unknown` (sin CVE).
+
+| Hallazgo | Activo | CWE | Estado |
+|---|---|---|---|
+| Cookie sin `HttpOnly` | DVWA | CWE-1004 | Validado en sandbox |
+| Cookie sin `SameSite` | DVWA | CWE-1275 | Validado en sandbox |
+| Falta protección contra clickjacking | DVWA | CWE-1021 | Validado en sandbox |
+| Falta `Content-Security-Policy` | DVWA | CWE-693 | Validado en sandbox |
+| Falta `Content-Security-Policy` | Juice Shop | CWE-693 | Validado en sandbox (también Nuclei) |
+| Banner con versión del servidor | DVWA | CWE-497 | No validado: sin verificación en el catálogo |
+| Encabezado `Server` con versión | DVWA | CWE-497 | No validado: sin verificación en el catálogo |
+| Falta `X-Content-Type-Options` | DVWA | CWE-693 | No validado: sin verificación en el catálogo |
+
+La corrida anterior, `P5-recorrido-03`, **no se entregó**: al revisar el informe antes
+de aprobar, P5 encontró dos hallazgos distintos unificados por error y una
+verificación inexistente mostrada como real. Se corrigió con test y mutación (M35).
+
+## 7. Riesgos y límites
+
+- **Correlación por CVE sin efecto práctico:** no hay snapshot de NVD en el
+  repositorio y el correlador espera `producto/versión` mientras el recon informa
+  `producto:versión`.
+- **Sin agentes LLM en runtime** y evals live no ejecutadas (§5, change 009).
+- **`ScopeToken` es una clase pública:** cualquier código del harness puede
+  construirlo sin el emisor; la restricción probada es estática (revisión del 003).
+- **`deliver(report, True)`** con booleano sigue existiendo por compatibilidad; el
+  recorrido usa solo la entrega con aprobación registrada.
+- **Reescritura completa de la bitácora** por alguien con acceso al disco: solo el
+  ancla guardada fuera del archivo la hace visible.
+- **ZAP varía entre corridas** (la alerta 10023 apareció en `-03` y no en `-04`).
+- La corrida real de ZAP de P4 aprobó su gate con `--approved`, sin registrar quién;
+  las corridas posteriores usan la CLI de aprobación.
+
+## 8. Retrospectiva del trabajo con IA
+
+Los errores de la IA detectados y corregidos, con su commit, están en `ia-errores.md`
+y `entrega/retrospectiva.md`. Casos representativos: tests que fallaban por un
+fixture y no por el control (P2, P5), un token válido en el instante exacto de
+expiración (P2), un test débil revelado por una mutación (P5, M33) y un informe con
+hallazgos unificados por error que frenó el gate de entrega (P5).
+**Pendiente:** filas de P1, P3 y P4.
+
+## 9. Aporte por integrante
+
+| Integrante | Changes | Aporte principal |
+|---|---|---|
+| P1 | 002 (diseño, delta, contrato) | Contrato de la bitácora y diseño de persistencia, integridad y concurrencia |
+| P2 | 003, gates del 007 | RoE, tokens, red team A1–A10, mutaciones M1–M9, revisión de `tool-selection.md` |
+| P3 | 004, 007 · 2.3–2.4 | Loop A real (subfinder/httpx en runner aislado), grafo de activos, CVSS v4 estricto, estructura PTES |
+| P4 | 005 | Clientes NVD/EPSS offline, mapeo CWE, correlador, adaptador y corrida real de ZAP, loop B, 20 evals, templates de Nuclei |
+| P5 | 006, 007, 008, 009; cierre de 002 y 005 | Sandbox y loop C, informe y entrega, recorrido de un comando, análisis real; implementación del 002 (diseño de P1) y cierre técnico del 005 |
+
+### P2 — Autorización, RoE, tokens y red team
 
 Se implementó el parser YAML del Rules of Engagement (RoE), que limita dominios
 y CIDR al laboratorio declarado en `harness/profiles.yaml` y verifica aprobación,
@@ -131,82 +265,14 @@ estática: la clase sigue siendo pública y puede construirse desde fuera del
 paquete, por lo que no impide en runtime la fabricación de tokens. También falta
 una revisión independiente de seguridad del diff.
 
-## Validación, informe y recorrido de un comando (P5)
+### P5 — Validación, informe y recorrido
 
-**Sandbox y loop C (change 006).** La validación ocurre en un contenedor nuevo
-por verificación, en la red interna del laboratorio. El contenedor corre de
-solo lectura, sin capacidades, sin volúmenes y con límites de memoria y
-procesos. Se destruye siempre, aunque la verificación falle; si no se puede
-destruir, el loop se aborta. Cada verificación hace una sola solicitud GET, sin
-seguir redirecciones, con timeout de 10 s y respuesta truncada a 1 MB. El envío
-pasa por `Harness.invoke` con un token de fase `validate`. Antes de crear el
-contenedor, el Sender rechaza cualquier host que no sea del laboratorio, aunque
-el token lo incluya. La aprobación del Reviewer se liga al hallazgo, a la
-verificación y al hash de los parámetros: si el agente cambia un parámetro
-después de aprobado, el hallazgo vuelve a `PENDING_HITL`. Nada se aprueba solo;
-un hallazgo sin decisión figura como "no validado (sin aprobación)". Un hallazgo
-queda validado solo si los dos intentos coinciden. La bitácora guarda el hash y
-el largo del cuerpo de la respuesta, nunca el cuerpo.
-
-La prueba de aislamiento la ejecutó una persona: desde la red del sandbox,
-`1.1.1.1:80` no es alcanzable y `dvwa.lab.test:80` sí (control positivo).
-
-**Huecos del kit encontrados.** `run_parametrized` aceptaba un `path` que
-cambiaba el host (`//example.com/`), recorridos (`/../../etc/passwd`) y un
-`param_name` con separadores de query; además, el catálogo aceptaba entradas
-aprobadas por un agente. Los cuatro se corrigieron con test en rojo primero
-(B1–B4 en `entrega/red-team.md`).
-
-**Informe, entrega y exportación (change 007).** El informe toma el estado de
-cada hallazgo de la bitácora del loop C, no de lo que declare el hallazgo: un
-"validado" sin respaldo hace fallar la generación. Antes de generarlo se
-verifica la cadena de la bitácora y que cada referencia de evidencia exista. El
-informe se identifica por su hash, y la entrega exige una aprobación registrada
-por una persona para ese hash exacto: si cambia un hallazgo, la aprobación
-anterior no sirve. Si el contenido incluye cookies de sesión, tokens, contraseñas,
-claves o el canario de la verificación de reflexión, la generación falla en vez
-de redactarlos. La exportación a DefectDojo (formato de importación genérico)
-solo procede con informes entregados, sin nombres de personas ni datos de
-respuestas, y sin inventar severidad: el contrato no trae puntaje CVSS y se
-marca `severity-unknown`. Un informe con alguna etapa simulada se marca **DEMO**
-y no se puede entregar ni exportar.
-
-**Recorrido de un comando.** `python -m harness.pipeline run` recorre RoE →
-recon → análisis → validación → informe → entrega. El recon real de P3 corre
-dentro del runner del laboratorio; el sandbox, desde el host. En cada gate el
-comando espera una decisión registrada con la CLI en otra terminal. Corrida real
-del 18/11/2026 (`entrega/evidencia/salidas/P5-recorrido-02/`):
-
-| Etapa | Resultado |
-|---|---|
-| Recon (real) | `STOPPED`, grafo estabilizado: `dvwa.lab.test`, `juiceshop.lab.test` |
-| Análisis | Simulado (`lab/analysis-fixture.json`): 4 candidatos del catálogo inerte |
-| Validación (real, sandbox) | Falta de protección contra clickjacking, ausencia de CSP y cookie sin flags en DVWA: **validados** en los dos intentos. Clickjacking en Juice Shop: **no validado** (no se observó la debilidad) |
-| Informe | Versión 1, **DEMO** por el análisis simulado: entrega bloqueada, sin exportación |
-| Bitácoras exportadas | `harness-audit.json` y `evidence.json` verificadas (`ok`) |
-
-Los vectores CVSS del análisis simulado son valores de ejemplo y no una
-evaluación; por eso el informe de esta corrida no es un resultado de pentest.
-
-**Prueba de formato en DefectDojo.** Como el informe es DEMO, el recorrido no lo
-exporta. Para verificar el formato, se reconstruyó ese mismo informe desde su
-bitácora exportada (mismo `report_hash`), se convirtieron sus hallazgos con el
-exportador del proyecto marcándolos `[DEMO]` y se importaron en una instancia
-local de DefectDojo con el parser *Generic Findings Import*. Se importaron los
-4 hallazgos con su CWE, 3 como verificados y las etiquetas `severity-unknown`.
-Al re-importar el mismo archivo no se creó ningún hallazgo: la deduplicación
-por identificador estable funciona (`P5-defectdojo-prueba-formato.txt`).
-
-**Mutaciones.** M10–M29 en `entrega/mutaciones.md`: cada control nuevo (barrera
-de host, destrucción del contenedor, gate por hallazgo, ligadura al hash,
-consistencia entre intentos, respaldo en bitácora, entrega, DEMO, datos
-sensibles, exportación y gates del recorrido) hace fallar al menos un test al
-desactivarlo.
-
-**Límites y pendientes:** el análisis real depende del change 005 (P4); hasta
-entonces ningún informe del recorrido se entrega ni se exporta. La bitácora del
-recorrido se exporta en JSON verificable; la persistencia SQLite depende del
-change 002 (P1). `deliver(report, reviewer_approved)` con booleano sigue
-existiendo por compatibilidad, aunque el recorrido no lo usa. Falta la revisión
-cruzada de 006 y 007, y la importación en DefectDojo de un informe entregado (hoy
-solo hay una prueba de formato con el informe DEMO).
+El sandbox crea un contenedor de solo lectura y sin capacidades por verificación, lo
+destruye siempre y hace una sola solicitud sin seguir redirecciones; el Sender
+rechaza hosts fuera del lab aunque el token los incluya. La aprobación se liga al hash
+de los parámetros. El informe deriva cada estado de la bitácora, se identifica por su
+hash, rechaza datos sensibles y no se entrega ni exporta si alguna etapa es simulada.
+El change 008 conectó el loop B de P4 (ZAP) al recorrido con su propio gate y una
+tabla de vectores CVSS firmada. El change 002 se implementó sobre el diseño de P1, con
+un único desvío documentado (evento como JSON canónico). Detalle y evidencia: los
+`archive.md` de cada change y `entrega/evidencia/salidas/P5-*`.
