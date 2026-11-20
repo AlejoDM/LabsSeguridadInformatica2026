@@ -13,7 +13,7 @@
 
 ## Implementación — análisis
 - [x] 3.1 Adaptador `zap.baseline_scan` (fixtures + corrida contra el lab)
-- [ ] 3.2 Curar y revisar ≥ 5 templates en `templates/allowlist/` y completar `MANIFEST.md`
+- [x] 3.2 Curar y revisar ≥ 5 templates en `templates/allowlist/` y completar `MANIFEST.md`
 - [ ] 3.3 Corrida de `nuclei.safe_templates` contra el lab
 - [x] 3.4 Orquestación del loop B con `decide_detection`
 
