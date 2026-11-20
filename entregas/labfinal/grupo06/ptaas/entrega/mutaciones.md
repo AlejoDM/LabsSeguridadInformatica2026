@@ -35,6 +35,11 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M27 (P5) | Evidencia previa (`pipeline.run`) | Aceptar un directorio de salida existente | `test_recorrido_no_sobrescribe_salida_existente` | 1 test falló |
 | M28 (P5) | Informe DEMO en el recorrido (`pipeline.run`) | Seguir el camino de entrega | `test_recorrido_con_analisis_simulado_sale_demo` | 1 test falló |
 | M29 (P5) | Verificación de la evidencia exportada (`verify_evidence`) | Devolver siempre válido | `test_verificacion_detecta_bitacora_exportada_alterada` | 1 test falló |
+| M30 (P5) | Gate `active_analysis` (`harness/pipeline.py`, change 008) | No esperar la aprobación | `test_sin_aprobacion_del_analisis_activo_no_corre_zap` | 1 test falló |
+| M31 (P5) | Aprobación humana de la tabla de mapeo (`load_mapping`) | No exigir `approved_by` | `test_tabla_sin_aprobacion_se_rechaza`, `test_tabla_aprobada_por_agente_se_rechaza` | 2 tests fallaron |
+| M32 (P5) | Reporte de ZAP acotado al objetivo (`check_report_scope`) | No controlar el host | `test_instancia_fuera_del_objetivo_se_rechaza`, `test_reporte_de_zap_fuera_del_objetivo_aborta` | 2 tests fallaron |
+| M33 (P5) | Exclusión de alertas informativas (`findings_from_alerts`) | No filtrar riesgo 0 | Primera corrida: **sobrevivió** (test débil). Con el test corregido: `test_alerta_informativa_no_genera_hallazgo` | 1 test falló tras corregir el test |
+| M34 (P5) | Descarte de alertas sin mapeo (`findings_from_alerts`) | Incluirlas con un vector inventado | `test_alerta_sin_mapeo_se_descarta_con_el_plugin`, `test_recorrido_con_analisis_real_entrega_y_exporta` | 2 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 
@@ -104,6 +109,16 @@ En M26 no hay otra barrera: el Guard y el Sender aceptan `otro.dvwa.lab.test`
 porque es un subdominio autorizado del lab. El único control que impide validar
 un activo que el recon no relevó es el descarte del recorrido.
 Evidencia: `mutacion-P5-007-recorrido.txt`.
+
+### M30 a M34 — Análisis real en el recorrido (P5, change 008)
+
+Se mutaron `harness/pipeline.py` y `harness/zap_analysis.py` y se corrió
+`tests/test_analisis_real.py`. Línea base: `14 passed`. **M33 sobrevivió en la
+primera corrida:** el test usaba la alerta 10111, que no trae CWE, y la descartaba
+otra regla; el control de riesgo 0 no estaba probado. Se corrigió el test para
+usar la 10027 (riesgo 0 con CWE 615) y la mutación pasó a detectarse. Es el caso
+que la rúbrica describe: si una mutación no rompe nada, falta un test.
+Evidencia: `mutacion-P5-008.txt`.
 
 ## Lo que no se mutó y por qué
 
