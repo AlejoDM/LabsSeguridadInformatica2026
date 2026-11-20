@@ -21,15 +21,15 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from harness import roe as roe_mod  # noqa: E402
-from harness import tokens  # noqa: E402
-from harness.adapters.nuclei_adapter import NucleiSafeTemplates  # noqa: E402
-from harness.audit import PersistentAuditLog  # noqa: E402
-from harness.contracts import Action, Guard, Harness, KillSwitch, Phase  # noqa: E402
-from harness.nuclei_allowlist import ALLOWLIST_DIR, verify_allowlist  # noqa: E402
-from harness.policy_loader import phase_allowlist  # noqa: E402
-from harness.recon_lab import export_audit  # noqa: E402
-from harness.validation import ApprovalStore  # noqa: E402
+from harness import roe as roe_mod
+from harness import tokens
+from harness.adapters.nuclei_adapter import NucleiSafeTemplates
+from harness.audit import PersistentAuditLog
+from harness.contracts import Action, Guard, Harness, KillSwitch, Phase
+from harness.nuclei_allowlist import ALLOWLIST_DIR, verify_allowlist
+from harness.policy_loader import phase_allowlist
+from harness.recon_lab import export_audit
+from harness.validation import ApprovalStore
 
 TARGETS = ("dvwa.lab.test", "juiceshop.lab.test")
 SAFE_KEYS = ("template-id", "host", "matched-at", "type", "timestamp", "matcher-status")
