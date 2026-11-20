@@ -121,7 +121,7 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
 CLI de aprobación, el informe, la exportación a DefectDojo, el recorrido de un comando,
 el análisis real con ZAP, la bitácora SQLite del 002 (sobre el diseño de P1) y el cierre
 técnico del 005 (adaptador de Nuclei por el harness, allow-list verificable);
-mutaciones M10–M41; redacción de este informe.
+mutaciones M10–M42; redacción de este informe.
 
 **Verificación humana:** P5 revisó y aprobó cada diseño y delta antes de los tests;
 firmó la tabla de vectores CVSS (`harness/zap_mapping.yaml`) y la segunda aprobación
@@ -131,7 +131,7 @@ todas las corridas reales, aprobando cada gate con la CLI. En la corrida
 errores introducidos por la IA, y no lo entregó (§6). Los errores de la IA están en
 `ia-errores.md`.
 
-**Límites:** las revisiones cruzadas de 006 y 007 las tiene que hacer otro integrante;
+**Límites:** el 007 espera la nueva revisión de P4 tras corregir lo que pidió;
 `mypy --strict` se corrió solo sobre los módulos de P5.
 
 ## 1. Resumen ejecutivo
@@ -149,9 +149,10 @@ inertes del catálogo, generó el informe desde la bitácora y lo exportó a Def
 tras la aprobación registrada de su hash. Los hallazgos son debilidades de
 configuración (encabezados de seguridad y cookies), no vulnerabilidades explotadas.
 
-Estado verificable: 477 tests en verde (1 omitido, requiere Docker), 221 Scenarios en
-11 specs, los changes 001–005, 008 y 009 al 100 % (006 y 007 esperan solo su revisión
-cruzada), 41 mutaciones registradas, red team A1–A10 y B1–B4 con historia de commits.
+Estado verificable: 480 tests en verde (1 omitido, requiere Docker), 221 Scenarios en
+11 specs, los changes 001–006, 008 y 009 al 100 % (el 007 espera la nueva revisión de
+P4 tras corregir lo que pidió), 42 mutaciones registradas, red team A1–A10 y B1–B4 con
+historia de commits.
 
 ## 2. Arquitectura
 
@@ -194,7 +195,7 @@ hash). El orquestador espera la decisión; nunca aprueba.
 - **Red team:** A1–A10 sobre el guard (P2) y B1–B4 sobre el catálogo de validación
   (P5), cada uno con commit del test en rojo y commit de la corrección
   (`entrega/red-team.md`).
-- **Mutaciones:** 41 controles rotos a propósito (M1–M41, `entrega/mutaciones.md`);
+- **Mutaciones:** 42 controles rotos a propósito (M1–M42, `entrega/mutaciones.md`);
   todos rompieron al menos un test. M33 sobrevivió en su primera corrida y obligó a
   corregir un test débil.
 - **Bitácora verificable:** `python -m harness.audit verify` detecta una fila
