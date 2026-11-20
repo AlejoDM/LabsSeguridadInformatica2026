@@ -279,6 +279,22 @@ def test_dato_sensible_falla_indicando_patron_y_hallazgo(campo, valor, patron):
     assert patron in str(exc.value) and "F7" in str(exc.value)
 
 
+@pytest.mark.parametrize("reason", [
+    "error: Authorization: Bearer abc.def",
+    "respuesta con eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIn0.c2lnbmF0dXJh",
+    "Set-Cookie: PHPSESSID=abc123",
+])
+def test_dato_sensible_en_el_motivo_de_la_bitacora_se_rechaza(reason):
+    """Revisión de P4 (007 · 1.3): el motivo (`reason`) que viene de validation.result
+    también llega al informe y a la exportación, así que pasa por el mismo filtro."""
+    rb = api("report_builder")
+    ev = InMemoryAuditStore()
+    log_validation(ev, "F8", "not_validated", reason=reason)
+    with pytest.raises(rb.SensitiveDataError) as exc:
+        build([finding("F8")], ev)
+    assert "F8" in str(exc.value)
+
+
 def test_informe_sin_datos_sensibles_se_genera():
     report = build([finding("F1"), finding("F2", cwe="CWE-693", title="Sin CSP")],
                    InMemoryAuditStore())
