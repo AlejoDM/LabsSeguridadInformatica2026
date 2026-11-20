@@ -18,4 +18,4 @@
 - [x] 3.3 Test: dos engagements no comparten registros
 - [x] 3.4 Test: escrituras concurrentes conservan la cadena
 - [x] 3.5 Mutation check del verificador y registro del resultado
-- [ ] 3.6 Archivar el delta en `openspec/specs/audit-log/spec.md`
+- [x] 3.6 Archivar el delta en `openspec/specs/audit-log/spec.md`
