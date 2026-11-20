@@ -20,5 +20,7 @@
 | 2026-11-19 | P5 | Claude Code / Opus 5.5 | Escribió el test de alertas informativas con la 10111, que no trae CWE: la descartaba otra regla y el control de riesgo 0 quedaba sin probar | La mutación M33 (no filtrar riesgo 0) no rompió ningún test | Se cambió el test a la 10027 (riesgo 0 con CWE válido); M33 pasó a detectarse | 5164ec7 |
 | 2026-11-19 | P5 | Claude Code / Opus 5.5 | Usó el valor centinela `NINGUNA` como si fuera una verificación del catálogo: el informe unificó dos alertas distintas (10009 y 10036, ambas CWE-497) y mostró `NINGUNA vNone` | P5 revisó el informe antes de aprobar la entrega (gate humano) en la corrida P5-recorrido-03 | La identidad del hallazgo usa la verificación solo si tiene versión del catálogo; el informe no se entregó | de98ef2 (test rojo) |
 
+| 2026-11-19 | P4 | ChatGPT / GPT-6 | El runner de ZAP usaba la codificaci?n predeterminada de Windows para leer la salida de Docker; la primera correcci?n no cubri? todas las llamadas | Al ejecutar el escaneo apareci? UnicodeDecodeError con cp1252 y fall? el procesamiento del JSON | Se configur? UTF-8 con errors=replace en las llamadas necesarias y se repiti? ZAP hasta obtener el reporte | bd47ceb |
+| 2026-11-18 | P4 | ChatGPT / GPT-6 | El adaptador Nuclei generado con asistencia de IA ten?a imports que no cumpl?an las reglas de Ruff | Ruff detect? el orden incorrecto de imports | Se corrigieron los imports y se verific? nuevamente el c?digo | 038df86 |
 Los commits de tests en rojo y correcciones se conservaron en esta rama local;
 todavía no se hizo push.

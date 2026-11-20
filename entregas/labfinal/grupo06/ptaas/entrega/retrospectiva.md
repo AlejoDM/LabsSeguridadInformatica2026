@@ -220,3 +220,32 @@ La conclusión práctica: los tests y las mutaciones atraparon los errores de c�
 pero no todos. Los dos errores más importantes (el informe defectuoso y el argumento
 sobre I2) los encontró una persona revisando lo que la IA producía. Por eso los gates
 humanos y la revisión no son trámites: son la última barrera.
+
+
+---
+
+# Retrospectiva de IA ? P4
+
+Herramienta: ChatGPT (GPT-6). Change 005, correlaci?n y an?lisis.
+
+## 1. Problemas de codificaci?n al ejecutar ZAP
+
+- **Error:** la soluci?n inicial generada con ayuda de IA no contempl? todas las llamadas a Docker que deb?an decodificarse con UTF-8 en Windows.
+- **Detecci?n:** al ejecutar ZAP apareci? un `UnicodeDecodeError` con `cp1252`; una primera correcci?n no lo resolvi? por completo.
+- **Correcci?n:** se configur? la decodificaci?n UTF-8 con reemplazo de caracteres inv?lidos en las llamadas correspondientes y se repiti? el escaneo.
+- **Aprendizaje:** que el c?digo pase los tests no garantiza que funcione con la codificaci?n del entorno real. Hay que revisar cada llamada externa y conservar el error como evidencia.
+- **Referencia:** `bd47ceb`.
+
+## 2. Correcci?n de calidad del c?digo
+
+- **Error:** c?digo generado con asistencia de IA necesit? ajustes de imports para cumplir las reglas de Ruff.
+- **Detecci?n:** la ejecuci?n del chequeo est?tico de Ruff.
+- **Correcci?n:** se ordenaron los imports sin modificar la funcionalidad y se repitieron las comprobaciones.
+- **Aprendizaje:** adem?s de tests funcionales, es necesario ejecutar herramientas est?ticas y revisar los cambios antes de publicarlos.
+- **Referencia:** `038df86`.
+
+## Balance
+
+La IA ayud? a acelerar la implementaci?n, preparar pruebas y documentar el Change 005, pero no reemplaz? las verificaciones. Los errores de ejecuci?n aparecieron al trabajar con Docker y Windows, y se resolvieron comprobando la causa y repitiendo las pruebas.
+
+Tambi?n result? importante distinguir entre resultados simulados, validaci?n de sintaxis, escaneos reales y aprobaciones humanas: no son evidencias equivalentes.
