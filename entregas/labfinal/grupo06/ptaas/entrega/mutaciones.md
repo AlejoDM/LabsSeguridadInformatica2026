@@ -48,6 +48,8 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M40 (P5, 002) | Cadena corrupta al abrir | Seguir aceptando registros | `test_cadena_corrupta_al_abrir_no_acepta_registros` | 1 test falló |
 | M41 (P5, 002) | Ancla de cabeza | No comparar el ancla | `test_ancla_detecta_borrado_del_ultimo_registro`, `test_cli_verify_con_ancla` | 2 tests fallaron |
 | M42 (P5, revisión de P4) | Filtro de datos sensibles sobre el motivo de la bitácora (`report_builder._from_log`) | Quitar el chequeo de `reason` | `test_dato_sensible_en_el_motivo_de_la_bitacora_se_rechaza` (3 casos) | 3 tests fallaron |
+| M43 (P5, I1) | Único camino (`tests/test_invariantes.py`) | Agregar en `harness/loops.py` una llamada directa a `subprocess.run(["nmap", ...])` | `test_i1_ninguna_herramienta_de_seguridad_se_ejecuta_fuera_de_un_adaptador` (señala archivo y línea) | 1 test falló |
+| M44 (P5, I6) | Kill switch en `Harness.invoke` (`harness/contracts.py`) | No chequear `killswitch.engaged` | `test_kill_switch_aborta_sin_ejecutar`, `test_kill_switch_aborta_sin_contenedor` | 2 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 
