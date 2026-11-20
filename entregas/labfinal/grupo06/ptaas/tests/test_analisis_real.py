@@ -118,6 +118,44 @@ def test_alerta_mapeada_sin_verificacion_del_catalogo(tmp_path):
     assert banner["poc_id"] is None
 
 
+def _sin_verificacion(ev, fid):
+    """validation.result tal como lo escribe el loop C para una alerta sin verificación."""
+    ev.append({"event": "validation.result", "engagement": ENG, "finding_id": fid,
+               "poc_id": "NINGUNA", "poc_version": None, "catalog_version": "0.1.0",
+               "params_hash": "h-" + fid, "status": "not_validated",
+               "reason": "fuera del catálogo", "attempts": 0})
+
+
+def test_alertas_distintas_sin_verificacion_no_se_unifican():
+    # Regresión de la corrida P5-recorrido-03: 10009 y 10036 (ambas CWE-497, sin
+    # verificación en el catálogo) se unificaron como si fueran el mismo hallazgo.
+    from harness.reporting import Finding
+    rb = api("report_builder")
+    ev = InMemoryAuditStore()
+    _sin_verificacion(ev, "DVWA-ZAP-10009")
+    _sin_verificacion(ev, "DVWA-ZAP-10036")
+    fs = [Finding("DVWA-ZAP-10009", "In Page Banner Information Leak", "dvwa.lab.test",
+                  "CWE-497", LOW, "Configurar el servidor", "not_validated"),
+          Finding("DVWA-ZAP-10036", "Server Leaks Version Information", "dvwa.lab.test",
+                  "CWE-497", LOW, "Suprimir el header Server", "not_validated")]
+    report = rb.build_report(ENG, fs, evidence=ev, stages={"recon": "real", "analysis": "real",
+                                                          "validation": "real"})
+    assert {f.id for f in report.findings} == {"DVWA-ZAP-10009", "DVWA-ZAP-10036"}
+
+
+def test_hallazgo_sin_verificacion_no_muestra_un_poc_inexistente():
+    from harness.reporting import Finding
+    rb = api("report_builder")
+    ev = InMemoryAuditStore()
+    _sin_verificacion(ev, "DVWA-ZAP-10021")
+    f = Finding("DVWA-ZAP-10021", "X-Content-Type-Options Header Missing", "dvwa.lab.test",
+                "CWE-693", LOW, "Enviar X-Content-Type-Options: nosniff", "not_validated")
+    report = rb.build_report(ENG, [f], evidence=ev, stages={"recon": "real", "analysis": "real",
+                                                           "validation": "real"})
+    assert report.findings[0].poc_id is None
+    assert "NINGUNA" not in report.markdown and "vNone" not in report.markdown
+
+
 def test_instancia_fuera_del_objetivo_se_rechaza(tmp_path):
     za = api("zap_analysis")
     alerts = dvwa_alerts()
