@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 # SPDX-License-Identifier: AGPL-3.0-or-later
 # Copyright (C) 2026 Fernando Boiero — CyberLab UTN FRVM
+# Modificado por el Grupo 06 (octubre 2026): implementación del loop de tool-use
+# (ejecución de tools, realimentación al LLM, detección de flags y corte).
+# Se distribuye bajo la misma licencia.
 """
 agente_esqueleto.py — agente propio del grupo 06. Entregable del Lab 09.
 
