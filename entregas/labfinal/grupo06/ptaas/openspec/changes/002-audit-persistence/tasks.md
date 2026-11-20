@@ -6,7 +6,7 @@
 - [ ] 1.3 Revisión del delta por otro integrante
 
 ## Implementación
-- [ ] 2.1 Tests que fallan para persistencia y recuperación tras reinicio
+- [x] 2.1 Tests que fallan para persistencia y recuperación tras reinicio
 - [ ] 2.2 `harness/audit.py`: almacenamiento append-only con hash encadenado
 - [ ] 2.3 Impedir UPDATE/DELETE (trigger o capa de acceso) y probarlo
 - [ ] 2.4 Verificador: `python -m harness.audit verify <archivo>`
