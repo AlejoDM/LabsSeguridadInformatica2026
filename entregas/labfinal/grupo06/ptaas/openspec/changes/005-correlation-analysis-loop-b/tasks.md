@@ -3,7 +3,7 @@
 ## Spec y diseño
 - [x] 1.1 `design.md`: snapshots, confianza, contradicciones, política de templates
 - [x] 1.2 Deltas de `correlation` y `vuln-analysis`
-- [ ] 1.3 Revisión cruzada
+- [x] 1.3 Revisión cruzada — Martin Beccereca (P5), 2026-11-19: aprobado con observaciones (ver archive.md)
 
 ## Implementación — correlación
 - [x] 2.1 Cliente de snapshot NVD (lectura offline) con tests
@@ -23,7 +23,7 @@
 - [x] 4.3 Test: un template fuera de la allow-list no se ejecuta
 - [x] 4.4 Test: dos iteraciones sin evidencia nueva → `inconclusive`
 - [x] 4.5 Evals de correlación y análisis ampliadas (≥ 10 casos en conjunto)
-- [ ] 4.6 Archivar deltas en `openspec/specs/`
+- [x] 4.6 Archivar deltas en `openspec/specs/`
 
 
 ## Estado de verificaci?n P4

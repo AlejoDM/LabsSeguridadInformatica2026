@@ -1,6 +1,8 @@
 # Change 005 — Solicitud de revisión y cierre (Persona 4)
 
-> **Estado: revisión pendiente.** Este registro NO constituye autorización, aprobación de seguridad ni prueba de ejecución de escáneres.
+> **Actualización 2026-11-19: revisión cruzada realizada por Martin Beccereca (P5): APROBADO CON OBSERVACIONES — ver `openspec/changes/005-correlation-analysis-loop-b/archive.md`.**
+>
+> Estado original: revisión pendiente. Este registro NO constituye autorización, aprobación de seguridad ni prueba de ejecución de escáneres.
 
 ## Estado conocido (19/11/2026)
 
@@ -18,11 +20,11 @@ El plan del equipo fija el ciclo **P1 → P2 → P3 → P4 → P5 → P1**: P3 r
 
 | Control de revisión | Resultado | Revisor | Fecha / evidencia |
 |---|---|---|---|
-| 1.1 design.md: datos offline, antigüedad, confianza, conflictos | PENDIENTE | | |
-| 1.2 specs correlation y vuln-analysis | PENDIENTE | | |
-| Tests negativos y trazabilidad de escenarios | PENDIENTE | | |
-| Acciones activas vía Harness.invoke y audit | PENDIENTE | | |
-| Loop B: dos rondas sin evidencia, anomalías | PENDIENTE | | |
+| 1.1 design.md: datos offline, antigüedad, confianza, conflictos | APROBADO (con observaciones) | Martin Beccereca (P5) | 2026-11-19 · archive.md |
+| 1.2 specs correlation y vuln-analysis | APROBADO (con observaciones) | Martin Beccereca (P5) | 2026-11-19 · archive.md |
+| Tests negativos y trazabilidad de escenarios | APROBADO (con observaciones) | Martin Beccereca (P5) | 2026-11-19 · archive.md |
+| Acciones activas vía Harness.invoke y audit | APROBADO (con observaciones) | Martin Beccereca (P5) | 2026-11-19 · archive.md |
+| Loop B: dos rondas sin evidencia, anomalías | APROBADO (con observaciones) | Martin Beccereca (P5) | 2026-11-19 · archive.md |
 
 ## Revisión de los cinco templates — tarea 3.2
 
