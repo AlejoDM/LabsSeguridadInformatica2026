@@ -57,10 +57,10 @@ def test_el_contrato_no_expone_operaciones_de_modificacion_ni_borrado():
 # sqlite3 y quitan los triggers: es lo que haría alguien con acceso al disco, y es
 # justamente lo que la cadena tiene que detectar.
 
-import importlib  # noqa: E402
-import json  # noqa: E402
-import sqlite3  # noqa: E402
-import threading  # noqa: E402
+import importlib
+import json
+import sqlite3
+import threading
 
 
 def api(module):
@@ -247,8 +247,15 @@ def test_harness_registra_en_la_bitacora_persistente(tmp_path):
     """2.5: Harness usa la bitácora persistente sin cambiar su contrato público."""
     import time
 
-    from harness.contracts import (Action, Guard, Harness, KillSwitch, Phase, ScopeToken,
-                                   ScopeViolation)
+    from harness.contracts import (
+        Action,
+        Guard,
+        Harness,
+        KillSwitch,
+        Phase,
+        ScopeToken,
+        ScopeViolation,
+    )
     from harness.policy_loader import phase_allowlist
 
     db = tmp_path / "eng-1.db"

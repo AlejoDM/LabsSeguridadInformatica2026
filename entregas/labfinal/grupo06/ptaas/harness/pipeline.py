@@ -39,8 +39,14 @@ from harness.adapters.httpx_adapter import HttpxProbe
 from harness.adapters.subfinder_adapter import NoPassiveSources, SubfinderEnum
 from harness.adapters.zap_adapter import ZapBaseline
 from harness.asset_graph import AssetGraph
-from harness.audit import Entry, InMemoryAuditStore, VerifyResult, verificar_cadena
-from harness.contracts import AuditLog, Guard, Harness, KillSwitch, Phase, Result, ToolAdapter
+from harness.audit import (
+    Entry,
+    PersistentAuditLog,
+    SQLiteAuditStore,
+    VerifyResult,
+    verificar_cadena,
+)
+from harness.contracts import Guard, Harness, KillSwitch, Phase, Result, ToolAdapter
 from harness.defectdojo_export import export as export_defectdojo
 from harness.loops import run_recon
 from harness.poc.catalog import ParameterError
@@ -234,8 +240,9 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
     bridges = bridges or real_bridges()
     eng = roe.engagement_id
     stages = {"recon": "real", "analysis": str(cfg.analysis.provenance), "validation": "real"}
-    harness_audit = AuditLog()
-    evidence = InMemoryAuditStore()
+    # Change 002: las dos bitácoras se persisten en SQLite (un archivo por engagement).
+    harness_audit = PersistentAuditLog(out / "harness-audit.db", eng)
+    evidence = SQLiteAuditStore(out / "evidence.db", eng)
     result = PipelineResult("ABORTED", 2, output=out, stages=stages)
     started = datetime.now(UTC).isoformat()
 
@@ -428,7 +435,12 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
                          "message": result.message})
         export_audit(harness_audit, out / "harness-audit.json")
         _export_evidence(evidence, out / "evidence.json")
-        _write_manifest(out, eng, stages, result, started)
+        # Ancla de cabeza (diseño 002): se guarda fuera de cada archivo, en el manifiesto.
+        anchors = {"harness-audit.db": harness_audit.store.anchor(),
+                   "evidence.db": evidence.anchor()}
+        harness_audit.close()
+        evidence.close()
+        _write_manifest(out, eng, stages, result, started, anchors)
         log(f"[fin] {result.status}: {result.message}")
 
 
@@ -471,7 +483,7 @@ def _write_report_json(path: Path, report: Report) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
 
 
-def _export_evidence(evidence: InMemoryAuditStore, path: Path) -> None:
+def _export_evidence(evidence: Any, path: Path) -> None:
     entries = evidence.entries()
     payload = {"count": len(entries), "head": entries[-1].hash if entries else "GENESIS",
                "entries": [{"seq": e.seq, "prev": e.prev, "hash": e.hash, "data": dict(e.data)}
@@ -492,13 +504,29 @@ def verify_evidence(path: Path) -> VerifyResult:
 
 
 def verify_outputs(output: Path) -> dict[str, VerifyResult]:
+    """Verifica las exportaciones JSON y, si están, las bitácoras SQLite contra su ancla."""
     output = Path(output)
-    return {"harness-audit.json": verify_audit(output / "harness-audit.json"),
-            "evidence.json": verify_evidence(output / "evidence.json")}
+    results = {"harness-audit.json": verify_audit(output / "harness-audit.json"),
+               "evidence.json": verify_evidence(output / "evidence.json")}
+    manifest_path = output / "manifest.json"
+    anchors = {}
+    if manifest_path.is_file():
+        anchors = json.loads(manifest_path.read_text(encoding="utf-8")).get("anchors", {})
+    for name in ("harness-audit.db", "evidence.db"):
+        if not (output / name).is_file():
+            continue                      # los .db no se versionan (.gitignore)
+        store = SQLiteAuditStore.open_existing(output / name)
+        try:
+            anchor = anchors.get(name)
+            results[name] = (store.verify_anchor(anchor["count"], anchor["head"]) if anchor
+                             else VerifyResult(False, "sin ancla en el manifiesto"))
+        finally:
+            store.close()
+    return results
 
 
 def _write_manifest(out: Path, eng: str, stages: Mapping[str, str], result: PipelineResult,
-                    started: str) -> None:
+                    started: str, anchors: Mapping[str, tuple[int, str]]) -> None:
     files = {}
     for p in sorted(out.iterdir()):
         if p.is_file() and p.name != "manifest.json":
@@ -507,6 +535,7 @@ def _write_manifest(out: Path, eng: str, stages: Mapping[str, str], result: Pipe
                 "stages": dict(stages), "started_at": started,
                 "finished_at": datetime.now(UTC).isoformat(),
                 "report_hash": result.report.report_hash if result.report else None,
+                "anchors": {k: {"count": c, "head": h} for k, (c, h) in anchors.items()},
                 "files_sha256": files}
     (out / "manifest.json").write_text(json.dumps(manifest, ensure_ascii=False, indent=2) + "\n",
                                        encoding="utf-8")
