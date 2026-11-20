@@ -118,7 +118,7 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
 
 **Finalidad:** diseño, deltas, tests y código de los changes 006, 007, 008 y 009; la
 bitácora SQLite del 002 (sobre el diseño de P1) y el cierre técnico del 005; mutaciones
-M10–M42; integración de este informe.
+M10–M44; integración de este informe.
 
 **Verificación humana:** P5 aprobó cada diseño y delta antes de los tests, firmó la tabla
 de vectores CVSS y la segunda aprobación de los templates de Nuclei, y ejecutó en persona
@@ -143,10 +143,10 @@ inertes del catálogo, generó el informe desde la bitácora y lo exportó a Def
 tras la aprobación registrada de su hash. Los hallazgos son debilidades de
 configuración (encabezados de seguridad y cookies), no vulnerabilidades explotadas.
 
-Estado verificable: 480 tests en verde (1 omitido, requiere Docker), 221 Scenarios en
-11 specs, los changes 001–006, 008 y 009 al 100 % (el 007 espera la nueva revisión de
-P4 tras corregir lo que pidió), 42 mutaciones registradas, red team A1–A10 y B1–B4 con
-historia de commits.
+Estado verificable: 483 tests en verde (2 omitidos sin Docker, corridos aparte con
+Docker real), 221 Scenarios en 11 specs, los 9 changes al 100 %, 44 mutaciones
+registradas, matriz de invariantes I1–I8 y red team A1–A10 y B1–B4 con historia de
+commits.
 
 ## 2. Arquitectura
 
@@ -189,7 +189,7 @@ hash). El orquestador espera la decisión; nunca aprueba.
 - **Red team:** A1–A10 sobre el guard (P2) y B1–B4 sobre el catálogo de validación
   (P5), cada uno con commit del test en rojo y commit de la corrección
   (`entrega/red-team.md`).
-- **Mutaciones:** 42 controles rotos a propósito (M1–M42, `entrega/mutaciones.md`);
+- **Mutaciones:** 44 controles rotos a propósito (M1–M44, `entrega/mutaciones.md`);
   todos rompieron al menos un test. M33 sobrevivió en su primera corrida y obligó a
   corregir un test débil.
 - **Bitácora verificable:** `python -m harness.audit verify` detecta una fila
@@ -200,6 +200,13 @@ hash). El orquestador espera la decisión; nunca aprueba.
 - **Herramientas reales contra el lab:** httpx/subfinder (P3), ZAP (P4 y recorrido),
   Nuclei con 5 templates aprobados por dos personas (`templates/allowlist/MANIFEST.md`,
   verificado por hash antes de cada corrida) y el sandbox (P5).
+- **Adaptadores propios:** el kit traía solo nmap y Nuclei. El grupo agregó **subfinder y
+  httpx** (P3, change 004), **ZAP baseline** (P4, change 005) y el **sandbox de
+  validación** (P5, change 006). Cada uno tiene tests de bloqueo (objetivo fuera del lab,
+  redirección externa, fase incorrecta, aprobación faltante), revisión cruzada y su change
+  archivado; además se corrigió el adaptador de Nuclei para que pase por el harness.
+- **Matriz de invariantes:** cada invariante I1–I8 con sus tests, mutaciones y evidencia
+  en `entrega/matriz-invariantes.md`.
 
 ## 5. Evals
 
