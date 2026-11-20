@@ -15,9 +15,22 @@ DRAFT = ROOT / "templates" / "proposed_p4"
 
 
 def test_cinco_templates_propuestos_no_en_allowlist() -> None:
+    # Intención original (P4): ningún template propuesto entra a la allow-list sin
+    # aprobación. Actualizado por P5 el 2026-11-19, cuando la segunda aprobación quedó
+    # registrada: ahora se exige que cada template de P4 en la allow-list pase la
+    # verificación del MANIFEST (hash + aprobación de otra persona) y sea idéntico a
+    # su propuesta. Sin aprobación, verify_allowlist falla y este test también.
+    from harness.nuclei_allowlist import normalized_sha256, verify_allowlist
+
     drafts = sorted(DRAFT.glob("*.yaml"))
     assert len(drafts) == 5
-    assert not list((ROOT / "templates" / "allowlist").glob("p4-*.yaml"))
+    allow = ROOT / "templates" / "allowlist"
+    copied = sorted(allow.glob("p4-*.yaml"))
+    if copied:
+        approved = {r["archivo"] for r in verify_allowlist(allow)}
+        for path in copied:
+            assert path.name in approved
+            assert normalized_sha256(path) == normalized_sha256(DRAFT / path.name)
 
 
 @pytest.mark.parametrize("name", [
