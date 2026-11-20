@@ -49,3 +49,9 @@ filtro de datos sensibles. Se resolvió en el orden pedido:
 
 **Verificación de la corrección:** `entrega/evidencia/salidas/P5-007-correccion-verificada.txt` (52 tests de reporting y 480 de la suite en verde).
 
+## Cierre
+
+**Revisión de la corrección:** Alejo De Miguel (P1), 2026-11-20, no autor del change.
+Confirmó por WhatsApp que la corrección (`a2dd6a6`: filtro de datos sensibles sobre el
+motivo de la bitácora, con su test) atiende lo pedido por P4. 1.3 cerrada.
+
