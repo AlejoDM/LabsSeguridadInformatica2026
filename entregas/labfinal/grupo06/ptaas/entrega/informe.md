@@ -91,26 +91,26 @@ implementación inicial y GPT-6 Luna en la revisión posterior.
 
 **Herramienta:** ChatGPT, modelo GPT-6.
 
-**Finalidad y partes asistidas (Change 005 ? correlaci?n y an?lisis):**
+**Finalidad y partes asistidas (Change 005 — correlación y análisis):**
 
-- Asistencia en el dise?o OpenSpec, clientes offline de NVD y EPSS, mapeo CWE/ATT&CK y correlador con evidencia.
-- Apoyo en los adaptadores ZAP y Nuclei, la orquestaci?n del loop B, tests y evaluaciones golden.
-- Preparaci?n de comandos de PowerShell, correcci?n de errores y documentaci?n de evidencias.
+- Asistencia en el diseño OpenSpec, clientes offline de NVD y EPSS, mapeo CWE/ATT&CK y correlador con evidencia.
+- Apoyo en los adaptadores ZAP y Nuclei, la orquestación del loop B, tests y evaluaciones golden.
+- Preparación de comandos de PowerShell, corrección de errores y documentación de evidencias.
 
-**Verificaci?n humana y comprobaciones realizadas:**
+**Verificación humana y comprobaciones realizadas:**
 
 - Ejecut? las pruebas automatizadas: 432 aprobadas y 1 omitida en mi rama P4.
 - Ejecut? las evaluaciones golden: 32/32 casos aprobados.
-- Revis? est?ticamente cinco templates Nuclei y valid? su sintaxis con Nuclei v3.11.1, sin conexi?n de red.
+- Revis? estáticamente cinco templates Nuclei y valid? su sintaxis con Nuclei v3.11.1, sin conexión de red.
 - Ejecut? ZAP baseline contra DVWA dentro de la red Docker interna: 11 alertas no validadas y 0 fallos reportados.
-- Revis? las salidas, correg? problemas de ejecuci?n y guard? la evidencia en GitHub.
+- Revis? las salidas, correg? problemas de ejecución y guard? la evidencia en GitHub.
 
-**L?mites de la verificaci?n:**
+**Límites de la verificación:**
 
 - Las evaluaciones golden no equivalen a evaluaciones live con un modelo.
 - Las alertas de ZAP no demuestran por s? solas que una vulnerabilidad sea explotable.
-- La corrida inicial de ZAP de P4 us? una aprobaci?n local sin registrar la identidad del aprobador; las corridas integradas posteriores usan la CLI.
-- La integraci?n final y la segunda aprobaci?n de Nuclei fueron completadas posteriormente por P5, seg?n la evidencia grupal.
+- La corrida inicial de ZAP de P4 us? una aprobación local sin registrar la identidad del aprobador; las corridas integradas posteriores usan la CLI.
+- La integración final y la segunda aprobación de Nuclei fueron completadas posteriormente por P5, según la evidencia grupal.
 
 ### P5
 
