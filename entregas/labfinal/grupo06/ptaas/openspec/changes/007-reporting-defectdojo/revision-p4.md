@@ -33,3 +33,19 @@ La observación surge de la revisión estática.
 No se detect? una filtración real.
 
 **Estado:** pendiente de corrección y nueva revisión.
+
+## Respuesta de P5 (2026-11-20)
+
+Observación aceptada: el motivo (`reason`) de `validation.result` no pasaba por el
+filtro de datos sensibles. Se resolvió en el orden pedido:
+
+1. Test en rojo `test_dato_sensible_en_el_motivo_de_la_bitacora_se_rechaza`, con un
+   encabezado `Authorization`, un token JWT y una cookie de sesión en `reason`
+   (commit `234fde2`; evidencia `P5-007-revision-p4-rojo.txt`).
+2. `_from_log` aplica `_check_sensitive` al motivo; el informe se rechaza indicando el
+   hallazgo (commit `a2dd6a6`).
+3. `tests/test_reporting_e2e.py`: 52 passed; suite completa: 480 passed, 1 skipped.
+4. Mutación M42 (quitar el filtro del motivo): los 3 tests nuevos fallan.
+
+**Pendiente:** nueva revisión de P4 para cerrar la 1.3.
+

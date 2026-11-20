@@ -3,7 +3,7 @@
 ## Spec y diseño
 - [x] 1.1 `design.md`: estructura del informe, versionado, qué sale hacia DefectDojo
 - [x] 1.2 Delta de `reporting` con ≥ 4 Requirements nuevos
-- [x] 1.3 Revisión cruzada — María Belén Benito (P4), 2026-11-20: pide cambios (ver revision-p4.md)
+- [ ] 1.3 Revisión cruzada — María Belén Benito (P4), 2026-11-20: pide cambios (ver revision-p4.md). Corregido por P5 en `a2dd6a6`; pendiente de nueva revisión de P4
 
 ## Implementación
 - [x] 2.1 Tests que fallan para armado del informe desde hallazgos y bitácora

@@ -38,3 +38,14 @@
 
 - No ejecuté el sandbox contra el lab: Docker no estaba disponible.
 - No revisé las evals de validación ni el catálogo; no son parte de 006 · 1.3.
+
+## Respuesta de P5 (2026-11-20)
+
+- **Observación 2 (destrucción tras un fallo real):** se agregó
+  `test_real_sandbox_se_destruye_aunque_docker_falle`, que hace fallar un `docker run`
+  real (imagen inexistente con `--pull never`) y comprueba con Docker que no queda
+  ningún contenedor del engagement (commit `f04a386`). Como el de aislamiento, corre con
+  `PTAAS_SANDBOX_DOCKER=1`.
+- **Observación 1 (aislamiento solo con Docker):** se mantiene la evidencia manual con
+  control positivo; los dos tests con Docker real se corren con la variable de arriba.
+

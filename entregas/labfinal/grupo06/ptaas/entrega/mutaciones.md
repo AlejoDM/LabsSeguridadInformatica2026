@@ -47,6 +47,7 @@ detectarla y se restauró el archivo original. Las salidas completas quedaron en
 | M39 (P5, 002) | Aislamiento por engagement | Aceptar eventos de otro engagement | `test_archivo_de_otro_engagement_rechaza_el_evento` | 1 test falló |
 | M40 (P5, 002) | Cadena corrupta al abrir | Seguir aceptando registros | `test_cadena_corrupta_al_abrir_no_acepta_registros` | 1 test falló |
 | M41 (P5, 002) | Ancla de cabeza | No comparar el ancla | `test_ancla_detecta_borrado_del_ultimo_registro`, `test_cli_verify_con_ancla` | 2 tests fallaron |
+| M42 (P5, revisión de P4) | Filtro de datos sensibles sobre el motivo de la bitácora (`report_builder._from_log`) | Quitar el chequeo de `reason` | `test_dato_sensible_en_el_motivo_de_la_bitacora_se_rechaza` (3 casos) | 3 tests fallaron |
 
 ## Detalle de las mutaciones más relevantes
 
