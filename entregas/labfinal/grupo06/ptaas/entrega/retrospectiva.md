@@ -249,3 +249,39 @@ Herramienta: ChatGPT (GPT-6). Change 005, correlaci?n y an?lisis.
 La IA ayud? a acelerar la implementaci?n, preparar pruebas y documentar el Change 005, pero no reemplaz? las verificaciones. Los errores de ejecuci?n aparecieron al trabajar con Docker y Windows, y se resolvieron comprobando la causa y repitiendo las pruebas.
 
 Tambi?n result? importante distinguir entre resultados simulados, validaci?n de sintaxis, escaneos reales y aprobaciones humanas: no son evidencias equivalentes.
+
+
+# Retrospectiva de IA — P1
+
+Herramienta: Claude Code (Haiku 5.5). Bitácora y auditoría (change 002) y revisión
+cruzada del change 006.
+
+## 1. Commit del contrato sin mostrar la firma antes
+
+- **Error:** el contrato de la bitácora (`harness/audit.py`) se commiteó sin mostrar
+  antes la firma propuesta. El método del plan pide mostrarla y esperar revisión.
+- **Detección:** al releer la sección 7.2 del plan, después del commit.
+- **Corrección:** la firma quedó explícita en `design.md` y en la nota de traspaso,
+  para que el grupo la revise. El test en rojo ya estaba en un commit separado.
+- **Aprendizaje:** un contrato compartido por todo el grupo necesita revisión antes de
+  commitearse, aunque la implementación sea pequeña. Un test en rojo no reemplaza la
+  revisión de la firma.
+- **Referencia:** `a5170fe`, `e0634d9`.
+
+## 2. Informe de un push que sí había llegado
+
+- **Error:** le informé al usuario que mis commits quedaban sin subir y que el push
+  estaba bloqueado. Esa afirmación no coincidía con el estado del remoto.
+- **Detección:** al hacer `git fetch`, `origin/labfinal-ptaas-grupo06` ya contenía los
+  commits que creía pendientes.
+- **Corrección:** se corrigió el informe al usuario. No hubo cambios de código.
+- **Aprendizaje:** antes de afirmar que algo no se subió, hay que consultar el remoto
+  (`git fetch` y `git log origin/...`). Un error de comando no garantiza que la acción
+  haya fallado.
+- **Referencia:** sin commit de código.
+
+## Balance
+
+La IA ayudó a escribir el contrato, los tests y los documentos de diseño. Los dos
+errores fueron de proceso y de reporte, no de código, y se detectaron al comparar lo
+dicho con el estado real del repositorio y con el método del plan.
