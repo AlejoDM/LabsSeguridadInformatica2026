@@ -1,8 +1,27 @@
 """Adaptador nuclei.safe_templates: solo templates curados y tags permitidos."""
 from __future__ import annotations
 
-from harness.adapters.common import Runner, default_runner, load_profiles, validate_url
+from harness.adapters.common import (
+    InvalidTarget,
+    Runner,
+    default_runner,
+    load_profiles,
+    validate_target,
+    validate_url,
+)
 from harness.contracts import Action, Phase, ScopeToken
+
+# Cierre de 005 · 3.3 (P5): el Guard del harness evalúa un HOST, así que el adaptador
+# recibe el host del laboratorio y arma la URL, igual que ZapBaseline.
+_LAB_URLS = {"dvwa.lab.test": "http://dvwa.lab.test/",
+             "juiceshop.lab.test": "http://juiceshop.lab.test:3000/"}
+
+
+def target_url(host: str) -> str:
+    host = validate_target(host)
+    if host not in _LAB_URLS:
+        raise InvalidTarget("Nuclei solo admite hosts exactos del laboratorio")
+    return _LAB_URLS[host]
 
 
 def build_argv(url: str, profile: dict | None = None) -> list[str]:
@@ -45,7 +64,11 @@ class NucleiSafeTemplates:
         self._profile = profile or load_profiles()["nuclei"]
 
     def run(self, action: Action, target: str, token: ScopeToken) -> dict:
-        argv = build_argv(target, self._profile)
+        if action.name != self.name or action.phase != Phase.ANALYZE:
+            raise PermissionError("fase o capability Nuclei no autorizada")
+        # Por Harness.invoke llega el host del lab; se conserva la URL por compatibilidad.
+        url = target if target.startswith(("http://", "https://")) else target_url(target)
+        argv = build_argv(url, self._profile)
         raw = self._runner(argv, self._profile["timeout_s"])
         lines = [ln for ln in raw.splitlines() if ln.strip()]
         return {"tool": "nuclei", "target": target, "format": "jsonl", "lines": lines}
