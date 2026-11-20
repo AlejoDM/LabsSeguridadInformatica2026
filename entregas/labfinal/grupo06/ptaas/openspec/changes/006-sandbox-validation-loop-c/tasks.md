@@ -3,7 +3,7 @@
 ## Spec y diseño
 - [x] 1.1 `design.md`: ciclo de vida del sandbox, límites, evidencia, timeout del Reviewer
 - [x] 1.2 Deltas de `validation` y `poc-catalog`
-- [ ] 1.3 Revisión cruzada
+- [x] 1.3 Revisión cruzada (aprobado con observaciones, P1: ver revision-p1.md)
 
 ## Implementación
 - [x] 2.1 Tests que fallan para el `Sender` aislado (sin red externa, sin estado)
