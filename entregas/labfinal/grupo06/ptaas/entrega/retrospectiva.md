@@ -74,3 +74,105 @@ Para los casos 4–6 también se conservó el par separado de test rojo y correc
 - **Aprendizaje:** las propiedades de la spec deben quedar forzadas por la
   interfaz, en vez de depender de que cada consumidor recuerde un parámetro opcional.
 - **Test rojo:** `9a76691`. **Corrección:** `937a234`.
+
+
+---
+
+# Retrospectiva de IA — P5
+
+Herramienta: Claude Code (Opus 5.5). Changes 006, 007, 008 y 009, implementación del
+002 y cierre del 005. Cada caso tiene su fila en `ia-errores.md`. Todos se detectaron
+antes de que el error llegara a un informe entregado.
+
+## 1. El Scenario del kill switch esperaba el resultado equivocado
+
+- **Error:** el delta de `validation` decía que, con el kill switch activado, el
+  resultado era `BLOCKED`. `Harness.invoke` registra `ABORTED`, que es lo que exige la
+  invariante I6.
+- **Detección:** al leer `contracts.py` antes de escribir el test.
+- **Corrección:** se corrigió el Scenario para describir el comportamiento real.
+- **Aprendizaje:** la spec también puede estar mal; antes de escribir el test hay que
+  contrastarla con el código que ya hace cumplir el control.
+- **Referencia:** `edb9dfc`.
+
+## 2. Tests en rojo por la razón equivocada
+
+- **Error (dos veces):** los tests de `path` y `param_name` fallaban porque un sender
+  falso devolvía `None` y rompía el evaluador, no porque faltara el control. Más
+  tarde, los tests negativos de `approve-gate` "fallaban" solo porque el subcomando
+  todavía no existía.
+- **Detección:** revisando el motivo de cada fallo antes de commitear el rojo, no solo
+  la cantidad de fallos.
+- **Corrección:** el sender falso devuelve una respuesta válida (ahora fallan con
+  `DID NOT RAISE ParameterError`); los tests de `approve-gate` comprueban primero que
+  una llamada válida funciona y que no quedó ninguna aprobación registrada.
+- **Aprendizaje:** un test en rojo solo prueba algo si falla por la ausencia del
+  control. Hay que leer el motivo, no contar fallos.
+- **Referencia:** `cfdd3a0`, `0b53073`.
+
+## 3. Dos tests que se contradecían
+
+- **Error:** un test exigía un único contenedor por hallazgo validado; otro necesitaba
+  un segundo intento para detectar resultados inconsistentes. Los dos no podían pasar
+  a la vez.
+- **Detección:** al implementar el loop C.
+- **Corrección:** el primero pasó a verificar lo que realmente le importaba (que cada
+  contenedor se destruya); la cantidad de intentos la cubre otro test.
+- **Aprendizaje:** corregir un test está bien cuando el test estaba mal, no cuando
+  molesta. Quedó registrado como error de la IA, no como ajuste.
+- **Referencia:** `d7c457a`.
+
+## 4. Una mutación sobrevivió: el test no probaba el control
+
+- **Error:** el test de "alertas informativas no generan hallazgos" usaba una alerta
+  sin CWE, que otra regla ya descartaba. El filtro de riesgo 0 nunca se probaba.
+- **Detección:** la mutación M33 (desactivar el filtro) no rompió ningún test.
+- **Corrección:** el test usa una alerta informativa con CWE válido; M33 pasó a
+  detectarse.
+- **Aprendizaje:** un test verde no demuestra que el control funcione. Las mutaciones
+  encontraron lo que la revisión del código no vio.
+- **Referencia:** `5164ec7`.
+
+## 5. Un informe con errores llegó hasta el gate de entrega
+
+- **Error:** el código usó el valor `NINGUNA` (hallazgo sin verificación en el
+  catálogo) como si fuera una verificación real. El informe unificó dos alertas
+  distintas (10009 y 10036, ambas CWE-497) y mostró `Verificación: NINGUNA vNone`.
+- **Detección:** P5 revisó el informe antes de aprobar la entrega en la corrida real
+  `P5-recorrido-03`. Ningún test lo había detectado.
+- **Corrección:** test en rojo, corrección y mutación M35; la corrida `-03` se
+  conservó sin entregar y la corregida (`-04`) se entregó.
+- **Aprendizaje:** es el caso que justifica el gate humano de entrega: la persona que
+  revisa el resultado encontró lo que los tests no cubrían.
+- **Referencia:** `de98ef2` (test rojo), `70884f5` (corrección).
+
+## 6. Errores de proceso, no de código
+
+- **Interpretación del alcance:** la IA entendió que P5 tomaba toda la parte de P1,
+  incluido el change 002, cuando el acuerdo era solo la parte del 007. Lo corrigió P5
+  en la conversación.
+- **Evidencia desfasada:** la evidencia final se generó antes de marcar una task, y el
+  progreso registrado no coincidía con `tasks.md`. Se detectó comparándolos y se
+  regeneró (`7dc09d5`).
+- **Un argumento equivocado:** la IA justificó no usar LangGraph citando la invariante
+  I2, que solo exige que el *Guard* sea determinista, no la orquestación. P5 pidió ver
+  dónde estaba I2 y la IA corrigió el argumento antes de registrar la decisión
+  (change 009).
+- **Detalles de implementación:** un atributo con el nombre equivocado
+  (`LoopDecision.action` en lugar de `decision`), detectado por los tests.
+- **Aprendizaje:** la IA también se equivoca al interpretar qué se acordó y al
+  justificar decisiones. Pedirle la fuente de un argumento lo dejó en evidencia.
+
+## Patrones
+
+| Tipo de error | Cómo se detectó |
+|---|---|
+| Tests que no prueban el control (casos 2 y 4) | Leer el motivo del rojo; mutaciones |
+| Spec o tests inconsistentes con el código (casos 1 y 3) | Leer el código antes de escribir; implementar |
+| Defecto que ningún test cubría (caso 5) | Gate humano de entrega |
+| Interpretación y argumentación (caso 6) | Revisión de la persona; pedir la fuente |
+
+La conclusión práctica: los tests y las mutaciones atraparon los errores de código,
+pero no todos. Los dos errores más importantes (el informe defectuoso y el argumento
+sobre I2) los encontró una persona revisando lo que la IA producía. Por eso los gates
+humanos y la revisión no son trámites: son la última barrera.
