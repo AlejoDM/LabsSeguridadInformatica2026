@@ -12,5 +12,5 @@
 
 ## Verificación
 - [x] 3.1 Mutaciones de los controles nuevos
-- [ ] 3.2 Corrida real del recorrido con análisis real: informe entregado y exportado
+- [x] 3.2 Corrida real del recorrido con análisis real: informe entregado y exportado
 - [ ] 3.3 Archivar el delta
