@@ -168,6 +168,9 @@ def _from_log(f: Finding, entries: Sequence[Any], hashes: set[str]) -> ReportFin
 
     log_status = last["status"] if last else None
     reason = str(last.get("reason", "")) if last else "sin registro del loop C"
+    # Revisión de P4 (007 · 1.3): el motivo viene de la bitácora y llega al informe y a la
+    # exportación, así que pasa por el mismo filtro que los campos del hallazgo.
+    _check_sensitive(f.id, (reason,))
     if f.validation_status == "validated" and log_status != "validated":
         raise ReportError(f"{f.id}: declarado validado sin respaldo en la bitácora")
 
