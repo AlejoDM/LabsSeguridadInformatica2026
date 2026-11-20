@@ -267,6 +267,13 @@ expiración (P2), un test débil revelado por una mutación (P5, M33) y un infor
 hallazgos unificados por error que frenó el gate de entrega (P5).
 **Pendiente:** filas de P1 y P4.
 
+**Controles adicionales propuestos (change 010):** siete controles de gobernanza
+justificados con ISO/IEC 29147 (divulgación coordinada), ISO/IEC 30111 (ciclo del
+hallazgo hasta el cierre con retest) y NIST SP 800-115 (tratamiento y destrucción de la
+evidencia, limpieza al cerrar, detención por el contacto de emergencia), con su delta y
+la plantilla de divulgación completada con un hallazgo real
+(`docs/plantilla-divulgacion-29147.md`). Propuestos, no implementados.
+
 ## 9. Aporte por integrante
 
 | Integrante | Changes | Aporte principal |
