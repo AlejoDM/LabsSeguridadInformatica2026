@@ -37,6 +37,7 @@ from harness import roe as roe_mod
 from harness import tokens
 from harness.adapters.httpx_adapter import HttpxProbe
 from harness.adapters.subfinder_adapter import NoPassiveSources, SubfinderEnum
+from harness.adapters.zap_adapter import ZapBaseline
 from harness.asset_graph import AssetGraph
 from harness.audit import Entry, InMemoryAuditStore, VerifyResult, verificar_cadena
 from harness.contracts import AuditLog, Guard, Harness, KillSwitch, Phase, Result, ToolAdapter
@@ -64,8 +65,12 @@ from harness.validation import (
     ValidationRequest,
     run_validation_loop,
 )
+from harness.zap_analysis import NO_POC, AnalysisBlocked, ZapAnalysis
 
 DEFAULT_RUNNER = "ptaas-p3-runner-1"
+# Imagen de ZAP fijada por P4 (tools/run_zap_lab_p4.py). Se usa con --pull never.
+ZAP_IMAGE = ("ghcr.io/zaproxy/zaproxy@sha256:"
+             "9624669db72f54d86c4b46a7064518bd9bf79d8c61a4c31befa9923489f328af")
 _PROFILES = Path(__file__).resolve().parent / "profiles.yaml"
 # Puerto fijo de cada objetivo del lab (P3 detectó que Juice Shop escucha en 3000).
 LAB_PORTS = {"juiceshop.lab.test": 3000}
@@ -93,6 +98,7 @@ class Bridges:
     subfinder: Callable[[list[str], int], str]
     resolver: Callable[[str], list[str]]
     sandbox_runtime: Any
+    zap: Callable[[list[str], int], str] | None = None   # change 008
 
 
 @dataclass
@@ -145,7 +151,7 @@ _RESOLVE = (
 )
 
 
-def real_bridges(container: str = DEFAULT_RUNNER) -> Bridges:
+def real_bridges(container: str = DEFAULT_RUNNER, network: str = DEFAULT_NETWORK) -> Bridges:
     """httpx/subfinder corren dentro del runner con los adaptadores de P3; argv fijo, sin shell."""
 
     def in_runner(kind: str, argv: list[str], timeout: int) -> str:
@@ -169,7 +175,44 @@ def real_bridges(container: str = DEFAULT_RUNNER) -> Bridges:
 
     return Bridges(httpx=lambda a, t: in_runner("httpx", a, t),
                    subfinder=lambda a, t: in_runner("subfinder", a, t),
-                   resolver=resolver, sandbox_runtime=DockerRuntime())
+                   resolver=resolver, sandbox_runtime=DockerRuntime(),
+                   zap=zap_bridge(network))
+
+
+def zap_bridge(network: str = DEFAULT_NETWORK,
+               image: str = ZAP_IMAGE) -> Callable[[list[str], int], str]:
+    """ZAP baseline en un contenedor efímero en la red interna del lab (change 008).
+
+    Recibe el argv fijo del adaptador de P4 (`build_argv`). Verifica antes que la red
+    sea `internal`, no descarga imágenes (`--pull never`) y no guarda el reporte crudo:
+    lo devuelve al adaptador y se borra con el directorio temporal.
+    """
+    import tempfile
+
+    def run_zap(argv: list[str], timeout: int) -> str:
+        info = subprocess.run(["docker", "network", "inspect", network], shell=False,
+                              capture_output=True, text=True, timeout=30, check=False)
+        if info.returncode != 0 or json.loads(info.stdout)[0].get("Internal") is not True:
+            raise OSError(f"la red {network} no existe o no es interna: no se ejecuta ZAP")
+        if argv[0] != "zap-baseline.py" or argv[-2:] != ["-J", "/dev/stdout"]:
+            raise ValueError("argv de ZAP inesperado")
+        with tempfile.TemporaryDirectory(prefix="ptaas-zap-") as work:
+            cmd = ["docker", "run", "--rm", "--pull", "never", "--network", network,
+                   "--cap-drop", "ALL", "--security-opt", "no-new-privileges",
+                   "--mount", f"type=bind,src={work},dst=/zap/wrk",
+                   "--entrypoint", "zap-baseline.py", image, *argv[1:-1], "report.json"]
+            proc = subprocess.run(cmd, shell=False, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=timeout + 60,
+                                  check=False)
+            report = Path(work) / "report.json"
+            if not report.is_file():
+                raise OSError(f"ZAP no generó el reporte (exit {proc.returncode})")
+            data = json.loads(report.read_text(encoding="utf-8"))
+        if isinstance(data.get("site"), dict):
+            data["site"] = [data["site"]]
+        return json.dumps(data)
+
+    return run_zap
 
 
 # ---- Recorrido ----------------------------------------------------------------------------------
@@ -259,7 +302,47 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
         catalog = FrozenCatalog.load()
         findings: list[Finding] = []
         requests: list[ValidationRequest] = []
-        for cand in cfg.analysis.propose(assets):
+        if getattr(cfg.analysis, "requires_harness", False):
+            # Change 008: análisis real (loop B de P4 con ZAP) con gate humano propio.
+            log("[gate] esperando aprobación humana del análisis activo (ZAP baseline):\n  "
+                + cli_hint(f"approve-gate {eng} active_analysis"))
+            if not wait_for(lambda: store().gate_approved(eng, "active_analysis")):
+                harness_audit.record_decision("orchestrator", "analysis.active_analysis",
+                                              ",".join(sorted(assets)), eng,
+                                              Phase.ANALYZE.value, Result.PENDING_HITL)
+                evidence.append({"event": "gate.pending", "engagement": eng,
+                                 "gate": "active_analysis"})
+                result = PipelineResult("PENDING_HITL", 3, "sin aprobación del análisis activo",
+                                        output=out, stages=stages)
+                return result
+            gate = store().gate_record(eng, "active_analysis") or {}
+            evidence.append({"event": "hitl.decision.observed", "engagement": eng,
+                             "gate": "active_analysis", "reviewer": gate.get("reviewer"),
+                             "reason": gate.get("reason"), "decided_at": gate.get("ts")})
+            if bridges.zap is None:
+                raise ValueError("falta el puente de ZAP para el análisis real")
+            analyze_token = tokens.issue(roe, Phase.ANALYZE, audit=harness_audit,
+                                         agent="orchestrator")
+            zap_guard = Guard(phase_allowlist(),
+                              approvals={f"zap.baseline_scan@{h}" for h in assets},
+                              engagement_id=eng, resolver=bridges.resolver)
+            zap_harness = Harness(zap_guard, harness_audit, {
+                "zap.baseline_scan": cast(ToolAdapter, ZapBaseline(runner=bridges.zap,
+                                                                   timeout_s=600)),
+            }, KillSwitch())
+            try:
+                proposals = cfg.analysis.run(zap_harness, analyze_token, assets,
+                                             evidence=evidence)
+            except AnalysisBlocked as exc:
+                status = "PENDING_HITL" if exc.status == "PENDING_HITL" else "ABORTED"
+                result = PipelineResult(status, 3 if status == "PENDING_HITL" else 2,
+                                        f"análisis: {exc}", output=out, stages=stages)
+                return result
+            cvss_source = cfg.analysis.cvss_source()
+        else:
+            proposals = cfg.analysis.propose(assets)
+            cvss_source = None
+        for cand in proposals:
             missing = CANDIDATE_KEYS - set(cand)
             if missing:
                 raise ValueError(f"candidato {cand.get('id', '?')}: faltan {sorted(missing)}")
@@ -273,20 +356,23 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
             findings.append(Finding(cand["id"], cand["title"], cand["asset"], cand["cwe"],
                                     cand["cvss_v4_vector"], cand["remediation"],
                                     "not_validated", (), cand.get("epss")))
-            requests.append(ValidationRequest(cand["id"], cand["poc_id"],
+            requests.append(ValidationRequest(cand["id"], cand["poc_id"] or NO_POC,
                                               _params(cand, catalog)))
         evidence.append({"event": "stage.analysis", "engagement": eng,
                          "provenance": stages["analysis"], "findings": [f.id for f in findings]})
 
         # 4. Validación: registrar propuestas, esperar decisiones, correr el loop C.
         if requests:
+            # Solo se pide aprobación para lo que tiene verificación en el catálogo; el
+            # resto lo deja el loop C como "no validado (fuera del catálogo)".
+            to_approve = [r for r in requests if r.poc_id in catalog.entries]
             pending_store = store()
-            for req in requests:
+            for req in to_approve:
                 pending_store.request(req.finding_id, req.poc_id, req.params)
             log("[gate] hallazgos pendientes de aprobación (aprobar o rechazar cada uno):\n  "
                 + f"python -m harness.validation_cli --store {cfg.approvals_path} list\n  "
                 + cli_hint("approve <hallazgo>"))
-            wait_for(lambda: all(store().status(r.finding_id) != PENDING for r in requests))
+            wait_for(lambda: all(store().status(r.finding_id) != PENDING for r in to_approve))
             validate_token = tokens.issue(roe, Phase.VALIDATE, audit=harness_audit,
                                           agent="orchestrator")
             adapter = SandboxAdapter(runtime=bridges.sandbox_runtime,
@@ -302,8 +388,10 @@ def run(cfg: PipelineConfig, *, bridges: Bridges | None = None,
                                 sender=sender, catalog=catalog, evidence=evidence)
 
         # 5. Informe desde la bitácora.
-        report = build_report(eng, findings, evidence=evidence, stages=stages,
-                              scope=_scope(roe, assets))
+        scope = _scope(roe, assets)
+        if cvss_source:
+            scope["cvss_source"] = cvss_source
+        report = build_report(eng, findings, evidence=evidence, stages=stages, scope=scope)
         (out / "report.md").write_text(report.markdown + "\n", encoding="utf-8")
         _write_report_json(out / "report.json", report)
         log(f"[informe] versión {report.version} · hash {report.report_hash}"
@@ -436,8 +524,10 @@ def main(argv: list[str] | None = None) -> int:
     r.add_argument("--approvals", type=Path, required=True,
                    help="archivo de aprobaciones (usar uno nuevo por engagement)")
     r.add_argument("--output", type=Path, required=True, help="directorio NUEVO de salida")
-    r.add_argument("--analysis-fixture", type=Path, required=True,
-                   help="análisis simulado mientras no exista el change 005 (el informe sale DEMO)")
+    r.add_argument("--analysis", choices=["zap", "fixture"], default="zap",
+                   help="zap: loop B de P4 con ZAP baseline (real); fixture: simulado (DEMO)")
+    r.add_argument("--analysis-fixture", type=Path, default=Path("lab/analysis-fixture.json"),
+                   help="archivo del análisis simulado (solo con --analysis fixture)")
     r.add_argument("--wait", type=float, default=900, help="segundos de espera por cada gate")
     r.add_argument("--runner", default=DEFAULT_RUNNER)
     r.add_argument("--network", default=DEFAULT_NETWORK)
@@ -452,10 +542,12 @@ def main(argv: list[str] | None = None) -> int:
                              ensure_ascii=False))
         return 0 if all(res.ok for res in results.values()) else 1
 
+    analysis: Any = (ZapAnalysis() if args.analysis == "zap"
+                     else FixtureAnalysis(args.analysis_fixture))
     cfg = PipelineConfig(roe_path=args.roe, approvals_path=args.approvals,
-                         output_dir=args.output, analysis=FixtureAnalysis(args.analysis_fixture),
+                         output_dir=args.output, analysis=analysis,
                          wait_s=args.wait, sandbox_network=args.network)
-    outcome = run(cfg, bridges=real_bridges(args.runner))
+    outcome = run(cfg, bridges=real_bridges(args.runner, args.network))
     return outcome.exit_code
 
 

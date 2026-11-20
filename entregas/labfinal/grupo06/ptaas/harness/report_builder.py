@@ -243,7 +243,10 @@ def _markdown(engagement_id: str, version: int, report_hash: str, audit_head: st
     lines += ["", "## Metodología",
               ("Estructura de presentación PTES §7. El estado de validación de cada hallazgo "
                "se toma de la bitácora del loop C; la estructura no acredita por sí sola "
-               "ejecución completa de PTES, NIST SP 800-115 u OWASP WSTG."), "",
+               "ejecución completa de PTES, NIST SP 800-115 u OWASP WSTG.")]
+    if scope.get("cvss_source"):
+        lines.append(f"Vectores CVSS v4.0: {_text(scope['cvss_source'])}.")
+    lines += ["",
               "## Hallazgos priorizados",
               "Orden: EPSS conocido descendente; unknown al final. No se infiere puntaje CVSS.", ""]
     for f in sorted(findings, key=lambda x: (x.epss is None, -(x.epss or 0), x.id)):

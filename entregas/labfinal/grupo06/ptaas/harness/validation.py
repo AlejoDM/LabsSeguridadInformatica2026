@@ -34,7 +34,7 @@ from harness.sandbox import CAPABILITY, SandboxAborted, SandboxSender, SandboxTi
 PENDING = "PENDING_HITL"
 # Gates de engagement que se aprueban por la CLI. La validación es por hallazgo y la
 # entrega por hash del informe: tienen sus propios comandos.
-KNOWN_GATES = frozenset({"first_active_action"})
+KNOWN_GATES = frozenset({"first_active_action", "active_analysis"})
 APPROVED = "approved"
 REJECTED = "rejected"
 

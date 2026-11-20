@@ -19,4 +19,4 @@ scope:
 exclusions: {}
 emergency_contacts:
   - "<contacto del responsable del lab>"
-authorized_phases: ["recon", "validate"]
+authorized_phases: ["recon", "analyze", "validate"]

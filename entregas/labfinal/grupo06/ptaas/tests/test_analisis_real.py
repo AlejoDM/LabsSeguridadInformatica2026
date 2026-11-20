@@ -99,12 +99,15 @@ def test_alerta_sin_mapeo_se_descarta_con_el_plugin(tmp_path):
 
 
 def test_alerta_informativa_no_genera_hallazgo(tmp_path):
+    # 10027 es riesgo 0 pero trae CWE (615) y remediación: solo la regla de riesgo la
+    # puede excluir (con 10111, sin CWE, el test pasaba por otra regla; ver M33).
     za = api("zap_analysis")
     m = za.load_mapping(mapping_yaml(tmp_path / "m.yaml",
-                                     extra='  "10111": {poc_id: null, cvss_v4_vector: "'
+                                     extra='  "10027": {poc_id: null, cvss_v4_vector: "'
                                            + LOW + '", rationale: "info"}'))
-    cands, _ = za.findings_from_alerts("dvwa.lab.test", dvwa_alerts(), m)
-    assert all(c["pluginid"] != "10111" for c in cands)        # riesgo 0
+    cands, descartadas = za.findings_from_alerts("dvwa.lab.test", dvwa_alerts(), m)
+    assert all(c["pluginid"] != "10027" for c in cands)        # riesgo 0
+    assert all(d["pluginid"] != "10027" for d in descartadas)  # ni siquiera se descarta
 
 
 def test_alerta_mapeada_sin_verificacion_del_catalogo(tmp_path):
@@ -233,7 +236,7 @@ def test_reporte_de_zap_fuera_del_objetivo_aborta(tmp_path):
 
 
 def test_recorrido_con_analisis_real_entrega_y_exporta(tmp_path):
-    result, zap, br, output = run_real(tmp_path)
+    result, zap, _, output = run_real(tmp_path)
     assert result.status == "DELIVERED" and result.exit_code == 0
     assert result.report.demo is False and result.report.stages["analysis"] == "real"
     assert len(zap.calls) == 2                       # una vez por activo relevado
